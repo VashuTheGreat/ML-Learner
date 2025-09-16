@@ -2,9 +2,14 @@ from datacleaner import Model
 m = Model("titanic")   # dataset from seaborn
 m.loadData()
 df, _ = m.dataCleaner(m.data)
+params = {
+    "n_estimators": 200,
+    "max_depth": 5,
+    "random_state": 42
+}
 m.data = df
-output=m.TrainModel("RandomForestClassifier", "survived")
-print(output)
+output=m.TrainModel("RandomForestClassifier", "survived",params=params)
+# print(output)
 
 # Regression Example
 # m = Model("mpg")

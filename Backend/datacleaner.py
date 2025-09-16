@@ -11,7 +11,6 @@ from sklearn.metrics import (
     r2_score, mean_absolute_error, mean_squared_error
 )
 
-# Classification Models
 from sklearn.ensemble import (
     RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier, BaggingClassifier
 )
@@ -27,7 +26,6 @@ from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
 from catboost import CatBoostClassifier
 
-# Regression Models
 from sklearn.linear_model import (
     LinearRegression, Ridge, Lasso, ElasticNet, SGDRegressor, BayesianRidge,
     HuberRegressor, PassiveAggressiveRegressor, RANSACRegressor, TheilSenRegressor
@@ -41,13 +39,10 @@ from sklearn.neural_network import MLPRegressor
 from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
 from catboost import CatBoostRegressor
+from sklearn.decomposition import PCA
+from mlxtend.plotting import plot_decision_regions
 
-
-# ========================
-# All models dictionary
-# ========================
 models = {
-    # Classification
     "RandomForestClassifier": RandomForestClassifier,
     "GradientBoostingClassifier": GradientBoostingClassifier,
     "AdaBoostClassifier": AdaBoostClassifier,
@@ -70,8 +65,6 @@ models = {
     "XGBClassifier": XGBClassifier,
     "LGBMClassifier": LGBMClassifier,
     "CatBoostClassifier": CatBoostClassifier,
-
-    # Regression
     "LinearRegression": LinearRegression,
     "Ridge": Ridge,
     "Lasso": Lasso,
@@ -99,10 +92,6 @@ models = {
     "CatBoostRegressor": CatBoostRegressor,
 }
 
-
-# ========================
-# Model Wrapper
-# ========================
 class Model:
     def __init__(self, data_name):
         self.data_name = data_name
@@ -120,12 +109,10 @@ class Model:
     @staticmethod
     def dataCleaner(data: pd.DataFrame):
         df = data.copy().drop_duplicates().dropna()
-        # lowercase categorical + encode
         for col in df.select_dtypes(include=['object', 'category']).columns:
             df[col] = df[col].astype(str).str.lower()
         for col in df.select_dtypes(include=['bool']).columns:
             df[col] = df[col].astype(int)
-
         encoders = {}
         for col in df.select_dtypes(include=['object', 'category']).columns:
             le = LabelEncoder()
@@ -133,13 +120,13 @@ class Model:
             encoders[col] = le
         return df, encoders
 
-    def TrainModel(self, model_name, columnToPredict):
+    def TrainModel(self, model_name, columnToPredict,params=None):
         if model_name not in models:
             raise ValueError("Model doesn't exist")
-        self.model = models[model_name]()
+        self.model = models[model_name](**params)
         x_train, x_test, y_train, y_test = self.dataspliter(self.data, columnToPredict)
         self.model.fit(x_train, y_train)
-        return self.ValidateModel(x_test, y_test, model_name)
+        return self.ValidateModel(x_test, y_test, model_name, x_train, y_train)
 
     @staticmethod
     def buf(figures: list):
@@ -151,10 +138,9 @@ class Model:
         plt.close()
         figures.append(img_base64)
 
-    def plots(self, x_test, y_test, preds, isClassifier):
+    def plots(self, x_test, y_test, preds, x_train, y_train, isClassifier):
         figures = []
         if isClassifier:
-            # Confusion Matrix
             cm = confusion_matrix(y_test, preds)
             plt.figure(figsize=(6, 5))
             sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", cbar=False)
@@ -162,21 +148,16 @@ class Model:
             plt.title("Confusion Matrix Heatmap")
             self.buf(figures)
 
-            # Decision Boundary (2D only)
-            if x_test.shape[1] == 2:
-                X, y = x_test.values, y_test.values
-                h = .02
-                x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
-                y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
-                xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
-                                     np.arange(y_min, y_max, h))
-                Z = self.model.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
-                plt.contourf(xx, yy, Z, alpha=0.3)
-                plt.scatter(X[:, 0], X[:, 1], c=y, edgecolor="k", s=40)
-                plt.title("Decision Boundary (2D)")
-                self.buf(figures)
+            pca = PCA(n_components=2)
+            x_train_pca = pca.fit_transform(x_train)
+            self.model.fit(x_train_pca, y_train)
+            plt.figure(figsize=(6, 5))
+            plot_decision_regions(x_train_pca, y_train.values, clf=self.model, legend=2)
+            plt.xlabel("PCA Component 1")
+            plt.ylabel("PCA Component 2")
+            plt.title("Decision Boundary after PCA")
+            self.buf(figures)
 
-            # ROC Curve
             try:
                 from sklearn.metrics import roc_curve, auc
                 if len(np.unique(y_test)) == 2:
@@ -191,7 +172,6 @@ class Model:
                     self.buf(figures)
             except: pass
 
-            # Precision-Recall
             try:
                 from sklearn.metrics import precision_recall_curve
                 y_proba = self.model.predict_proba(x_test)[:, 1]
@@ -203,7 +183,6 @@ class Model:
             except: pass
 
         else:
-            # Regression: Predictions vs Actual
             plt.scatter(y_test, preds, alpha=0.6, color="blue", label="Predictions")
             plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()],
                      "r--", lw=2, label="Perfect Fit")
@@ -212,7 +191,6 @@ class Model:
             plt.legend()
             self.buf(figures)
 
-            # Residuals Plot
             residuals = y_test - preds
             plt.scatter(preds, residuals, alpha=0.6, color="purple")
             plt.axhline(y=0, color="r", linestyle="--")
@@ -220,7 +198,6 @@ class Model:
             plt.title("Residuals Plot")
             self.buf(figures)
 
-            # Prediction vs Actual (time-series style)
             plt.plot(y_test.values, label="Actual", color="blue")
             plt.plot(preds, label="Predicted", color="orange")
             plt.legend(); plt.title("Prediction vs Actual")
@@ -228,13 +205,13 @@ class Model:
 
         return figures
 
-    def ValidateModel(self, x_test, y_test, model_name):
+    def ValidateModel(self, x_test, y_test, model_name, x_train, y_train):
         preds = self.model.predict(x_test)
         if y_test.nunique() < 20 and y_test.dtype in ["int64", "int32"]:
             acc = accuracy_score(y_test, preds)
             prec = precision_score(y_test, preds, average="weighted", zero_division=0)
             rec = recall_score(y_test, preds, average="weighted", zero_division=0)
-            figs = self.plots(x_test, y_test, preds, isClassifier=True)
+            figs = self.plots(x_test, y_test, preds, x_train, y_train, isClassifier=True)
             return {
                 "type": "classification",
                 "accuracy": acc,
@@ -248,7 +225,7 @@ class Model:
             mae = mean_absolute_error(y_test, preds)
             mse = mean_squared_error(y_test, preds)
             rmse = mse ** 0.5
-            figs = self.plots(x_test, y_test, preds, isClassifier=False)
+            figs = self.plots(x_test, y_test, preds, x_train, y_train, isClassifier=False)
             return {
                 "type": "regression",
                 "r2": r2,

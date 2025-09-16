@@ -1,3 +1,6 @@
 Backend/__pycache__
 *.env'
 Backend_node/node_modules
+Backend/upload
+Backend/.ipynb_checkpoints
+Backend/.ipynb_checkpoints/
