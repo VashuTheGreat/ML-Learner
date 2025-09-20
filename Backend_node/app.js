@@ -4,8 +4,10 @@ const cors = require("cors");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const axios = require("axios");
 
+const MongoDBConnect=require("./utils/db")
 const app = express();
 const server = http.createServer(app);
+const router=require("./routes/signUp")
 
 app.use(cors({
   origin: "http://localhost:5173",
@@ -15,6 +17,8 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+app.use("/auth", router);
 app.post("/model", async (req, res) => {
   try {
     const flaskRes = await axios.post("http://127.0.0.1:5000/model", req.body);
@@ -29,6 +33,15 @@ app.get("/", (req, res) => {
   console.log(req.method);
   res.send("Hello World");
 });
+
+
+
+MongoDBConnect((client)=>{
+  // console.log("Clint",client);
+})
+
+
+// CreateUser({name:"Vansh",email:"Aloo@gmail.com"})
 
 const PORT = 3000;
 server.listen(PORT, () => {
