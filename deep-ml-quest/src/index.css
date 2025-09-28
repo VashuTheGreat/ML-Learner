@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Deep ML Learner Design System - LeetCode inspired with enhanced dark/light themes */
+
+@layer base {
+  :root {
+    /* Light Theme - Core colors */
+    --background: 0 0% 100%;
+    --foreground: 210 20% 14%;
+
+    /* Card system */
+    --card: 0 0% 100%;
+    --card-foreground: 210 20% 14%;
+    --card-hover: 210 40% 98%;
+
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 20% 14%;
+
+    /* Primary - LeetCode-style blue */
+    --primary: 213 94% 68%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 213 94% 63%;
+
+    /* Secondary - Subtle backgrounds */
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 210 20% 14%;
+
+    /* Muted - Light grays */
+    --muted: 210 40% 95%;
+    --muted-foreground: 215 13% 65%;
+
+    /* Accent - Highlight color */
+    --accent: 210 40% 95%;
+    --accent-foreground: 210 20% 14%;
+
+    /* Success - Green for solved problems */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning - Orange for medium difficulty */
+    --warning: 31 81% 56%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Destructive - Red for hard difficulty */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Interactive elements */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 213 94% 68%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(213 94% 68%), hsl(260 100% 80%));
+    --gradient-hero: linear-gradient(135deg, hsl(213 94% 68%) 0%, hsl(260 100% 80%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(210 40% 98%) 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -2px hsl(0 0% 0% / 0.05);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.1), 0 10px 10px -5px hsl(0 0% 0% / 0.04);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s ease-out;
+
+    --radius: 0.5rem;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 210 20% 14%;
+    --sidebar-primary: 213 94% 68%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 40% 95%;
+    --sidebar-accent-foreground: 210 20% 14%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 213 94% 68%;
+  }
+
+  .dark {
+    /* Dark Theme - Enhanced for better contrast */
+    --background: 210 20% 7%;
+    --foreground: 210 40% 98%;
+
+    /* Card system */
+    --card: 210 20% 10%;
+    --card-foreground: 210 40% 98%;
+    --card-hover: 210 20% 13%;
+
+    /* Popover */
+    --popover: 210 20% 10%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Primary - Brighter blue for dark theme */
+    --primary: 213 89% 72%;
+    --primary-foreground: 210 20% 7%;
+    --primary-hover: 213 89% 77%;
+
+    /* Secondary - Dark neutral */
+    --secondary: 210 20% 13%;
+    --secondary-foreground: 210 40% 98%;
+
+    /* Muted - Dark grays */
+    --muted: 210 20% 13%;
+    --muted-foreground: 215 20% 65%;
+
+    /* Accent - Subtle highlight */
+    --accent: 210 20% 13%;
+    --accent-foreground: 210 40% 98%;
+
+    /* Success - Brighter green */
+    --success: 142 71% 55%;
+    --success-foreground: 210 20% 7%;
+
+    /* Warning - Brighter orange */
+    --warning: 31 81% 66%;
+    --warning-foreground: 210 20% 7%;
+
+    /* Destructive - Brighter red */
+    --destructive: 0 62% 61%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Interactive elements */
+    --border: 210 20% 20%;
+    --input: 210 20% 13%;
+    --ring: 213 89% 72%;
+
+    /* Sidebar - Dark theme */
+    --sidebar-background: 210 20% 7%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 213 89% 72%;
+    --sidebar-primary-foreground: 210 20% 7%;
+    --sidebar-accent: 210 20% 13%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 210 20% 20%;
+    --sidebar-ring: 213 89% 72%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
