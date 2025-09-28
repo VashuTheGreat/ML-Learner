@@ -4,3 +4,27 @@ Backend_node/node_modules
 Backend/upload
 Backend/.ipynb_checkpoints
 Backend/.ipynb_checkpoints/
+Frontend/
+
+# Logs
+deep-ml-quest/logs
+deep-ml-quest/*.log
+deep-ml-quest/npm-debug.log*
+deep-ml-quest/yarn-debug.log*
+deep-ml-quest/yarn-error.log*
+deep-ml-quest/pnpm-debug.log*
+deep-ml-quest/lerna-debug.log*
+deep-ml-quest/node_modules
+deep-ml-quest/dist
+deep-ml-quest/dist-ssr
+deep-ml-quest/*.local
+deep-ml-quest/# Editor directories and files
+deep-ml-quest/.vscode/*
+deep-ml-quest/!.vscode/extensions.json
+deep-ml-quest/.idea
+deep-ml-quest/.DS_Store
+deep-ml-quest/*.suo
+deep-ml-quest/*.ntvs*
+deep-ml-quest/*.njsproj
+deep-ml-quest/*.sln
+deep-ml-quest/*.sw?
