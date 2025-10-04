@@ -1,4 +1,4 @@
-#root {
+/* #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
@@ -31,7 +31,7 @@
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
   }
-}
+} */
 
 .card {
   padding: 2em;
@@ -39,4 +39,31 @@
 
 .read-the-docs {
   color: #888;
+}
+.playground-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-container {
+  min-height: 60vh;
+  display: flex;
+}
+
+.files {
+  padding: 20px;
+  width: 10vw;
+}
+
+.editor {
+  width: 90vw;
+}
+
+.file-node {
+  cursor: pointer;
+}
+
+li {
+  list-style: none;
+  line-height: 24px;
 }
