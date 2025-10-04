@@ -5,11 +5,169 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Brain, MessageCircle, CheckCircle, Clock, Star } from "lucide-react";
+import { Mic, VideoOff,MicOff,User } from "lucide-react"; // icons
+import { useRef } from "react";
+
+
+interface Window {
+  SpeechRecognition: any;
+  webkitSpeechRecognition: any;
+}
 
 const Interview = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [micoff,setmicoff]=useState(false);
+    const [selected, setSelected] = useState("Girl");
+      const [open, setOpen] = useState(false);
+      const [listening, setListening] = useState(false);
+  const [finalTranscript, setFinalTranscript] = useState("");
+const recognitionRef = useRef<any>(null);
+const [airesponse,setairesponse]=useState({})
+
+
+
+const playMicOnSound = (callback) => {
+  const audio = new Audio("MicOn.mp3");
+
+  audio.onended = () => {
+    if (callback) callback();
+  };
+
+  audio.play();
+};
+
+async function playAudio(audioDataBase64) {
+  // 1. Base64 ko decode karke Blob me convert karo
+  const audioBytes = atob(audioDataBase64); // Base64 decode
+  const arrayBuffer = new ArrayBuffer(audioBytes.length);
+  const bufferView = new Uint8Array(arrayBuffer);
+  for (let i = 0; i < audioBytes.length; i++) {
+    bufferView[i] = audioBytes.charCodeAt(i);
+  }
+
+  // 2. Blob banalo (audio/mpeg assume kar raha hu, change karo agar alag ho)
+  const blob = new Blob([bufferView], { type: "audio/mpeg" });
+
+  // 3. Audio URL create karo
+  const audioUrl = URL.createObjectURL(blob);
+
+  // 4. Audio play karo
+  const audio = new Audio(audioUrl);
+
+  audio.onended = () => {
+    ismicoff(); // Audio khatam hone ke baad call hoga
+  };
+
+  await audio.play();
+}
+
+
+
+const getAIResponse = async (voice, userResponse) => {
+  try {
+    const response = await fetch("http://localhost:3000/airesponse", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        voice: voice,
+        userResponse: userResponse,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const data = await response.json();
+    setairesponse(data);
+    console.log("AI Response:", data);
+
+    if (data.audio_data) {
+      playAudio(data.audio_data); // tumhara audio play function
+    }
+
+  } catch (error) {
+    console.error("Error fetching AI response:", error);
+  }
+};
+
+
+      const startListening = () => {
+    const SpeechRecognition =
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert("Speech Recognition not supported");
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = true;
+    recognition.continuous = true;
+
+    let silenceTimer: NodeJS.Timeout;
+
+    recognition.onresult = (event) => {
+        clearTimeout(silenceTimer);
+
+        let interimTranscript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                setFinalTranscript(transcript);
+            } else {
+                interimTranscript += transcript;
+            }
+        }
+
+        silenceTimer = setTimeout(() => {
+            stopListening();
+
+        }, 5000);
+    };
+
+    recognition.onend = () => {
+        setListening(false);
+    };
+
+    recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+        setListening(false);
+    };
+
+    recognition.start();
+    recognitionRef.current = recognition;
+    setListening(true);
+};
+
+ 
+  
+
+ const stopListening = () => {
+    recognitionRef.current?.stop();
+    setListening(false);
+    setmicoff(false);
+
+    getAIResponse(selected, finalTranscript); 
+};
+
+
+const ismicoff = () => {
+  setmicoff(!micoff);
+
+  if (listening) {
+    stopListening();
+  } else {
+    playMicOnSound(() => {
+      startListening();
+    });
+  }
+};
+
 
   const mcqQuestions = [
     {
@@ -305,67 +463,79 @@ const Interview = () => {
           <TabsContent value="chatbot">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
-                <Card className="h-[600px] flex flex-col">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MessageCircle className="h-5 w-5" />
-                      AI Interview Assistant
-                    </CardTitle>
-                    <CardDescription>
-                      Practice answering interview questions with our AI assistant
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-1 flex flex-col">
-                    <div className="flex-1 bg-muted/30 rounded-lg p-4 mb-4 overflow-y-auto">
-                      <div className="space-y-4">
-                        <div className="bg-primary/10 rounded-lg p-3 max-w-[80%]">
-                          <p className="text-sm">
-                            <strong>AI Assistant:</strong> Hello! I'm here to help you practice for ML interviews. 
-                            I can ask you technical questions and provide feedback on your answers. Ready to start?
-                          </p>
-                        </div>
-                        <div className="bg-card rounded-lg p-3 max-w-[80%] ml-auto">
-                          <p className="text-sm">
-                            <strong>You:</strong> Yes, I'm ready! Let's start with some fundamental questions.
-                          </p>
-                        </div>
-                        <div className="bg-primary/10 rounded-lg p-3 max-w-[80%]">
-                          <p className="text-sm">
-                            <strong>AI Assistant:</strong> Great! Let's begin with this question: "Explain the difference between bagging and boosting in ensemble methods."
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="Type your answer here..."
-                        className="flex-1 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                      <Button>Send</Button>
-                    </div>
-                  </CardContent>
+<Card
+  className="h-[600px] flex flex-col bg-cover bg-center"
+  style={{
+    backgroundImage: `url(${selected}.jpg)`,
+  }}
+>
+  <div className="relative inline-block text-left">
+      <button
+        className="px-4 py-2 bg-black text-white rounded-lg shadow hover:bg-gray-800"
+        onClick={() => setOpen(!open)} // toggle dropdown
+      >
+        {selected}
+      </button>
+
+      {open && (
+        <div className="absolute mt-2 w-full rounded-md bg-black shadow-lg z-10">
+          <ul className="py-1">
+            <li
+              className="px-4 py-2 hover:bg-gray-800 cursor-pointer text-white"
+              onClick={() => {
+                setSelected("Boy");
+                setOpen(false); // close dropdown after selection
+              }}
+            >
+              Boy
+            </li>
+            <li
+              className="px-4 py-2 hover:bg-gray-800 cursor-pointer text-white"
+              onClick={() => {
+                setSelected("Girl");
+                setOpen(false); // close dropdown after selection
+              }}
+            >
+              Girl
+            </li>
+          </ul>
+        </div>
+      )}
+    </div>
+                    <div className="relative w-full h-full">
+  {/* Audio Call Button */}
+<Button 
+
+  className="absolute bottom-[50px] left-1/3 flex items-center justify-center w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg hover:scale-y-105 hover:scale-x-105"
+  onClick={ismicoff}
+>
+  {micoff?<Mic className="w-7 h-7" />:   <MicOff className="w-7 h-7" />
+}
+</Button>
+
+
+  {/* VideoOff Call Button */}
+  <Button className="absolute bottom-[50px] right-1/3 flex items-center justify-center w-16 h-16 rounded-full border-4 border-red-600 bg-red-600 text-white shadow-lg hover:bg-red-800 hover:scale-y-105 hover:scale-x-105 transition ">
+    <VideoOff className="w-7 h-7" />
+  </Button>
+</div>
+
+
                 </Card>
               </div>
 
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Sample Questions</CardTitle>
-                    <CardDescription>Click to practice with these questions</CardDescription>
+                    <CardTitle>YOU</CardTitle>
+                    <CardDescription>👋Hello Answer the question</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {chatbotQuestions.map((question, index) => (
-                        <button
-                          key={index}
-                          className="w-full text-left p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors text-sm"
-                        >
-                          {question}
-                        </button>
-                      ))}
-                    </div>
+                  <CardContent className="flex justify-center align-middle">
+                <div className="flex justify-center items-center bg-white text-black rounded-full w-40 h-40 shadow-lg border-4 border-gray-200">
+      <User className="w-20 h-20 text-gray-700" />
+    </div>
                   </CardContent>
+
                 </Card>
 
                 <Card>
@@ -399,6 +569,11 @@ const Interview = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+
+   
+<p>{finalTranscript}</p>
+    
     </div>
   );
 };
