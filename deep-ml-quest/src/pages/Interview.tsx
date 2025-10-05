@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Brain, CheckCircle, Star } from "lucide-react";
 import { Mic, VideoOff, MicOff, User } from "lucide-react";
+import { useNavigate,redirect } from "react-router-dom";
 
 interface Window {
   SpeechRecognition: any;
@@ -23,6 +24,12 @@ const Interview = () => {
   const [finalTranscript, setFinalTranscript] = useState("");
   const recognitionRef = useRef<any>(null);
   const [airesponse, setairesponse] = useState({});
+  const navigate=useNavigate()
+
+  const Notes=()=>{
+    navigate("/notes")
+    
+  }
 
   const playMicOnSound = (callback?: () => void) => {
     const audio = new Audio("MicOn.mp3");
@@ -401,7 +408,7 @@ const getAIResponse = async (voice, userResponse) => {
                           </div>
                         ))}
                       </div>
-                      <Button variant="outline" className="w-full mt-4">
+                      <Button variant="outline" className="w-full mt-4" onClick={Notes}>
                         Study This Topic
                       </Button>
                     </CardContent>
