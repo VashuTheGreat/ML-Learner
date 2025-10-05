@@ -24,7 +24,6 @@ const Navigation = () => {
     { name: "Home", path: "/", icon: null },
     { name: "Problems", path: "/problems", icon: Code },
     { name: "ML Playground", path: "/playground", icon: Zap },
-    { name: "Terminal", path: "/terminal-editor", icon: BookOpen },
     { name: "Dashboard", path: "/dashboard", icon: BarChart3 },
     { name: "Interview Prep", path: "/interview", icon: Users },
     { name: "About", path: "/about", icon: Info },
