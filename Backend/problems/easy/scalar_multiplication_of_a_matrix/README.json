@@ -1,0 +1,102 @@
+{
+    "title": "Scalar Multiplication of a Matrix (Easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Scalar Multiplication of a Matrix](#learn-scalar-multiplication-of-a-matrix)\n- [Solutions](#solutions)\n  - [Custom Implementation](#custom-implementation)\n  - [NumPy Implementation](#numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Scalar Multiplication of a Matrix",
+                    "url": "#learn-scalar-multiplication-of-a-matrix"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "NumPy Implementation",
+                    "url": "#numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Scalar Multiplication of a Matrix](https://www.deep-ml.com/problem/Scalar%20Multiplication%20of%20a%20Matrix)\n\nWrite a Python function that performs scalar multiplication on a matrix. The function should take a matrix (represented as a list of lists) and a scalar value as input, and return the resulting matrix after scalar multiplication.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Scalar Multiplication of a Matrix",
+                    "url": "https://www.deep-ml.com/problem/Scalar%20Multiplication%20of%20a%20Matrix"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "input: matrix = [[1, 2], [3, 4]], scalar = 2\noutput: [[2, 4], [6, 8]]\nreasoning: Each element of the matrix is multiplied by the scalar.\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Scalar Multiplication of a Matrix",
+            "content": "\nWhen a matrix $A$ is multiplied by a scalar $k$, the operation is defined as multiplying each element of $A$ by $k$. Given a matrix $A$:\n\n$$\nA = \\begin{pmatrix} \na_{11} & a_{12} \\\\ \na_{21} & a_{22} \n\\end{pmatrix}\n$$\n\nAnd a scalar $k$, the result of the scalar multiplication $kA$ is:\n\n$$\nkA = \\begin{pmatrix} \nka_{11} & ka_{12} \\\\ \nka_{21} & ka_{22} \n\\end{pmatrix}\n$$\n\nThis operation scales the matrix by $k$ without changing its dimension or the relative proportion of its elements.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "def scalar_multiply(matrix: list[list[int|float]], scalar: int|float) -> list[list[int|float]]:\n    l = []\n    for i in matrix:\n        l.append([j * scalar for j in i])\n    return l\n\nmatrix = [[1, 2], [3, 4]]\nscalar = 2\nprint(scalar_multiply(matrix=matrix, scalar=scalar))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef scalar_multiply(matrix: list[list[int|float]], scalar: int|float) -> list[list[int|float]]:\n    return (np.multiply(matrix, scalar))\n\n# Usage remains the same as the custom implementation\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nThe custom implementation of `scalar_multiply` function takes two parameters:\n\n- `matrix`: a 2D list representing the input matrix\n- `scalar`: an integer or float value to multiply the matrix with\n\nThe function works as follows:\n\n1. It initializes an empty list `l` to store the result.\n2. It iterates through each row `i` of the input matrix.\n3. For each row, it creates a new list comprehension `[j * scalar for j in i]` which multiplies each element `j` in the row by the scalar value.\n4. The resulting row is appended to the list `l`.\n5. Finally, it returns the list `l` containing the scalar-multiplied matrix.\n\nThis implementation is a straightforward and intuitive approach to scalar multiplication of a matrix. It directly applies the mathematical definition of scalar multiplication by iterating through each element of the matrix and multiplying it by the scalar value.\n\nThe NumPy implementation, on the other hand, utilizes the built-in `np.multiply()` function from the NumPy library. This method is more concise and potentially more efficient, especially for larger matrices, as it leverages NumPy's optimized array operations.\n\nBoth implementations will produce the same result, but the NumPy version may be preferred in scenarios where performance is critical or when working with larger datasets that are already in NumPy array format.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

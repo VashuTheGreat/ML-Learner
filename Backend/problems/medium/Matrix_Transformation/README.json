@@ -1,0 +1,93 @@
+{
+    "title": "Matrix Transformation (Medium) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Matrix Transformation](#learn-matrix-transformation)\n- [Solutions](#solutions)\n  - [Implementation](#implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Matrix Transformation",
+                    "url": "#learn-matrix-transformation"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Implementation",
+                    "url": "#implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Matrix Transformation](https://www.deep-ml.com/problem/Matrix%20Transformation)\n\nWrite a Python function that transforms a given matrix A using the operation $$T^{-1}AS$$, where T and S are invertible matrices. The function should first validate if the matrices T and S are invertible, and then perform the transformation.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Matrix Transformation",
+                    "url": "https://www.deep-ml.com/problem/Matrix%20Transformation"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "input: A = [[1, 2], [3, 4]], T = [[2, 0], [0, 2]], S = [[1, 1], [0, 1]]\noutput: [[0.5,1.5],[1.5,3.5]]\nreasoning: The matrices T and S are used to transform matrix A by computing T^(-1)AS.\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Matrix Transformation",
+            "content": "\nTransforming a matrix $$A$$ using the operation $$T^{-1}AS$$ involves several steps. This operation changes the basis of matrix $$A$$ using two invertible matrices $$T$$ and $$S$$. Given matrices $$A$$, $$T$$, and $$S$$:\n\n1. **Check if $$T$$ and $$S$$ are invertible** by ensuring their determinants are non-zero.\n2. **Compute the inverses** of $$T$$ and $$S$$, denoted as $$T^{-1}$$ and $$S^{-1}$$.\n3. **Perform the matrix multiplication** to obtain the transformed matrix:\n\n   $$A' = T^{-1}AS$$\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Example",
+            "content": "\nIf:\n\n$$\nA = \\begin{pmatrix} \n1 & 2 \\\\ \n3 & 4 \n\\end{pmatrix}\n$$\n\n$$\nT = \\begin{pmatrix} \n2 & 0 \\\\ \n0 & 2 \n\\end{pmatrix}\n$$\n\n$$\nS = \\begin{pmatrix} \n1 & 1 \\\\ \n0 & 1 \n\\end{pmatrix}\n$$\n\nFirst, check that $$T$$ and $$S$$ are invertible:\n- $$det(T) = 4 \\neq 0$$\n- $$det(S) = 1 \\neq 0$$\n\nCompute the inverses:\n\n$$\nT^{-1} = \\begin{pmatrix} \n\\frac{1}{2} & 0 \\\\ \n0 & \\frac{1}{2} \n\\end{pmatrix}\n$$\n\nThen, perform the transformation:\n\n$$\nA' = T^{-1}AS = \\begin{pmatrix} \n\\frac{1}{2} & 0 \\\\ \n0 & \\frac{1}{2} \n\\end{pmatrix} \\begin{pmatrix} \n1 & 2 \\\\ \n3 & 4 \n\\end{pmatrix} \\begin{pmatrix} \n1 & 1 \\\\ \n0 & 1 \n\\end{pmatrix} = \\begin{pmatrix} \n0.5 & 1.5 \\\\ \n1.5 & 3.5 \n\\end{pmatrix}\n$$\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef transform_matrix(\n    A: list[list[int | float]], T: list[list[int | float]], S: list[list[int | float]]\n) -> list[list[int | float]]:\n\n    if np.linalg.det(T) == 0 or np.linalg.det(S) == 0:\n        raise ValueError(\n            \"The determinant/s of the matrice/s equals 0; hence not invertible\"\n        )\n    transformed_matrix = np.linalg.inv(T) @ A @ S\n    return transformed_matrix  # type: ignore\n\nA = [[1, 2], [3, 4]]\nT = [[2, 0], [0, 2]]\nS = [[1, 1], [0, 1]]\nprint(transform_matrix(A=A, T=T, S=S))  # type: ignore\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nThe `transform_matrix` function takes three parameters:\n- `A`: The matrix to be transformed (list of lists)\n- `T`: The first transformation matrix (list of lists)\n- `S`: The second transformation matrix (list of lists)\n\nThe function implements the matrix transformation as follows:\n\n1. It first checks if matrices `T` and `S` are invertible by calculating their determinants using `np.linalg.det()`. If either determinant is zero, it raises a `ValueError` with an appropriate message.\n\n2. If both matrices are invertible, it performs the transformation using NumPy's matrix operations:\n   - `np.linalg.inv(T)` computes the inverse of matrix `T`\n   - The `@` operator is used for matrix multiplication\n   - The operation `np.linalg.inv(T) @ A @ S` performs the transformation $$T^{-1}AS$$\n\n3. The function returns the transformed matrix.\n\nNote: The `# type: ignore` comments are used to suppress type checking warnings. In this case, they're used because the return type of NumPy operations might not strictly match the type hint `list[list[int | float]]`.\n\nThe commented out \"Step 2\" section is identical to the implemented \"Step 1\" section. It appears to be a duplicate of the same function, possibly left as a backup or for comparison purposes.\n\nIn the example usage, matrices `A`, `T`, and `S` are defined, and the `transform_matrix` function is called with these matrices as arguments. The result is then printed.\n\nThis implementation efficiently uses NumPy for matrix operations, which is particularly beneficial for larger matrices due to NumPy's optimized array operations.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

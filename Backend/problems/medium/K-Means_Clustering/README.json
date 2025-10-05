@@ -1,0 +1,114 @@
+{
+    "title": "K-Means Clustering (Medium) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Implementing k-Means Clustering](#learn-implementing-k-means-clustering)\n- [Solutions](#solutions)\n  - [Custom Implementation](#custom-implementation)\n  - [NumPy Implementation](#numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Implementing k-Means Clustering",
+                    "url": "#learn-implementing-k-means-clustering"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "NumPy Implementation",
+                    "url": "#numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[K-Means Clustering](https://www.deep-ml.com/problem/K-Means%20Clustering)\n\nWrite a Python function that implements the k-Means algorithm for clustering, starting with specified initial centroids and a set number of iterations. The function should take a list of points (each represented as a tuple of coordinates), an integer k representing the number of clusters to form, a list of initial centroids (each a tuple of coordinates), and an integer representing the maximum number of iterations to perform. The function will iteratively assign each point to the nearest centroid and update the centroids based on the assignments until the centroids do not change significantly, or the maximum number of iterations is reached. The function should return a list of the final centroids of the clusters. Round to the nearest fourth decimal.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "K-Means Clustering",
+                    "url": "https://www.deep-ml.com/problem/K-Means%20Clustering"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "input: points = [(1, 2), (1, 4), (1, 0), (10, 2), (10, 4), (10, 0)], k = 2, initial_centroids = [(1, 1), (10, 1)], max_iterations = 10\noutput: [(1, 2), (10, 2)]\nreasoning: Given the initial centroids and a maximum of 10 iterations,\nthe points are clustered around these points, and the centroids are\nupdated to the mean of the assigned points, resulting in the final\ncentroids which approximate the means of the two clusters.\nThe exact number of iterations needed may vary,\nbut the process will stop after 10 iterations at most.\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Implementing k-Means Clustering",
+            "content": "\nk-Means clustering is a method to partition $n$ points into $k$ clusters. Here is a brief overview of how to implement the k-Means algorithm:\n\n1. **Initialization**: Start by selecting $k$ initial centroids. These can be randomly selected from the dataset or based on prior knowledge.\n\n2. **Assignment Step**: For each point in the dataset, find the nearest centroid. The \"nearest\" can be defined using Euclidean distance. Assign the point to the cluster represented by this nearest centroid.\n\n3. **Update Step**: Once all points are assigned to clusters, update the centroids by calculating the mean of all points in each cluster. This becomes the new centroid of the cluster.\n\n4. **Iteration**: Repeat the assignment and update steps until the centroids no longer change significantly, or until a predetermined number of iterations have been completed. This iterative process helps in refining the clusters to minimize within-cluster variance.\n\n5. **Result**: The final centroids represent the center of the clusters, and the points are partitioned accordingly.\n\nThis algorithm assumes that the mean is a meaningful measure, which might not be the case for non-numeric data. The choice of initial centroids can significantly affect the final clusters, hence multiple runs with different starting points can lead to a more comprehensive understanding of the cluster structure in the data.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\nimport math\n\ndef k_means_clustering(\n    points: list[tuple[float, float]],\n    k: int,\n    initial_centroids: list[tuple[float, float]],\n    max_iterations: int,\n) -> list[tuple[float, float]]:\n    def euc_dist(x1, x2):\n        return math.sqrt(\n            ((x2[1] - x1[1]) ** 2 + (x2[0] - x1[0]) ** 2)\n        )  # Euclidean distance formula\n\n    final_centroids = initial_centroids\n\n    # Iterate for the given max_iterations\n    for _ in range(max_iterations):\n        clusters = [[] for _ in range(k)]  # Create empty lists for clusters\n\n        # Assign points to the nearest centroid (initial draft)\n        for point in points:\n            distance = [euc_dist(point, final_centroids[i]) for i in range(k)]\n            closest_cluster_index = distance.index(min(distance))\n            clusters[closest_cluster_index].append(point)\n\n        new_centroids = []\n\n        # Update centroids by computing the mean of points in each cluster\n        for cluster in clusters:\n            if cluster:  # Only update centroids if cluster is not empty\n                new_centroid = tuple(np.round(np.mean(cluster, axis=0), 4))\n                new_centroids.append(new_centroid)\n            else:\n                new_centroids.append(\n                    final_centroids[clusters.index(cluster)]\n                )  # Keep the same centroid if no points in the cluster\n\n        # If centroids do not change, break early\n        if new_centroids == final_centroids:\n            break\n        final_centroids = new_centroids\n    return final_centroids  # type: ignore\n\n# Example usage\npoints = [(1, 2), (1, 4), (1, 0), (10, 2), (10, 4), (10, 0)]\nk = 2\ninitial_centroids = [(1, 1), (10, 1)]\nmax_iterations = 10\nprint(k_means_clustering(points=points, k=k, initial_centroids=initial_centroids, max_iterations=max_iterations))  # type: ignore\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef euclidean_distance(a, b):\n    return np.sqrt(((a - b) ** 2).sum(axis=1))\n\ndef k_means_clustering(points, k, initial_centroids, max_iterations):\n    points = np.array(points)\n    centroids = np.array(initial_centroids)\n\n    for iteration in range(max_iterations):\n        # Assign points to the nearest centroid\n        distances = np.array([euclidean_distance(points, centroid) for centroid in centroids])\n        assignments = np.argmin(distances, axis=0)\n\n        new_centroids = np.array([points[assignments == i].mean(axis=0) if len(points[assignments == i]) > 0 else centroids[i] for i in range(k)])\n\n        # Check for convergence\n        if np.all(centroids == new_centroids):\n            break\n        centroids = new_centroids\n        centroids = np.round(centroids,4)\n    return [tuple(centroid) for centroid in centroids]\n\n# Example usage\npoints = [(1, 2), (1, 4), (1, 0), (10, 2), (10, 4), (10, 0)]\nk = 2\ninitial_centroids = [(1, 1), (10, 1)]\nmax_iterations = 10\nprint(k_means_clustering(points=points, k=k, initial_centroids=initial_centroids, max_iterations=max_iterations))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n1. The `k_means_clustering` function takes four parameters: `points` (list of tuples), `k` (number of clusters), `initial_centroids` (list of tuples), and `max_iterations` (integer).\n\n2. A helper function `euc_dist` is defined to calculate the Euclidean distance between two points.\n\n3. The algorithm iterates for a maximum of `max_iterations` times:\n   - It creates empty clusters for each centroid.\n   - For each point, it calculates the distance to all centroids and assigns the point to the nearest centroid's cluster.\n   - It then updates the centroids by calculating the mean of all points in each cluster.\n   - If a cluster is empty, it keeps the previous centroid for that cluster.\n   - If the new centroids are the same as the previous ones, it breaks the loop early.\n\n4. The function returns the final centroids rounded to 4 decimal places.\n\n5. The `# type: ignore` comments are used to suppress type checking warnings, likely due to potential type mismatches in the code.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n1. The `euclidean_distance` function calculates the Euclidean distance between points using NumPy operations.\n\n2. The `k_means_clustering` function is implemented using NumPy arrays for efficient computations:\n   - It converts input points and centroids to NumPy arrays.\n   - For each iteration, it calculates distances between all points and centroids using vectorized operations.\n   - It assigns points to the nearest centroid using `np.argmin`.\n   - New centroids are calculated as the mean of assigned points, or kept the same if a cluster is empty.\n   - It checks for convergence by comparing new and old centroids.\n   - Centroids are rounded to 4 decimal places.\n\n3. The function returns the final centroids as a list of tuples.\n\nBoth implementations follow the same general algorithm but differ in their use of data structures and computational methods. The NumPy implementation is likely to be more efficient for larger datasets due to its use of vectorized operations.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

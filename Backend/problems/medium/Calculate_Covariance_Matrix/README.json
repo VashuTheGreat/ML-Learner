@@ -1,0 +1,114 @@
+{
+    "title": "Calculate Covariance Matrix (Medium) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Calculate Covariance Matrix](#learn-calculate-covariance-matrix)\n- [Solutions](#solutions)\n  - [Custom Implementation](#custom-implementation)\n  - [NumPy Implementation](#numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Calculate Covariance Matrix",
+                    "url": "#learn-calculate-covariance-matrix"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "NumPy Implementation",
+                    "url": "#numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Calculate Covariance Matrix](https://www.deep-ml.com/problem/Calculate%20Covariance%20Matrix)\n\nWrite a Python function that calculates the covariance matrix from a list of vectors. Assume that the input list represents a dataset where each vector is a feature, and vectors are of equal length.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Calculate Covariance Matrix",
+                    "url": "https://www.deep-ml.com/problem/Calculate%20Covariance%20Matrix"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "input: vectors = [[1, 2, 3], [4, 5, 6]]\noutput: [[1.0, 1.0], [1.0, 1.0]]\nreasoning: The dataset has two features with three observations each. The covariance between each pair of features (including covariance with itself) is calculated and returned as a 2x2 matrix.\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Calculate Covariance Matrix",
+            "content": "\nThe covariance matrix is a fundamental concept in statistics, illustrating how much two random variables change together. It's essential for understanding the relationships between variables in a dataset. For a dataset with $n$ features, the covariance matrix is an $n \\times n$ square matrix where each element $(i, j)$ represents the covariance between the $i^{th}$ and $j^{th}$ features. Covariance is defined by the formula:\n\n$$ \\text{cov}(X, Y) = \\frac{\\sum_{i=1}^{n} (x_i - \\bar{x})(y_i - \\bar{y})}{n-1} $$\n\nWhere:\n- $X$ and $Y$ are two random variables (features),\n- $x_i$ and $y_i$ are individual observations of $X$ and $Y$,\n- $\\bar{x}$ (x-bar) and $\\bar{y}$ (y-bar) are the means of $X$ and $Y$,\n- $n$ is the number of observations.\n\nIn the covariance matrix:\n- The diagonal elements (where $i = j$) indicate the variance of each feature.\n- The off-diagonal elements show the covariance between different features.\n\nThis matrix is symmetric, as the covariance between $X$ and $Y$ is equal to the covariance between $Y$ and $X$, denoted as $\\text{cov}(X, Y) = \\text{cov}(Y, X)$.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "def calculate_covariance_matrix(vectors: list[list[float]]) -> list[list[float]]:\n    n_features = len(vectors)\n    n_observations = len(vectors[0])\n    covariance_matrix = [[0 for _ in range(n_features)] for _ in range(n_features)]\n\n    means = [sum(feature) / n_observations for feature in vectors]\n    # print(covariance_matrix, \"\\n\", means)\n\n    for i in range(n_features):\n        for j in range(i, n_features):\n            covariance = sum(\n                (vectors[i][k] - means[i]) * (vectors[j][k] - means[j])\n                for k in range(n_observations)\n            ) / (n_observations - 1)\n            covariance_matrix[i][j] = covariance_matrix[j][i] = covariance\n\n    return covariance_matrix\n\n# Example usage\nvectors = [[1, 2, 3], [4, 5, 6]]\nresult = calculate_covariance_matrix(vectors)\nprint(result)\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef calculate_covariance_matrix(vectors: list[list[float]]) -> list[list[float]]:\n    # Convert the input list to a NumPy array for easier mathematical operations\n    data = np.array(vectors)\n\n    # Calculate the mean of each feature\n    means = np.mean(data, axis=1)\n\n    # Center the data by subtracting the mean of each feature\n    centered_data = data - means[:, np.newaxis]\n\n    # Number of observations (columns)\n    n = data.shape[1]\n\n    # Calculate the covariance matrix\n    covariance_matrix = np.dot(centered_data, centered_data.T) / (n - 1)\n\n    return covariance_matrix.tolist()\n\n# Example usage\nvectors = [[1, 2, 3], [4, 5, 6]]\nresult = calculate_covariance_matrix(vectors)\nprint(result)\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n1. The function `calculate_covariance_matrix` takes a list of vectors as input.\n2. It initializes variables for the number of features and observations, and creates an empty covariance matrix.\n3. The means of each feature are calculated.\n4. A commented print statement is included for debugging purposes, which would show the initial empty covariance matrix and the calculated means.\n5. The function then iterates through each pair of features, calculating their covariance using the formula provided in the \"Learn\" section.\n6. The covariance is stored symmetrically in the matrix (both at [i][j] and [j][i]).\n7. Finally, the completed covariance matrix is returned.\n\nThis implementation follows the mathematical definition of covariance closely, making it easy to understand but potentially less efficient for large datasets.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n1. The function first converts the input list to a NumPy array for efficient operations.\n2. It calculates the mean of each feature using `np.mean()`.\n3. The data is centered by subtracting the mean from each feature.\n4. The number of observations is determined from the shape of the data.\n5. The covariance matrix is calculated using matrix multiplication (`np.dot()`) of the centered data with its transpose, divided by (n-1).\n6. The result is converted back to a list before being returned.\n\nThis implementation leverages NumPy's efficient array operations, making it faster for larger datasets. The use of matrix multiplication to calculate covariance is a common optimization in numerical libraries.\n\nBoth implementations produce the same result, but the NumPy version is likely to be more efficient, especially for larger datasets. The custom implementation, however, provides a clearer view of the step-by-step process of calculating the covariance matrix.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

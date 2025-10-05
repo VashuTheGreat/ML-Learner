@@ -1,0 +1,129 @@
+{
+    "title": "Calculate Mean by Row or Column (Easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Calculate Mean by Row or Column](#learn-calculate-mean-by-row-or-column)\n- [Solutions](#solutions)\n  - [Custom Implementation](#custom-implementation)\n  - [Alternative Custom Implementation](#alternative-custom-implementation)\n  - [NumPy Implementation](#numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Calculate Mean by Row or Column",
+                    "url": "#learn-calculate-mean-by-row-or-column"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "Alternative Custom Implementation",
+                    "url": "#alternative-custom-implementation"
+                },
+                {
+                    "text": "NumPy Implementation",
+                    "url": "#numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Calculate Mean by Row or Column](https://www.deep-ml.com/problem/Calculate%20Mean%20by%20Row%20or%20Column)\n\nWrite a Python function that calculates the mean of a matrix either by row or by column, based on a given mode. The function should take a matrix (list of lists) and a mode ('row' or 'column') as input and return a list of means according to the specified mode.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Calculate Mean by Row or Column",
+                    "url": "https://www.deep-ml.com/problem/Calculate%20Mean%20by%20Row%20or%20Column"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "# Example 1:\ninput: matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]], mode = 'column'\noutput: [4.0, 5.0, 6.0]\nreasoning: Calculating the mean of each column results in [(1+4+7)/3, (2+5+8)/3, (3+6+9)/3].\n\n# Example 2:\ninput: matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]], mode = 'row'\noutput: [2.0, 5.0, 8.0]\nreasoning: Calculating the mean of each row results in [(1+2+3)/3, (4+5+6)/3, (7+8+9)/3].\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Calculate Mean by Row or Column",
+            "content": "\nCalculating the mean of a matrix by row or column involves averaging the elements across the specified dimension. This operation provides insights into the distribution of values within the dataset, useful for data normalization and scaling.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Row Mean",
+            "content": "\nThe mean of a row is computed by summing all elements in the row and dividing by the number of elements. For row \\(i\\), the mean is:\n\n$$\n\\mu_{\\text{row } i} = \\frac{1}{n} \\sum_{j=1}^{n} a_{ij}\n$$\n\nwhere \\(a_{ij}\\) is the matrix element in the \\(i^{th}\\) row and \\(j^{th}\\) column, and \\(n\\) is the total number of columns.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Column Mean",
+            "content": "\nSimilarly, the mean of a column is found by summing all elements in the column and dividing by the number of elements. For column \\(j\\), the mean is:\n\n$$\n\\mu_{\\text{column } j} = \\frac{1}{m} \\sum_{i=1}^{m} a_{ij}\n$$\n\nwhere \\(m\\) is the total number of rows.\n\nThis mathematical formulation helps in understanding how data is aggregated across different dimensions, a critical step in various data preprocessing techniques.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "def calculate_matrix_mean(matrix: list[list[float]], mode: str) -> list[float]:\n    l = []\n    if mode == \"row\":\n        for n in range(len(matrix)):\n            sum = 0\n            for i in matrix[n]:\n                sum += i\n            l.append(sum/len(matrix))\n\n    elif mode == \"column\":\n        for i in range(0, len(matrix)):\n            sum = 0\n            for j in range(0, len(matrix)):\n                sum += matrix[j][i]\n            l.append(sum/len(matrix[0]))\n     \n    return l\n\nmatrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]\nmode = 'column'\nprint(calculate_matrix_mean(matrix=matrix, mode=mode))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Alternative Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "def calculate_matrix_mean(matrix: list[list[float]], mode: str) -> list[float]:\n    if mode == \"row\":\n        return [sum(row) / len(row) for row in matrix]\n    elif mode == \"column\":\n        return [sum(col) / len(matrix) for col in zip(*matrix)]\n    else:\n        raise ValueError(\"Mode must be of type 'row' or 'column' \")\n\nmatrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]\nmode = 'column'\nprint(calculate_matrix_mean(matrix=matrix, mode=mode))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef calculate_matrix_mean(matrix: list[list[float]], mode: str) -> list[float]:\n    if mode == \"row\":\n        return np.array(np.sum(matrix, axis=0) // len(matrix)).tolist()\n    elif mode == \"column\":\n        return np.array(np.sum(matrix, axis=1) // len(matrix[0])).tolist()\n\nmatrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]\nmode = 'column'\nprint(calculate_matrix_mean(matrix=matrix, mode=mode))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nThe custom implementation of `calculate_matrix_mean` function takes two parameters:\n\n- `matrix`: a 2D list representing the input matrix\n- `mode`: a string that specifies whether to calculate the mean by 'row' or by 'column'\n\nThe function works as follows:\n\n1. It initializes an empty list `l` to store the result.\n2. If the mode is 'row':\n   - It iterates through each row `n` of the matrix.\n   - For each row, it calculates the sum of the elements and then divides by the number of elements to get the mean.\n   - The mean is appended to the list `l`.\n3. If the mode is 'column':\n   - It iterates through each column index `i`.\n   - For each column, it calculates the sum of the elements by iterating through each row and then divides by the number of elements to get the mean.\n   - The mean is appended to the list `l`.\n4. Finally, it returns the list `l` containing the means.\n\nThe alternative custom implementation simplifies the logic using list comprehensions and the built-in `zip` function to transpose the matrix for column-wise operations.\n\nThe NumPy implementation leverages NumPy's optimized array operations for potentially more efficient calculations, especially useful for larger matrices.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

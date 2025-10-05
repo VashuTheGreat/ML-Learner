@@ -1,0 +1,114 @@
+{
+    "title": "Softmax Activation Function Implementation (Easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Understanding the Softmax Activation Function](#learn-understanding-the-softmax-activation-function)\n- [Solutions](#solutions)\n  - [Custom Implementation](#custom-implementation)\n  - [NumPy Implementation](#numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Understanding the Softmax Activation Function",
+                    "url": "#learn-understanding-the-softmax-activation-function"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "NumPy Implementation",
+                    "url": "#numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Softmax Activation Function Implementation](https://www.deep-ml.com/problem/Softmax%20Activation%20Function%20Implementation)\n\nWrite a Python function that computes the softmax activation for a given list of scores. The function should return the softmax values as a list, each rounded to four decimal places.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Softmax Activation Function Implementation",
+                    "url": "https://www.deep-ml.com/problem/Softmax%20Activation%20Function%20Implementation"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "input: scores = [1, 2, 3]\noutput: [0.0900, 0.2447, 0.6652]\nreasoning: The softmax function converts a list of values into a probability distribution. The probabilities are proportional to the exponential of each element divided by the sum of the exponentials of all elements in the list.\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Understanding the Softmax Activation Function",
+            "content": "\nThe softmax function is a generalization of the sigmoid function and is used in the output layer of a neural network model that handles multi-class classification tasks.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Mathematical Definition",
+            "content": "\nThe softmax function is mathematically represented as:\n\n$$\n\\text{softmax}(z_i) = \\frac{e^{z_i}}{\\sum_{j} e^{z_j}}\n$$\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Characteristics",
+            "content": "\n- **Output Range**: Each output value is between 0 and 1, and the sum of all outputs is 1.\n- **Purpose**: It transforms scores into probabilities, which are easier to interpret and are useful for classification.\n\nThis function is essential for models where the output needs to represent a probability distribution across multiple classes.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import math\n\ndef softmax(scores: list[int | float]) -> list[float]:\n    sum_exp_scores = sum([math.exp(i) for i in scores])\n    probabilities = [round(math.exp(i) / sum_exp_scores, 4) for i in scores]\n    return probabilities\n\nscores = [1, 2, 3]\nprint(softmax(scores=scores))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef softmax(scores: list[int | float]) -> list[float]:\n    sum_exp_scores = sum([np.exp(i) for i in scores])\n    probabilities = [round(np.exp(i)/sum_exp_scores, 4) for i in scores]\n    return probabilities\n\nscores = [1, 2, 3]\nprint(softmax(scores=scores))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nBoth implementations of the `softmax` function take a list of scores as input and return a list of probabilities. The function works as follows:\n\n1. Calculate the exponential of each score in the input list.\n2. Sum up all the exponential values.\n3. Divide each exponential value by the sum to get the softmax probabilities.\n4. Round each probability to four decimal places.\n\nThe custom implementation uses Python's built-in `math` module, while the NumPy implementation uses the `numpy` library. Both approaches yield the same results, but the NumPy version might be more efficient for larger datasets due to its optimized array operations.\n\nThe main difference between the two implementations is the use of `math.exp()` in the custom version versus `np.exp()` in the NumPy version. Both functions compute the exponential of a given number, but `np.exp()` can handle array inputs more efficiently.\n\nBoth implementations demonstrate a clear understanding of the softmax function and provide an efficient way to compute softmax probabilities for a given list of scores.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

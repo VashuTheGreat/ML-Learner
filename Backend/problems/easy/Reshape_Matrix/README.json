@@ -1,0 +1,102 @@
+{
+    "title": "Reshape Matrix (Easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Reshaping a Matrix](#learn-reshaping-a-matrix)\n- [Solutions](#solutions)\n  - [Custom Implementation](#custom-implementation)\n  - [NumPy Implementation](#numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Reshaping a Matrix",
+                    "url": "#learn-reshaping-a-matrix"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "NumPy Implementation",
+                    "url": "#numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Reshape Matrix](https://www.deep-ml.com/problem/Reshape%20Matrix)\n\nWrite a Python function that reshapes a given matrix into a specified shape.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Reshape Matrix",
+                    "url": "https://www.deep-ml.com/problem/Reshape%20Matrix"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "input: a = [[1,2,3,4],[5,6,7,8]], new_shape = (4, 2)\noutput: [[1, 2], [3, 4], [5, 6], [7, 8]]\nreasoning: The given matrix is reshaped from 2x4 to 4x2.\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Reshaping a Matrix",
+            "content": "\nMatrix reshaping involves changing the shape of a matrix without altering its data. This is essential in many machine learning tasks where the input data needs to be formatted in a specific way. For example, consider a matrix $M$:\n\nOriginal Matrix $M$:\n\n$$\nM = \\begin{pmatrix} \n1 & 2 & 3 & 4 \\\\ \n5 & 6 & 7 & 8 \n\\end{pmatrix}\n$$\n\nReshaped Matrix $M'$ with shape (4, 2):\n\n$$\nM' = \\begin{pmatrix} \n1 & 2 \\\\ \n3 & 4 \\\\ \n5 & 6 \\\\ \n7 & 8 \n\\end{pmatrix}\n$$\n\nEnsure the total number of elements remains constant during reshaping.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "def reshape_matrix(a: list[list[int|float]], new_shape: tuple[int, int]) -> list[list[int|float]]:\n    l = [[0] * new_shape[1] for _ in range(new_shape[0])]\n    flat_a = [elem for row in a for elem in row]  # Flatten the original matrix\n    # print(flat_a)\n    for i in range(new_shape[0]):\n        for j in range(new_shape[1]):\n            l[i][j] = flat_a[i * new_shape[1] + j] # type: ignore\n    return l # type: ignore\n\na = [[1, 2, 3, 4], [5, 6, 7, 8]]\nnew_shape = (4, 2)\nprint(reshape_matrix(a=a, new_shape=new_shape)) # type: ignore\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef reshape_matrix(a: list[list[int|float]], new_shape: tuple[int, int]) -> list[list[int|float]]:\n    # Write your code here and return a python list after reshaping by using numpy's tolist() method\n    return np.reshape(a, newshape=new_shape).tolist()\n\n# Usage remains the same as the custom implementation\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nThe custom implementation of `reshape_matrix` function takes two parameters:\n\n- `a`: a 2D list representing the input matrix\n- `new_shape`: a tuple of two integers specifying the desired shape of the output matrix\n\nThe function works as follows:\n\n1. It initializes a new 2D list `l` with the desired shape, filled with zeros.\n2. It flattens the input matrix `a` into a 1D list `flat_a` using a list comprehension.\n3. It then iterates through the new matrix shape, filling it with elements from the flattened input matrix.\n4. The index calculation `i * new_shape[1] + j` ensures that elements are placed in the correct position in the reshaped matrix.\n5. Finally, it returns the reshaped matrix `l`.\n\nThis implementation manually handles the reshaping process, providing a clear understanding of how matrix reshaping works at a fundamental level.\n\nThe NumPy implementation, on the other hand, utilizes the built-in `np.reshape()` function from the NumPy library. This method is more concise and potentially more efficient, especially for larger matrices, as it leverages NumPy's optimized array operations. The `tolist()` method is then used to convert the NumPy array back to a Python list, ensuring compatibility with the function's return type.\n\nBoth implementations will produce the same result, but the NumPy version may be preferred in scenarios where performance is critical or when working with larger datasets that are already in NumPy array format.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

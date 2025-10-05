@@ -1,0 +1,114 @@
+{
+    "title": "Batch Iterator for Dataset (Easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Understanding Batch Iteration](#learn-understanding-batch-iteration)\n- [Solutions](#solutions)\n  - [Custom Implementation](#custom-implementation)\n  - [NumPy Implementation](#numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Understanding Batch Iteration",
+                    "url": "#learn-understanding-batch-iteration"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "NumPy Implementation",
+                    "url": "#numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Batch Iterator for Dataset](https://www.deep-ml.com/problem/Batch%20Iterator%20for%20Dataset)\n\nWrite a Python function to create a batch iterator for the samples in a numpy array X and an optional numpy array y. The function should yield batches of a specified size. If y is provided, the function should yield batches of (X, y) pairs; otherwise, it should yield batches of X only.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Batch Iterator for Dataset",
+                    "url": "https://www.deep-ml.com/problem/Batch%20Iterator%20for%20Dataset"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n**Reasoning:**\nThe dataset X contains 5 samples, and we are using a batch size of 2. Therefore, the function will divide the dataset into 3 batches. The first two batches will contain 2 samples each, and the last batch will contain the remaining sample. The corresponding values from y are also included in each batch.\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "X = np.array([[1, 2], \n              [3, 4], \n              [5, 6], \n              [7, 8], \n              [9, 10]])\ny = np.array([1, 2, 3, 4, 5])\nbatch_size = 2\nbatch_iterator(X, y, batch_size)\noutput:\n[[[[1, 2], [3, 4]], [1, 2]],\n [[[5, 6], [7, 8]], [3, 4]],\n [[[9, 10]], [5]]]\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Understanding Batch Iteration",
+            "content": "\nBatch iteration is a common technique used in machine learning and data processing to handle large datasets more efficiently. Instead of processing the entire dataset at once, which can be memory-intensive, data is processed in smaller, more manageable batches.\n\nHere's a step-by-step method to create a batch iterator:\n\n1. **Determine the Number of Samples:** Calculate the total number of samples in the dataset.\n2. **Iterate in Batches:** Loop through the dataset in increments of the specified batch size.\n3. **Yield Batches:** For each iteration, yield a batch of samples from X and, if provided, the corresponding samples from y.\n\nThis method ensures efficient processing and can be used for both training and evaluation phases in machine learning workflows.\n\nMathematically, given a dataset $$X$$ with $$n$$ samples and a batch size of $$b$$, the number of batches $$N$$ is calculated as:\n\n$$N = \\left\\lceil\\frac{n}{b}\\right\\rceil$$\n\nWhere $$\\lceil \\cdot \\rceil$$ denotes the ceiling function.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef batch_iterator(X, y=None, batch_size=64):\n    n_samples = len(X) # Rows of X array\n    batches = (n_samples + batch_size - 1) // batch_size  # Calculate the number of batches\n    # print(batches)\n    result = []\n\n    for i in range(batches):\n        start_idx = i * batch_size\n        end_idx = min(start_idx + batch_size, n_samples)\n        \n        if y is not None:\n            batch_X = X[start_idx:end_idx].tolist()\n            batch_y = y[start_idx:end_idx].tolist()\n            result.append([batch_X, batch_y])\n        else:\n            batch_X = X[start_idx:end_idx].tolist()\n            result.append(batch_X)\n    \n    return result\n\nX = np.array([[1, 2], [3, 4], [5, 6], [7, 8], [9, 10]])\ny = np.array([1, 2, 3, 4, 5])\nbatch_size = 2\nprint(batch_iterator(X, y, batch_size))\n\nprint(batch_iterator(np.array([[1, 1], [2, 2], [3, 3], [4, 4]]), batch_size=3))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef batch_iterator(X, y=None, batch_size=64):\n    n_samples = X.shape[0]\n    batches = []\n    for i in np.arange(0, n_samples, batch_size):\n        begin, end = i, min(i+batch_size, n_samples)\n        if y is not None:\n            batches.append([X[begin:end], y[begin:end]])\n        else:\n            batches.append(X[begin:end])\n    return batches\n\n# Usage remains the same as the custom implementation\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nBoth implementations of the `batch_iterator` function take three parameters:\n\n- `X`: a numpy array representing the input samples\n- `y`: an optional numpy array representing the labels (default is None)\n- `batch_size`: an integer specifying the size of each batch (default is 64)\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n1. Calculate the number of samples (`n_samples`) in the input array `X`.\n2. Calculate the number of batches using integer division, ensuring all samples are covered.\n3. Initialize an empty list `result` to store the batches.\n4. Iterate through the range of batches:\n   - Calculate the start and end indices for each batch.\n   - If `y` is provided, create batches of `[X, y]` pairs.\n   - If `y` is not provided, create batches of `X` only.\n   - Append each batch to the `result` list.\n5. Return the `result` list containing all batches.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n1. Get the number of samples from the shape of `X`.\n2. Initialize an empty list `batches` to store the results.\n3. Use `np.arange()` to create an iterator over the sample indices with the given `batch_size`.\n4. For each iteration:\n   - Calculate the begin and end indices for the current batch.\n   - If `y` is provided, append `[X[begin:end], y[begin:end]]` to `batches`.\n   - If `y` is not provided, append `X[begin:end]` to `batches`.\n5. Return the `batches` list.\n\nBoth implementations achieve the same result, but the NumPy version leverages NumPy's built-in functions for potentially better performance, especially with larger datasets. The custom implementation provides more explicit control over the batching process and may be easier to understand for those less familiar with NumPy.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

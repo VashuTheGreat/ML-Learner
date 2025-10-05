@@ -1,0 +1,137 @@
+{
+    "title": "Ridge Regression Loss Function (Easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Ridge Regression Loss](#learn-ridge-regression-loss)\n  - [Key Concepts](#key-concepts)\n  - [Ridge Loss Function](#ridge-loss-function)\n  - [Implementation Steps](#implementation-steps)\n- [Solutions](#solutions)\n  - [Custom Implementation](#custom-implementation)\n  - [NumPy Implementation](#numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Ridge Regression Loss",
+                    "url": "#learn-ridge-regression-loss"
+                },
+                {
+                    "text": "Key Concepts",
+                    "url": "#key-concepts"
+                },
+                {
+                    "text": "Ridge Loss Function",
+                    "url": "#ridge-loss-function"
+                },
+                {
+                    "text": "Implementation Steps",
+                    "url": "#implementation-steps"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "NumPy Implementation",
+                    "url": "#numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Implement Ridge Regression Loss Function](https://www.deep-ml.com/problem/Ridge%20Regression%20Loss)\n\nWrite a Python function `ridge_loss` that implements the Ridge Regression loss function. The function should take a 2D numpy array `X` representing the feature matrix, a 1D numpy array `w` representing the coefficients, a 1D numpy array `y_true` representing the true labels, and a float `alpha` representing the regularization parameter. The function should return the Ridge loss, which combines the Mean Squared Error (MSE) and a regularization term.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Implement Ridge Regression Loss Function",
+                    "url": "https://www.deep-ml.com/problem/Ridge%20Regression%20Loss"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\nX = np.array([[1, 1], [2, 1], [3, 1], [4, 1]])\nw = np.array([0.2, 2])\ny_true = np.array([2, 3, 4, 5])\nalpha = 0.1\n\nloss = ridge_loss(X, w, y_true, alpha)\nprint(loss)\n# Expected Output: 2.204\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Ridge Regression Loss",
+            "content": "\nRidge Regression is a linear regression method with a regularization term to prevent overfitting by controlling the size of the coefficients.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Key Concepts",
+            "content": "\n1. **Regularization**: Adds a penalty to the loss function to discourage large coefficients, helping to generalize the model.\n2. **Mean Squared Error (MSE)**: Measures the average squared difference between actual and predicted values.\n3. **Penalty Term**: The sum of the squared coefficients, scaled by the regularization parameter α, which controls the strength of the regularization.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Ridge Loss Function",
+            "content": "\nThe Ridge Loss function combines MSE and the penalty term:\n\n\n\nWhere:\n- $n$ is the number of samples\n- $y_i$ is the true value for the $i$-th sample\n- $\\hat{y}_i$ is the predicted value for the $i$-th sample\n- $\\lambda$ is the regularization parameter (alpha)\n- $\\beta_j$ are the coefficients (w)\n- $p$ is the number of features\n\n",
+            "code_blocks": [
+                {
+                    "language": "math",
+                    "code": "L(\\beta) = \\frac{1}{n} \\sum_{i=1}^{n} (y_i - \\hat{y}_i)^2 + \\alpha \\sum_{j=1}^{p} \\beta_j^2\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Implementation Steps",
+            "content": "\n1. **Calculate MSE**: Compute the average squared difference between actual and predicted values.\n2. **Add Regularization Term**: Compute the sum of squared coefficients multiplied by α.\n3. **Combine and Minimize**: Sum MSE and the regularization term to form the Ridge loss, then minimize this loss to find the optimal coefficients.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef ridge_loss(X: np.ndarray, w: np.ndarray, y_true: np.ndarray, alpha: float) -> float:\n    y_pred = []\n    for i in range(len(X)):\n        temp = 0\n        for j in range(len(w)):\n            temp += X[i][j] * w[j]\n        y_pred.append(temp)\n\n    MSE = sum((((y_true - y_pred) ** 2) / len(X)).tolist())\n    sum_w = sum([i**2 for i in w])\n    reg = alpha * sum_w\n    return MSE + reg\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef ridge_loss(X: np.ndarray, w: np.ndarray, y_true: np.ndarray, alpha: float) -> float:\n    y_pred = (X @ w).tolist()\n    MSE = np.mean((y_true - y_pred)**2).tolist()\n    reg = alpha * np.sum(w**2).tolist()\n    return MSE + reg\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nBoth implementations of the `ridge_loss` function take four parameters:\n- `X`: a 2D numpy array representing the feature matrix\n- `w`: a 1D numpy array representing the coefficients\n- `y_true`: a 1D numpy array representing the true labels\n- `alpha`: a float representing the regularization parameter\n\nThe functions work as follows:\n\n1. **Custom Implementation**:\n   - Calculates the predicted values `y_pred` using a nested loop to perform matrix multiplication.\n   - Computes the Mean Squared Error (MSE) by summing the squared differences between true and predicted values, divided by the number of samples.\n   - Calculates the sum of squared coefficients `sum_w`.\n   - Computes the regularization term `reg` by multiplying `alpha` with `sum_w`.\n   - Returns the sum of MSE and the regularization term.\n\n2. **NumPy Implementation**:\n   - Uses NumPy's matrix multiplication `@` to calculate the predicted values `y_pred`.\n   - Computes the MSE using NumPy's `mean` function.\n   - Calculates the regularization term using NumPy's `sum` function on the squared coefficients.\n   - Returns the sum of MSE and the regularization term.\n\nBoth implementations produce the same result, but the NumPy version is more concise and potentially more efficient, especially for larger matrices, as it leverages NumPy's optimized array operations.\n\nThe custom implementation provides a more explicit calculation process, which can be helpful for understanding the steps involved in computing the Ridge Regression loss. However, for performance and simplicity, the NumPy implementation is generally preferred in practical applications.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

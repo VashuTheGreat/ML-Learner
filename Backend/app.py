@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify
 from datacleaner import Model
 from flask_cors import CORS
-from interviewChat import *
+from interviewChat import interview_flow
+from problemsFetcher import fetchData
 import base64
+import subprocess
+
 app = Flask(__name__)
 CORS(app)
 
@@ -49,43 +52,61 @@ def model():
 
 
 
-def interview_flow(userInput, voice):
-    if voice.lower() == "boy":
-        voice = "Fritz-PlayAI"  # allowed male voice
-    else:
-        voice = "Aaliyah-PlayAI"  # allowed female voice
-
-    state = History()
-    userInput = userInput.strip()
-    if not userInput:
-        return {"airesponse": "", "audio_data": ""}
-
-    try:
-        state_updated = response(state, llm, userInput)
-        last_ai_response = state_updated.hist[-1]["AI"]
-        audio_data = speak(last_ai_response, voice=voice)
-        if audio_data:
-            import base64
-            audio_b64 = base64.b64encode(audio_data).decode("utf-8")
-            return {"airesponse": last_ai_response, "audio_data": audio_b64}
-        return {"airesponse": last_ai_response, "audio_data": ""}
-    except Exception as e:
-        print(f"❌ Error in interview_flow loop: {e}")
-        return {"airesponse": "", "audio_data": ""}
 
 @app.route('/airesponse', methods=['POST'])
 def airesponse():
     data = request.get_json()
-    print(data)
-    airesponse = interview_flow(voice=data.get('voice'), userInput=data.get('userResponse'))
+    print("📩 Received:", data)
 
-    if not airesponse:
-        return jsonify({"error": "No response generated"}), 500
+    airesponse = interview_flow(
+        user_id=data.get("user_id", "default_user"),  # unique user id from frontend
+        voice=data.get("voice"),
+        userInput=data.get("userResponse")
+    )
 
-    return jsonify({
-        "airesponse": airesponse.get('airesponse', ''),
-        "audio_data": airesponse.get("audio_data", "")
-    })
+    return jsonify(airesponse)
 
+
+
+@app.route('/problems', methods=['GET'])
+def problems():
+    print("📩 GET request received at /problems")
+    data = fetchData()  # ✅ CALL the function
+    return jsonify(data)  # ✅ Return JSON response
+
+
+
+@app.route("/run", methods=["POST"])
+def run_code():
+    data = request.get_json()
+
+    if "code" not in data:
+        return jsonify({"error": "No code provided"}), 400
+
+    try:
+        # Decode Base64 encoded code
+        encoded_code = data["code"]
+        user_code = base64.b64decode(encoded_code).decode()
+
+        # Run code inside docker container
+        result = subprocess.run(
+            ["docker", "run", "--rm", "-i", "python-runner"],
+            input=user_code.encode(),
+            capture_output=True,
+            timeout=10  # timeout increase to handle larger code
+        )
+
+        stdout = result.stdout.decode()
+        stderr = result.stderr.decode()
+
+        return jsonify({"output": stdout, "error": stderr})
+
+    except base64.binascii.Error:
+        return jsonify({"error": "Invalid Base64 encoded code"}), 400
+    except subprocess.TimeoutExpired:
+        return jsonify({"error": "Execution timed out"}), 408
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+        
 if __name__ == "__main__":
     app.run(debug=True)

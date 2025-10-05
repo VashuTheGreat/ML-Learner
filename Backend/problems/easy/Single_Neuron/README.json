@@ -1,0 +1,97 @@
+{
+    "title": "Single Neuron (Easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Single Neuron Model](#learn-single-neuron-model)\n- [Solutions](#solutions)\n  - [Custom Implementation](#custom-implementation)\n  - [Code Explanation](#code-explanation)\n- [Mathematical Background](#mathematical-background)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Single Neuron Model",
+                    "url": "#learn-single-neuron-model"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                },
+                {
+                    "text": "Mathematical Background",
+                    "url": "#mathematical-background"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Single Neuron](https://www.deep-ml.com/problem/Single%20Neuron)\n\nWrite a Python function that simulates a single neuron with a sigmoid activation function for binary classification, handling multidimensional input features. The function should take a list of feature vectors (each vector representing multiple features for an example), associated true binary labels, and the neuron's weights (one for each feature) and bias as input. It should return the predicted probabilities after sigmoid activation and the mean squared error between the predicted probabilities and the true labels, both rounded to four decimal places.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Single Neuron",
+                    "url": "https://www.deep-ml.com/problem/Single%20Neuron"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "input: features = [[0.5, 1.0], [-1.5, -2.0], [2.0, 1.5]], labels = [0, 1, 0], weights = [0.7, -0.4], bias = -0.1\noutput: ([0.4626, 0.4134, 0.6682], 0.3349)\nreasoning: For each input vector, the weighted sum is calculated by multiplying each feature by its corresponding weight, adding these up along with the bias, then applying the sigmoid function to produce a probability. The MSE is calculated as the average squared difference between each predicted probability and the corresponding true label.\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Single Neuron Model",
+            "content": "\nThis task involves a neuron model designed for binary classification with multidimensional input features, using the sigmoid activation function to output probabilities. It also involves calculating the mean squared error (MSE) to evaluate prediction accuracy.\n\nThe single neuron model with multidimensional input and sigmoid activation is a fundamental building block in neural networks. It's used for binary classification tasks where the goal is to predict the probability of an input belonging to one of two classes.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import math\nimport numpy as np\n\ndef single_neuron_model(\n    features: list[list[float]], labels: list[int], weights: list[float], bias: float\n) -> (list[float], float):  # type: ignore\n    # Your code here\n\n    # Step 1\n    # print(features, \"\\n\", weights)\n    weighted_sum = []\n    for i in features:\n        c = 0\n        temp = 0\n        for j in i:\n            temp += j * weights[c]\n            c += 1\n        weighted_sum.append(temp + bias)\n    # print(weighted_sum)\n\n    probabilities = [0] * len(weighted_sum)\n    for i in range(len(weighted_sum)):\n        probabilities[i] = round(1 / (1 + np.exp(-weighted_sum[i])), 4)\n    # print(probabilities)\n    mse = 0\n    for i in range(len(labels)):\n        mse += (labels[i] - probabilities[i]) ** 2\n    # print(mse/len(labels))\n    # weighted_sum = features * weights\n    # print(weighted_sum)\n    return probabilities, round(mse / len(labels), 4)\n\n    # # Step 2:\n    # probabilities = []\n    # for feature_vector in features:\n    #     z = (\n    #         sum(weight * feature for weight, feature in zip(weights, feature_vector))\n    #         + bias\n    #     )\n    #     prob = 1 / (1 + math.exp(-z))\n    #     probabilities.append(round(prob, 4))\n\n    # mse = sum((prob - label) ** 2 for prob, label in zip(probabilities, labels)) / len(\n    #     labels\n    # )\n    # mse = round(mse, 4)\n\n    # return probabilities, mse\n\nfeatures = [[0.5, 1.0], [-1.5, -2.0], [2.0, 1.5]]\nlabels = [0, 1, 0]\nweights = [0.7, -0.4]\nbias = -0.1\nprint(single_neuron_model(features=features, labels=labels, weights=weights, bias=bias))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nThe `single_neuron_model` function implements a single neuron for binary classification. Here's a breakdown of the implementation:\n\n1. The function initializes an empty list `weighted_sum` to store the weighted sum of features for each input vector.\n\n2. It iterates through each feature vector in `features`:\n   - For each feature in the vector, it multiplies it by the corresponding weight and accumulates the result in `temp`.\n   - After processing all features in a vector, it adds the bias to `temp` and appends the result to `weighted_sum`.\n\n3. The function then calculates the probabilities using the sigmoid activation function:\n   - It initializes a list `probabilities` with zeros.\n   - For each value in `weighted_sum`, it applies the sigmoid function (1 / (1 + e^(-x))) and rounds the result to 4 decimal places.\n\n4. The Mean Squared Error (MSE) is calculated:\n   - It iterates through the labels and probabilities, calculating the squared difference for each pair.\n   - The sum of these squared differences is divided by the number of samples to get the average.\n\n5. Finally, the function returns the list of probabilities and the rounded MSE.\n\nThe commented-out \"Step 2\" provides an alternative implementation using list comprehensions and the `zip` function. This approach is more concise but may be less intuitive for beginners.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Mathematical Background",
+            "content": "\nThe single neuron model involves two main mathematical operations:\n\n1. Neuron Output Calculation:\n\n   $$z = \\sum (weight_i \\times feature_i) + bias$$\n   $$probability = \\frac{1}{1 + e^{-z}}$$\n\n2. Mean Squared Error (MSE) Calculation:\n\n   $$MSE = \\frac{1}{n} \\sum (predicted - true)^2$$\n\nWhere:\n- $z$ is the sum of weighted inputs plus bias\n- $probability$ is the sigmoid activation output\n- $predicted$ are the probabilities after sigmoid activation\n- $true$ are the true binary labels\n\nThis mathematical foundation allows the single neuron to perform binary classification by outputting probabilities and evaluating its performance using MSE.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

@@ -1,0 +1,131 @@
+{
+    "title": "Solve Linear Equations using Jacobi Method (Medium) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Solving Linear Equations Using the Jacobi Method](#learn-solving-linear-equations-using-the-jacobi-method)\n- [Solutions](#solutions)\n  - [Custom Implementation](#custom-implementation)\n  - [NumPy Implementation](#numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Solving Linear Equations Using the Jacobi Method",
+                    "url": "#learn-solving-linear-equations-using-the-jacobi-method"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "NumPy Implementation",
+                    "url": "#numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Solve Linear Equations using Jacobi Method](https://www.deep-ml.com/problem/Solve%20Linear%20Equations%20using%20Jacobi%20Method)\n\nWrite a Python function that uses the Jacobi method to solve a system of linear equations given by Ax = b. The function should iterate 10 times, rounding each intermediate solution to four decimal places, and return the approximate solution x.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Solve Linear Equations using Jacobi Method",
+                    "url": "https://www.deep-ml.com/problem/Solve%20Linear%20Equations%20using%20Jacobi%20Method"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "input: A = [[5, -2, 3], [-3, 9, 1], [2, -1, -7]], b = [-1, 2, 3], n=2\noutput: [0.146, 0.2032, -0.5175]\nreasoning: The Jacobi method iteratively solves each equation for x[i] using the formula x[i] = (1/a_ii) * (b[i] - sum(a_ij * x[j] for j != i)), where a_ii is the diagonal element of A and a_ij are the off-diagonal elements.\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Solving Linear Equations Using the Jacobi Method",
+            "content": "\nThe Jacobi method is an iterative algorithm used for solving a system of linear equations. This method is particularly useful for large systems where direct methods like Gaussian elimination are computationally expensive.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Algorithm Overview",
+            "content": "\nFor a system of equations represented by $$Ax = b$$, where $$A$$ is a matrix and $$x$$ and $$b$$ are vectors, the Jacobi method involves the following steps:\n\n1. **Initialization**: Start with an initial guess for $$x$$.\n2. **Iteration**: For each equation $$i$$, update $$x_i$$ using:\n\n   $$x_i = \\frac{1}{a_{ii}} (b_i - \\sum_{j \\neq i} a_{ij} x_j)$$\n\n   where $$a_{ii}$$ are the diagonal elements of $$A$$, and $$a_{ij}$$ are the off-diagonal elements.\n\n3. **Convergence**: Repeat the iteration until the changes in $$x$$ are below a certain tolerance or until a maximum number of iterations is reached.\n\nThis method assumes that all diagonal elements of $$A$$ are non-zero and that the matrix is diagonally dominant or properly conditioned for convergence.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Practical Considerations",
+            "content": "\n- The method may not converge for all matrices.\n- Choosing a good initial guess can improve convergence.\n- Diagonal dominance of $$A$$ ensures convergence of the Jacobi method.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef solve_jacobi(A: np.ndarray, b: np.ndarray, n: int) -> list:\n    aii = np.diag(A).tolist()\n\n    # To understand various ways of calculating non-diagonal elements, referred to this - https://stackoverflow.com/a/46736275/12346331\n    m = np.array(A).shape[0]\n    strided = np.lib.stride_tricks.as_strided\n    s0, s1 = np.array(A).strides\n    aij = strided(\n        np.array(A).ravel()[1:], shape=(m - 1, m), strides=(s0 + s1, s1)\n    ).reshape(m, -1)\n\n    x = [0 for _ in range(len(b))]\n\n    # Perform Jacobi iteration for n iterations\n    for _ in range(n):\n        new_x = x.copy()\n        for i in range(m):\n            sum_aij_xj = sum(A[i][j] * x[j] for j in range(m) if j != i)\n            new_x[i] = round((1 / aii[i]) * (b[i] - sum_aij_xj), 4)\n        x = new_x\n\n    return x\n\nA = [[5, -2, 3], [-3, 9, 1], [2, -1, -7]]\nb = [-1, 2, 3]\nn = 2\nprint(solve_jacobi(A=A, b=b, n=n))  # type: ignore\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef solve_jacobi(A: np.ndarray, b: np.ndarray, n: int) -> list:\n    d_a = np.diag(A)\n    nda = A - np.diag(d_a)\n    x = np.zeros(len(b))\n    x_hold = np.zeros(len(b))\n    for _ in range(n):\n        for i in range(len(A)):\n            x_hold[i] = (1/d_a[i]) * (b[i] - sum(nda[i]*x))\n        x = x_hold.copy()\n    return np.round(x,4).tolist()\n\n# Usage remains the same as the custom implementation\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n1. The function `solve_jacobi` takes three parameters:\n   - `A`: The coefficient matrix (numpy array)\n   - `b`: The constant vector (numpy array)\n   - `n`: The number of iterations\n\n2. `aii = np.diag(A).tolist()`: Extracts the diagonal elements of matrix A and converts them to a list.\n\n3. The commented section calculates non-diagonal elements using numpy's `as_strided` function. This is an advanced technique for efficient array manipulation:\n   This creates a view of the non-diagonal elements, which can be useful for optimization in larger matrices.\n\n4. `x = [0 for _ in range(len(b))]`: Initializes the solution vector with zeros.\n\n5. The main iteration loop:\n   - Iterates `n` times\n   - Creates a copy of `x` for updating\n   - For each equation, calculates the new value of `x[i]` using the Jacobi method formula\n   - Rounds each value to 4 decimal places\n\n6. Returns the final solution vector.\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "   m = np.array(A).shape[0]\n   strided = np.lib.stride_tricks.as_strided\n   s0, s1 = np.array(A).strides\n   aij = strided(\n       np.array(A).ravel()[1:], shape=(m - 1, m), strides=(s0 + s1, s1)\n   ).reshape(m, -1)\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n1. `d_a = np.diag(A)`: Extracts the diagonal elements of A.\n2. `nda = A - np.diag(d_a)`: Calculates the non-diagonal elements by subtracting the diagonal from A.\n3. Initializes `x` and `x_hold` as zero vectors.\n4. The main iteration loop:\n   - Updates each `x[i]` using vectorized operations\n   - Copies `x_hold` to `x` after each iteration\n5. Returns the rounded solution vector.\n\nBoth implementations follow the Jacobi method algorithm, but the NumPy implementation uses more numpy operations, which can be more efficient for larger matrices. The custom implementation is more explicit in its calculations, which can be helpful for understanding the process.\n\nThe code then demonstrates the usage of the function with a sample 3x3 system of equations, iterating twice (`n=2`).\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

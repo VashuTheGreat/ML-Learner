@@ -1,0 +1,114 @@
+{
+    "title": "Calculate Accuracy Score (Easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Understanding Accuracy Score](#learn-understanding-accuracy-score)\n- [Solutions](#solutions)\n  - [Custom Implementation](#custom-implementation)\n  - [NumPy Implementation](#numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Understanding Accuracy Score",
+                    "url": "#learn-understanding-accuracy-score"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "NumPy Implementation",
+                    "url": "#numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Calculate Accuracy Score](https://www.deep-ml.com/problem/Calculate%20Accuracy%20Score)\n\nWrite a Python function to calculate the accuracy score of a model's predictions. The function should take in two 1D numpy arrays: `y_true`, which contains the true labels, and `y_pred`, which contains the predicted labels. It should return the accuracy score as a float.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Calculate Accuracy Score",
+                    "url": "https://www.deep-ml.com/problem/Calculate%20Accuracy%20Score"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "y_true = np.array([1, 0, 1, 1, 0, 1])\ny_pred = np.array([1, 0, 0, 1, 0, 1])\noutput = accuracy_score(y_true, y_pred)\nprint(output)\n# Output:\n# 0.8333333333333334\n\nReasoning:\nThe function compares the true labels with the predicted labels and calculates the ratio of correct predictions to the total number of predictions. In this example, there are 5 correct predictions out of 6, resulting in an accuracy score of 0.8333333333333334.\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Understanding Accuracy Score",
+            "content": "\nAccuracy is a metric used to evaluate the performance of a classification model. It is defined as the ratio of the number of correct predictions to the total number of predictions made. Mathematically, accuracy is given by:\n\n$$\\text{Accuracy} = \\frac{\\text{Number of Correct Predictions}}{\\text{Total Number of Predictions}}$$\n\nIn this problem, you will write a function to calculate the accuracy score given the true labels and the predicted labels. The function will compare the two arrays and compute the accuracy as the proportion of matching elements.\n\nAccuracy is a straightforward and commonly used metric for classification tasks. It provides a quick way to understand how well a model is performing, but it may not always be the best metric, especially for imbalanced datasets.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef accuracy_score(y_true : list[int | float], y_pred : list[int | float]) -> float:\n    # Your code here\n    c = 0\n    for i in range(len(y_true)):\n        if y_true[i] == y_pred[i]:\n            c += 1\n    return c/len(y_true)\n\ny_true = np.array([1, 0, 1, 1, 0, 1])\ny_pred = np.array([1, 0, 0, 1, 0, 1])\noutput = accuracy_score(y_true, y_pred)\nprint(output)\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef accuracy_score(y_true : list[int | float], y_pred : list[int | float]) -> float:\n    # Your code here\n    accuracy = np.sum(y_true == y_pred, axis=0)/len(y_pred)\n    return accuracy\n\ny_true = np.array([1, 0, 1, 1, 0, 1])\ny_pred = np.array([1, 0, 0, 1, 0, 1])\noutput = accuracy_score(y_true, y_pred)\nprint(output)\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nBoth implementations of the `accuracy_score` function take two parameters:\n\n- `y_true`: a 1D numpy array containing the true labels\n- `y_pred`: a 1D numpy array containing the predicted labels\n\nThe function returns a float value representing the accuracy score.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\nThe custom implementation works as follows:\n\n1. Initialize a counter `c` to 0.\n2. Iterate through the indices of `y_true` and `y_pred`.\n3. For each index, if the elements in `y_true` and `y_pred` are equal, increment the counter `c`.\n4. After the loop, return the ratio of `c` to the total number of elements.\n\nThis implementation directly applies the mathematical definition of accuracy by counting the number of correct predictions and dividing by the total number of predictions.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\nThe NumPy implementation utilizes NumPy's array operations:\n\n1. Use `y_true == y_pred` to create a boolean array where `True` represents correct predictions.\n2. Use `np.sum()` to count the number of `True` values (correct predictions).\n3. Divide the sum by the total number of predictions (`len(y_pred)`).\n\nThis implementation is more concise and potentially more efficient, especially for larger arrays, as it leverages NumPy's optimized array operations.\n\nBoth implementations will produce the same result, but the NumPy version may be preferred in scenarios where performance is critical or when working with larger datasets that are already in NumPy array format.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

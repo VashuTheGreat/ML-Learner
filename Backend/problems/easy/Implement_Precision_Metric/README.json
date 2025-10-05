@@ -1,0 +1,126 @@
+{
+    "title": "Implement Precision Metric (easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Understanding Precision in Classification](#learn-understanding-precision-in-classification)\n- [Solutions](#solutions)\n  - [Step 1: Custom Implementation](#step-1-custom-implementation)\n  - [Step 2: NumPy Implementation](#step-2-numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Understanding Precision in Classification",
+                    "url": "#learn-understanding-precision-in-classification"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Step 1: Custom Implementation",
+                    "url": "#step-1-custom-implementation"
+                },
+                {
+                    "text": "Step 2: NumPy Implementation",
+                    "url": "#step-2-numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Implement Precision Metric](https://www.deep-ml.com/problem/Precision%20Metric)\n\nWrite a Python function `precision` that calculates the precision metric given two numpy arrays: `y_true` and `y_pred`. The `y_true` array contains the true binary labels, and the `y_pred` array contains the predicted binary labels. Precision is defined as the ratio of true positives to the sum of true positives and false positives.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Implement Precision Metric",
+                    "url": "https://www.deep-ml.com/problem/Precision%20Metric"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ny_true = np.array([1, 0, 1, 1, 0, 1])\ny_pred = np.array([1, 0, 1, 0, 0, 1])\n\nresult = precision(y_true, y_pred)\nprint(result)\n# Expected Output: 1.0\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Understanding Precision in Classification",
+            "content": "\nPrecision is a key metric used in the evaluation of classification models, particularly in binary classification. It provides insight into the accuracy of the positive predictions made by the model.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Mathematical Definition",
+            "content": "\nPrecision is defined as the ratio of true positives (TP) to the sum of true positives and false positives (FP):\n\n$$ \\text{Precision} = \\frac{\\text{TP}}{\\text{TP} + \\text{FP}} $$\n\nWhere:\n- True Positives (TP): The number of positive samples that are correctly identified as positive.\n- False Positives (FP): The number of negative samples that are incorrectly identified as positive.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Characteristics of Precision",
+            "content": "\n- Range: Precision ranges from 0 to 1, where 1 indicates perfect precision (no false positives) and 0 indicates no true positives.\n- Interpretation: High precision means that the model has a low false positive rate, meaning it rarely labels negative samples as positive.\n- Use Case: Precision is particularly useful when the cost of false positives is high, such as in medical diagnosis or fraud detection.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Step 1: Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "def precision(y_true, y_pred):\n    tp, fp = 0, 0\n    for i in range(len(y_pred)):\n        if (y_pred[i] == y_true[i]) and y_true[i] == 1:\n            tp += 1\n        elif (y_pred[i] != y_true[i]) and y_pred[i] == 1:\n            fp += 1\n    return tp/(tp + fp)\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Step 2: NumPy Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef precision(y_true, y_pred):\n    tp, fp = np.sum((y_true == 1) & (y_pred == 1)), np.sum((y_true == 0) & (y_pred == 1))\n    return tp / (tp + fp) if (tp + fp) > 0 else 0.0\n\ny_true = np.array([1, 0, 1, 1, 0, 1])\ny_pred = np.array([1, 0, 1, 0, 0, 1])\n\nresult = precision(y_true, y_pred)\nprint(result)\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Step 1: Custom Implementation",
+            "content": "\nThis implementation uses a traditional loop-based approach to calculate precision:\n\n1. Initialize counters `tp` (true positives) and `fp` (false positives) to 0.\n2. Iterate through the arrays `y_true` and `y_pred` simultaneously:\n   - If `y_pred[i] == y_true[i] == 1`, increment `tp` (true positive).\n   - If `y_pred[i] != y_true[i]` and `y_pred[i] == 1`, increment `fp` (false positive).\n3. Calculate and return the precision as `tp / (tp + fp)`.\n\nThis method is straightforward and easy to understand but may be less efficient for large datasets compared to vectorized operations.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Step 2: NumPy Implementation",
+            "content": "\nThe NumPy implementation leverages efficient array operations:\n\n1. `tp = np.sum((y_true == 1) & (y_pred == 1))`: Calculates true positives using element-wise comparison and logical AND.\n2. `fp = np.sum((y_true == 0) & (y_pred == 1))`: Calculates false positives similarly.\n3. `return tp / (tp + fp) if (tp + fp) > 0 else 0.0`: Computes precision, handling the case of zero division.\n\nThis implementation is more efficient, especially for large arrays, as it utilizes NumPy's vectorized operations. It also includes a check to avoid division by zero, returning 0.0 if there are no positive predictions.\n\nBoth implementations correctly calculate the precision metric, but the NumPy version is generally preferred for its efficiency and built-in handling of edge cases.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

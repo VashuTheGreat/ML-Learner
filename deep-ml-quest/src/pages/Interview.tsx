@@ -1,13 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Brain, MessageCircle, CheckCircle, Clock, Star } from "lucide-react";
-import { Mic, VideoOff,MicOff,User } from "lucide-react"; // icons
-import { useRef } from "react";
-
+import { Brain, CheckCircle, Star } from "lucide-react";
+import { Mic, VideoOff, MicOff, User } from "lucide-react";
 
 interface Window {
   SpeechRecognition: any;
@@ -18,154 +16,110 @@ const Interview = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
   const [showResults, setShowResults] = useState(false);
-  const [micoff,setmicoff]=useState(false);
-    const [selected, setSelected] = useState("Girl");
-      const [open, setOpen] = useState(false);
-      const [listening, setListening] = useState(false);
+  const [micoff, setmicoff] = useState(false);
+  const [selected, setSelected] = useState("Girl");
+  const [open, setOpen] = useState(false);
+  const [listening, setListening] = useState(false);
   const [finalTranscript, setFinalTranscript] = useState("");
-const recognitionRef = useRef<any>(null);
-const [airesponse,setairesponse]=useState({})
+  const recognitionRef = useRef<any>(null);
+  const [airesponse, setairesponse] = useState({});
 
-
-
-const playMicOnSound = (callback) => {
-  const audio = new Audio("MicOn.mp3");
-
-  audio.onended = () => {
-    if (callback) callback();
+  const playMicOnSound = (callback?: () => void) => {
+    const audio = new Audio("MicOn.mp3");
+    audio.onended = () => {
+      if (callback) callback();
+    };
+    audio.play();
   };
 
-  audio.play();
-};
-
-async function playAudio(audioDataBase64) {
-  // 1. Base64 ko decode karke Blob me convert karo
-  const audioBytes = atob(audioDataBase64); // Base64 decode
-  const arrayBuffer = new ArrayBuffer(audioBytes.length);
-  const bufferView = new Uint8Array(arrayBuffer);
-  for (let i = 0; i < audioBytes.length; i++) {
-    bufferView[i] = audioBytes.charCodeAt(i);
+  async function playAudio(audioDataBase64: string) {
+    const audioBytes = atob(audioDataBase64);
+    const arrayBuffer = new ArrayBuffer(audioBytes.length);
+    const bufferView = new Uint8Array(arrayBuffer);
+    for (let i = 0; i < audioBytes.length; i++) {
+      bufferView[i] = audioBytes.charCodeAt(i);
+    }
+    const blob = new Blob([bufferView], { type: "audio/mpeg" });
+    const audioUrl = URL.createObjectURL(blob);
+    const audio = new Audio(audioUrl);
+    audio.onended = () => {
+      playMicOnSound(() => startListening());
+    };
+    await audio.play();
   }
 
-  // 2. Blob banalo (audio/mpeg assume kar raha hu, change karo agar alag ho)
-  const blob = new Blob([bufferView], { type: "audio/mpeg" });
-
-  // 3. Audio URL create karo
-  const audioUrl = URL.createObjectURL(blob);
-
-  // 4. Audio play karo
-  const audio = new Audio(audioUrl);
-
-  audio.onended = () => {
-    ismicoff(); // Audio khatam hone ke baad call hoga
-  };
-
-  await audio.play();
-}
-
-
-
 const getAIResponse = async (voice, userResponse) => {
+    console.log("🚀 getAIResponse called with:", voice, userResponse);
+
   try {
+    const user_id = localStorage.getItem("user_id") || crypto.randomUUID();
+    localStorage.setItem("user_id", user_id);
+
     const response = await fetch("http://localhost:3000/airesponse", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        voice: voice,
-        userResponse: userResponse,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ voice, userResponse, user_id }), // ✅ added user_id
     });
 
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-
+    if (!response.ok) throw new Error("Network error");
     const data = await response.json();
     setairesponse(data);
-    console.log("AI Response:", data);
-
-    if (data.audio_data) {
-      playAudio(data.audio_data); // tumhara audio play function
-    }
-
+    if (data.audio_data) await playAudio(data.audio_data);
   } catch (error) {
     console.error("Error fetching AI response:", error);
   }
 };
 
 
-      const startListening = () => {
+  const startListening = () => {
     const SpeechRecognition =
-        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        alert("Speech Recognition not supported");
-        return;
+      alert("Speech Recognition not supported");
+      return;
     }
-
     const recognition = new SpeechRecognition();
     recognition.lang = "en-US";
     recognition.interimResults = true;
     recognition.continuous = true;
-
     let silenceTimer: NodeJS.Timeout;
-
-    recognition.onresult = (event) => {
-        clearTimeout(silenceTimer);
-
-        let interimTranscript = "";
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript;
-            if (event.results[i].isFinal) {
-                setFinalTranscript(transcript);
-            } else {
-                interimTranscript += transcript;
-            }
-        }
-
-        silenceTimer = setTimeout(() => {
-            stopListening();
-
-        }, 5000);
+    recognition.onresult = (event: any) => {
+      clearTimeout(silenceTimer);
+      let interimTranscript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) setFinalTranscript(transcript);
+        else interimTranscript += transcript;
+      }
+      silenceTimer = setTimeout(() => stopListening(), 3000);
     };
-
-    recognition.onend = () => {
-        setListening(false);
+    recognition.onend = () => setListening(false);
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error:", event.error);
+      setListening(false);
     };
-
-    recognition.onerror = (event) => {
-        console.error("Speech recognition error:", event.error);
-        setListening(false);
-    };
-
     recognition.start();
     recognitionRef.current = recognition;
     setListening(true);
-};
+  };
 
- 
-  
-
- const stopListening = () => {
+  const stopListening = () => {
     recognitionRef.current?.stop();
     setListening(false);
     setmicoff(false);
+    if (finalTranscript.trim()) getAIResponse(selected, finalTranscript);
+  };
 
-    getAIResponse(selected, finalTranscript); 
-};
+  // const ismicoff = () => {
+  //   setmicoff(!micoff);
+  //   if (listening) stopListening();
+  //   else playMicOnSound(() => startListening());
+  // };
 
-
-const ismicoff = () => {
+  const ismicoff = () => {
   setmicoff(!micoff);
-
-  if (listening) {
-    stopListening();
-  } else {
-    playMicOnSound(() => {
-      startListening();
-    });
-  }
+  if (listening) stopListening();
+  else startListening();
 };
 
 
@@ -177,22 +131,18 @@ const ismicoff = () => {
         "To increase model complexity",
         "To prevent overfitting",
         "To speed up training",
-        "To increase training accuracy"
+        "To increase training accuracy",
       ],
       correctAnswer: 1,
-      explanation: "Regularization helps prevent overfitting by adding a penalty term to the loss function."
+      explanation:
+        "Regularization helps prevent overfitting by adding a penalty term to the loss function.",
     },
     {
       id: 2,
       question: "Which algorithm is best suited for linearly separable data?",
-      options: [
-        "K-Means",
-        "Decision Tree",
-        "SVM with linear kernel",
-        "Random Forest"
-      ],
+      options: ["K-Means", "Decision Tree", "SVM with linear kernel", "Random Forest"],
       correctAnswer: 2,
-      explanation: "SVM with linear kernel is optimal for linearly separable data."
+      explanation: "SVM with linear kernel is optimal for linearly separable data.",
     },
     {
       id: 3,
@@ -201,42 +151,40 @@ const ismicoff = () => {
         "Speed vs accuracy",
         "Simplicity vs complexity",
         "Underfitting vs overfitting balance",
-        "Training vs testing performance"
+        "Training vs testing performance",
       ],
       correctAnswer: 2,
-      explanation: "The bias-variance tradeoff represents the balance between underfitting (high bias) and overfitting (high variance)."
-    }
+      explanation:
+        "The bias-variance tradeoff represents the balance between underfitting (high bias) and overfitting (high variance).",
+    },
   ];
 
   const interviewTopics = [
     {
       category: "Machine Learning Fundamentals",
-      topics: ["Supervised vs Unsupervised Learning", "Bias-Variance Tradeoff", "Cross-Validation", "Feature Selection"],
-      level: "Beginner"
+      topics: [
+        "Supervised vs Unsupervised Learning",
+        "Bias-Variance Tradeoff",
+        "Cross-Validation",
+        "Feature Selection",
+      ],
+      level: "Beginner",
     },
     {
       category: "Algorithms",
       topics: ["Linear Regression", "Logistic Regression", "Decision Trees", "Random Forest", "SVM", "K-Means"],
-      level: "Intermediate"
+      level: "Intermediate",
     },
     {
       category: "Deep Learning",
       topics: ["Neural Networks", "Backpropagation", "CNN", "RNN", "LSTM", "Transformers"],
-      level: "Advanced"
+      level: "Advanced",
     },
     {
       category: "Model Evaluation",
       topics: ["Accuracy vs Precision", "ROC Curves", "Confusion Matrix", "A/B Testing"],
-      level: "Intermediate"
-    }
-  ];
-
-  const chatbotQuestions = [
-    "Explain the difference between bagging and boosting",
-    "How would you handle missing data in a dataset?",
-    "What are the assumptions of linear regression?",
-    "Explain the concept of gradient descent",
-    "How do you prevent overfitting in neural networks?"
+      level: "Intermediate",
+    },
   ];
 
   const handleAnswerSelect = (answerIndex: number) => {
@@ -246,35 +194,34 @@ const ismicoff = () => {
   };
 
   const handleNextQuestion = () => {
-    if (currentQuestionIndex < mcqQuestions.length - 1) {
+    if (currentQuestionIndex < mcqQuestions.length - 1)
       setCurrentQuestionIndex(currentQuestionIndex + 1);
-    } else {
-      setShowResults(true);
-    }
+    else setShowResults(true);
   };
 
   const calculateScore = () => {
     let correct = 0;
     selectedAnswers.forEach((answer, index) => {
-      if (answer === mcqQuestions[index].correctAnswer) {
-        correct++;
-      }
+      if (answer === mcqQuestions[index].correctAnswer) correct++;
     });
     return (correct / mcqQuestions.length) * 100;
   };
 
   const getLevelColor = (level: string) => {
     switch (level) {
-      case "Beginner": return "default";
-      case "Intermediate": return "secondary";
-      case "Advanced": return "destructive";
-      default: return "default";
+      case "Beginner":
+        return "default";
+      case "Intermediate":
+        return "secondary";
+      case "Advanced":
+        return "destructive";
+      default:
+        return "default";
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <div className="bg-gradient-to-r from-primary/10 to-accent/10 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -286,7 +233,6 @@ const ismicoff = () => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="mcq" className="space-y-8">
           <TabsList className="grid w-full grid-cols-3">
@@ -295,10 +241,8 @@ const ismicoff = () => {
             <TabsTrigger value="chatbot">AI Interview Chat</TabsTrigger>
           </TabsList>
 
-          {/* MCQ Section */}
           <TabsContent value="mcq">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Question Panel */}
               <div className="lg:col-span-2">
                 <Card>
                   <CardHeader>
@@ -308,7 +252,8 @@ const ismicoff = () => {
                         Question {currentQuestionIndex + 1} of {mcqQuestions.length}
                       </CardTitle>
                       <Badge variant="outline">
-                        {Math.round(((currentQuestionIndex + 1) / mcqQuestions.length) * 100)}% Complete
+                        {Math.round(((currentQuestionIndex + 1) / mcqQuestions.length) * 100)}%
+                        Complete
                       </Badge>
                     </div>
                     <Progress value={((currentQuestionIndex + 1) / mcqQuestions.length) * 100} />
@@ -319,7 +264,6 @@ const ismicoff = () => {
                         <h3 className="text-lg font-medium">
                           {mcqQuestions[currentQuestionIndex].question}
                         </h3>
-                        
                         <div className="space-y-3">
                           {mcqQuestions[currentQuestionIndex].options.map((option, index) => (
                             <button
@@ -331,21 +275,22 @@ const ismicoff = () => {
                                   : "border-border hover:bg-muted/50"
                               }`}
                             >
-                              <span className="font-medium mr-3">{String.fromCharCode(65 + index)}.</span>
+                              <span className="font-medium mr-3">
+                                {String.fromCharCode(65 + index)}.
+                              </span>
                               {option}
                             </button>
                           ))}
                         </div>
-
                         <div className="flex justify-between">
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             disabled={currentQuestionIndex === 0}
                             onClick={() => setCurrentQuestionIndex(currentQuestionIndex - 1)}
                           >
                             Previous
                           </Button>
-                          <Button 
+                          <Button
                             onClick={handleNextQuestion}
                             disabled={selectedAnswers[currentQuestionIndex] === undefined}
                           >
@@ -360,13 +305,21 @@ const ismicoff = () => {
                         </div>
                         <h3 className="text-xl font-semibold">Quiz Complete!</h3>
                         <p className="text-muted-foreground">
-                          You scored {selectedAnswers.filter((answer, index) => answer === mcqQuestions[index].correctAnswer).length} out of {mcqQuestions.length} questions correctly.
+                          You scored{" "}
+                          {
+                            selectedAnswers.filter(
+                              (answer, index) => answer === mcqQuestions[index].correctAnswer
+                            ).length
+                          }{" "}
+                          out of {mcqQuestions.length} questions correctly.
                         </p>
-                        <Button onClick={() => {
-                          setCurrentQuestionIndex(0);
-                          setSelectedAnswers([]);
-                          setShowResults(false);
-                        }}>
+                        <Button
+                          onClick={() => {
+                            setCurrentQuestionIndex(0);
+                            setSelectedAnswers([]);
+                            setShowResults(false);
+                          }}
+                        >
                           Retake Quiz
                         </Button>
                       </div>
@@ -375,7 +328,6 @@ const ismicoff = () => {
                 </Card>
               </div>
 
-              {/* Progress Panel */}
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -385,7 +337,9 @@ const ismicoff = () => {
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Questions Answered</span>
-                        <span className="font-semibold">{selectedAnswers.filter(a => a !== undefined).length}/{mcqQuestions.length}</span>
+                        <span className="font-semibold">
+                          {selectedAnswers.filter((a) => a !== undefined).length}/{mcqQuestions.length}
+                        </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Current Streak</span>
@@ -416,7 +370,6 @@ const ismicoff = () => {
             </div>
           </TabsContent>
 
-          {/* Study Topics Section */}
           <TabsContent value="topics">
             <div className="space-y-6">
               <div className="text-center">
@@ -425,7 +378,6 @@ const ismicoff = () => {
                   Master these key areas to excel in ML interviews
                 </p>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {interviewTopics.map((topic, index) => (
                   <Card key={index} className="hover:shadow-lg transition-shadow">
@@ -442,8 +394,8 @@ const ismicoff = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
-                        {topic.topics.map((item, itemIndex) => (
-                          <div key={itemIndex} className="flex items-center gap-2 text-sm">
+                        {topic.topics.map((item, i) => (
+                          <div key={i} className="flex items-center gap-2 text-sm">
                             <CheckCircle className="h-4 w-4 text-success" />
                             {item}
                           </div>
@@ -459,68 +411,56 @@ const ismicoff = () => {
             </div>
           </TabsContent>
 
-          {/* Chatbot Section */}
           <TabsContent value="chatbot">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
-<Card
-  className="h-[600px] flex flex-col bg-cover bg-center"
-  style={{
-    backgroundImage: `url(${selected}.jpg)`,
-  }}
->
-  <div className="relative inline-block text-left">
-      <button
-        className="px-4 py-2 bg-black text-white rounded-lg shadow hover:bg-gray-800"
-        onClick={() => setOpen(!open)} // toggle dropdown
-      >
-        {selected}
-      </button>
-
-      {open && (
-        <div className="absolute mt-2 w-full rounded-md bg-black shadow-lg z-10">
-          <ul className="py-1">
-            <li
-              className="px-4 py-2 hover:bg-gray-800 cursor-pointer text-white"
-              onClick={() => {
-                setSelected("Boy");
-                setOpen(false); // close dropdown after selection
-              }}
-            >
-              Boy
-            </li>
-            <li
-              className="px-4 py-2 hover:bg-gray-800 cursor-pointer text-white"
-              onClick={() => {
-                setSelected("Girl");
-                setOpen(false); // close dropdown after selection
-              }}
-            >
-              Girl
-            </li>
-          </ul>
-        </div>
-      )}
-    </div>
-                    <div className="relative w-full h-full">
-  {/* Audio Call Button */}
-<Button 
-
-  className="absolute bottom-[50px] left-1/3 flex items-center justify-center w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg hover:scale-y-105 hover:scale-x-105"
-  onClick={ismicoff}
->
-  {micoff?<Mic className="w-7 h-7" />:   <MicOff className="w-7 h-7" />
-}
-</Button>
-
-
-  {/* VideoOff Call Button */}
-  <Button className="absolute bottom-[50px] right-1/3 flex items-center justify-center w-16 h-16 rounded-full border-4 border-red-600 bg-red-600 text-white shadow-lg hover:bg-red-800 hover:scale-y-105 hover:scale-x-105 transition ">
-    <VideoOff className="w-7 h-7" />
-  </Button>
-</div>
-
-
+                <Card
+                  className="h-[600px] flex flex-col bg-cover bg-center"
+                  style={{ backgroundImage: `url(${selected}.jpg)` }}
+                >
+                  <div className="relative inline-block text-left">
+                    <button
+                      className="px-4 py-2 bg-black text-white rounded-lg shadow hover:bg-gray-800"
+                      onClick={() => setOpen(!open)}
+                    >
+                      {selected}
+                    </button>
+                    {open && (
+                      <div className="absolute mt-2 w-full rounded-md bg-black shadow-lg z-10">
+                        <ul className="py-1">
+                          <li
+                            className="px-4 py-2 hover:bg-gray-800 cursor-pointer text-white"
+                            onClick={() => {
+                              setSelected("Boy");
+                              setOpen(false);
+                            }}
+                          >
+                            Boy
+                          </li>
+                          <li
+                            className="px-4 py-2 hover:bg-gray-800 cursor-pointer text-white"
+                            onClick={() => {
+                              setSelected("Girl");
+                              setOpen(false);
+                            }}
+                          >
+                            Girl
+                          </li>
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                  <div className="relative w-full h-full">
+                    <Button
+                      className="absolute bottom-[50px] left-1/3 flex items-center justify-center w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg hover:scale-105 transition"
+                      onClick={ismicoff}
+                    >
+                      {micoff ? <Mic className="w-7 h-7" /> : <MicOff className="w-7 h-7" />}
+                    </Button>
+                    <Button className="absolute bottom-[50px] right-1/3 flex items-center justify-center w-16 h-16 rounded-full border-4 border-red-600 bg-red-600 text-white shadow-lg hover:bg-red-800 hover:scale-105 transition">
+                      <VideoOff className="w-7 h-7" />
+                    </Button>
+                  </div>
                 </Card>
               </div>
 
@@ -531,11 +471,10 @@ const ismicoff = () => {
                     <CardDescription>👋Hello Answer the question</CardDescription>
                   </CardHeader>
                   <CardContent className="flex justify-center align-middle">
-                <div className="flex justify-center items-center bg-white text-black rounded-full w-40 h-40 shadow-lg border-4 border-gray-200">
-      <User className="w-20 h-20 text-gray-700" />
-    </div>
+                    <div className="flex justify-center items-center bg-white text-black rounded-full w-40 h-40 shadow-lg border-4 border-gray-200">
+                      <User className="w-20 h-20 text-gray-700" />
+                    </div>
                   </CardContent>
-
                 </Card>
 
                 <Card>
@@ -570,10 +509,7 @@ const ismicoff = () => {
         </Tabs>
       </div>
 
-
-   
-<p>{finalTranscript}</p>
-    
+      <p>{finalTranscript}</p>
     </div>
   );
 };

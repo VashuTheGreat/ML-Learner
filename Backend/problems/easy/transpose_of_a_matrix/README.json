@@ -1,0 +1,135 @@
+{
+    "title": "Transpose of a Matrix (Easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Transpose of a Matrix](#learn-transpose-of-a-matrix)\n- [Solutions](#solutions)\n  - [Custom Implementation](#custom-implementation)\n  - [Alternative Custom Implementation](#alternative-custom-implementation)\n  - [NumPy Implementation](#numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Transpose of a Matrix",
+                    "url": "#learn-transpose-of-a-matrix"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "Alternative Custom Implementation",
+                    "url": "#alternative-custom-implementation"
+                },
+                {
+                    "text": "NumPy Implementation",
+                    "url": "#numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Transpose of a Matrix](https://www.deep-ml.com/problem/Transpose%20of%20a%20Matrix)\n\nWrite a Python function that computes the transpose of a given matrix.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Transpose of a Matrix",
+                    "url": "https://www.deep-ml.com/problem/Transpose%20of%20a%20Matrix"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "input: a = [[1, 2, 3], [4, 5, 6]]\noutput: [[1, 4], [2, 5], [3, 6]]\nreasoning: The transpose of a matrix is obtained by flipping rows and columns.\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Transpose of a Matrix",
+            "content": "\nConsider a matrix \\( M \\) and its transpose \\( M^T \\):\n\nOriginal Matrix \\( M \\):\n\n$$\nM = \\begin{pmatrix} \na & b & c \\\\ \nd & e & f \n\\end{pmatrix}\n$$\n\nTransposed Matrix \\( M^T \\):\n\n$$\nM^T = \\begin{pmatrix} \na & d \\\\ \nb & e \\\\ \nc & f \n\\end{pmatrix}\n$$\n\nTransposing a matrix involves converting its rows into columns and vice versa. This operation is fundamental in linear algebra for various computations and transformations.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "def transpose_matrix(a: list[list[int | float]]) -> list[list[int | float]]:\n    l = [[a[j][i] for j in range(len(a))] for i in range(len(a[0]))]\n    return l\n\na = [[1, 2, 3], [4, 5, 6]]\nprint(transpose_matrix(a=a))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Alternative Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "def transpose_matrix(a: list[list[int | float]]) -> list[list[int | float]]:\n    matrix_a = list(zip(*a))\n    return [list(row) for row in matrix_a]\n\na = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]\nprint(transpose_matrix(a=a))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef transpose_matrix(a: list[list[int | float]]) -> list[list[int | float]]:\n    return np.transpose(a)\n\na = [[1, 2, 3], [4, 5, 6]]\nprint(transpose_matrix(a=a))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\nThe first custom implementation of the `transpose_matrix` function uses nested list comprehensions to transpose the input matrix:\n\n1. The outer list comprehension iterates over the columns of the input matrix by using the range of the number of columns (`range(len(a[0]))`).\n2. The inner list comprehension iterates over the rows of the input matrix by using the range of the number of rows (`range(len(a))`).\n3. For each column index `i`, a new row is created by extracting the element at index `i` from each row `j` of the input matrix.\n4. The resulting transposed matrix is returned.\n\nThis implementation is efficient and directly converts rows to columns using list comprehensions.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Alternative Custom Implementation",
+            "content": "\nThe second custom implementation uses the built-in `zip` function to transpose the matrix:\n\n1. The `zip(*a)` expression unpacks the input matrix `a` and aggregates elements from each row into tuples representing the columns.\n2. The `list(zip(*a))` converts these tuples into a list of tuples.\n3. A list comprehension is used to convert each tuple (representing a row in the transposed matrix) into a list.\n4. The resulting transposed matrix is returned.\n\nThis implementation is concise and leverages Python's built-in functions for readability and simplicity.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\nThe NumPy implementation uses the `np.transpose` function to transpose the matrix:\n\n1. The `np.transpose(a)` function is called with the input matrix `a`.\n2. The function returns the transposed matrix as a NumPy array.\n\nThis implementation is highly efficient, especially for larger matrices, as it utilizes NumPy's optimized array operations. It is recommended when working with large datasets or when NumPy is already being used in the project.\n\nBy implementing these solutions, we can understand different approaches to transposing a matrix, each with its own advantages in terms of readability, simplicity, and performance.",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

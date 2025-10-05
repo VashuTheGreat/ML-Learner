@@ -1,0 +1,122 @@
+{
+    "title": "ReLU Activation Function (Easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Understanding the ReLU Activation Function](#learn-understanding-the-relu-activation-function)\n  - [Mathematical Definition](#mathematical-definition)\n  - [Characteristics](#characteristics)\n- [Solutions](#solutions)\n  - [Custom Implementation](#custom-implementation)\n  - [NumPy Implementation](#numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Understanding the ReLU Activation Function",
+                    "url": "#learn-understanding-the-relu-activation-function"
+                },
+                {
+                    "text": "Mathematical Definition",
+                    "url": "#mathematical-definition"
+                },
+                {
+                    "text": "Characteristics",
+                    "url": "#characteristics"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "NumPy Implementation",
+                    "url": "#numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[ReLU Activation Function](https://www.deep-ml.com/problem/ReLU%20Activation%20Function)\n\nWrite a Python function `relu` that implements the Rectified Linear Unit (ReLU) activation function. The function should take a single float as input and return the value after applying the ReLU function. The ReLU function returns the input if it's greater than 0, otherwise, it returns 0.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "ReLU Activation Function",
+                    "url": "https://www.deep-ml.com/problem/ReLU%20Activation%20Function"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "print(relu(0)) \n# Output: 0\n\nprint(relu(1)) \n# Output: 1\n\nprint(relu(-1)) \n# Output: 0\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Understanding the ReLU Activation Function",
+            "content": "\nThe ReLU (Rectified Linear Unit) activation function is widely used in neural networks, particularly in hidden layers of deep learning models. It maps any real-valued number to the non-negative range $$[0, \\infty)$$, which helps introduce non-linearity into the model while maintaining computational efficiency.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Mathematical Definition",
+            "content": "\nThe ReLU function is mathematically defined as:\n\n$$f(z) = \\max(0, z)$$\n\nWhere $z$ is the input to the function.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Characteristics",
+            "content": "\n1. **Output Range**: The output is always in the range $$[0, \\infty)$$. Values below 0 are mapped to 0, while positive values are retained.\n\n2. **Shape**: The function has an \"L\" shaped curve with a horizontal axis at $z = 0$ and a linear increase for positive $z$.\n\n3. **Gradient**: The gradient is 1 for positive values of $z$ and 0 for non-positive values. This means the function is linear for positive inputs and flat (zero gradient) for negative inputs.\n\nThis function is particularly useful in deep learning models as it introduces non-linearity while being computationally efficient, helping to capture complex patterns in the data.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import math\n\ndef relu(z: float) -> float:\n    return max(0, z)\n\n# Testing\nprint(relu(2))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef relu(z: float) -> float:\n    return np.maximum(0, z)\n\n# Testing\nprint(relu(2))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nThe problem has been solved using two different approaches: a custom built-in method and using NumPy's built-in function.\n\n1. **Custom Implementation**:\n   The custom implementation uses Python's built-in `max()` function to compare 0 and the input `z`. This elegantly captures the ReLU function's behavior: returning 0 for negative inputs and the input itself for positive values.\n\n2. **NumPy Implementation**:\n   The NumPy implementation uses the `np.maximum()` function, which performs element-wise maximum comparison between two arrays or values. In this case, it compares 0 and the input `z`, effectively implementing the ReLU function.\n\nBoth implementations achieve the same result, but the NumPy version might be more efficient for large-scale operations or when working with arrays of data. The custom implementation is straightforward and doesn't require additional libraries, making it suitable for simpler applications or when NumPy is not available.\n\nThe `relu()` function is typed with Python's type hints, indicating that it takes a float as input and returns a float. This enhances code readability and can help catch type-related errors early in development.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

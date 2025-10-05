@@ -1,0 +1,102 @@
+{
+    "title": "Convert Vector to Diagonal Matrix (Easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Understanding Diagonal Matrices](#learn-understanding-diagonal-matrices)\n- [Solutions](#solutions)\n  - [Custom Implementation](#custom-implementation)\n  - [NumPy Implementation](#numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Understanding Diagonal Matrices",
+                    "url": "#learn-understanding-diagonal-matrices"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "NumPy Implementation",
+                    "url": "#numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Convert Vector to Diagonal Matrix](https://www.deep-ml.com/problem/Convert%20Vector%20to%20Diagonal%20Matrix)\n\nWrite a Python function to convert a 1D numpy array into a diagonal matrix. The function should take in a 1D numpy array `x` and return a 2D numpy array representing the diagonal matrix.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Convert Vector to Diagonal Matrix",
+                    "url": "https://www.deep-ml.com/problem/Convert%20Vector%20to%20Diagonal%20Matrix"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n**Reasoning:** The input vector [1, 2, 3] is converted into a diagonal matrix where the elements of the vector form the diagonal of the matrix.\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "x = np.array([1, 2, 3])\noutput = make_diagonal(x)\nprint(output)\n# Output:\n# [[1. 0. 0.]\n#  [0. 2. 0.]\n#  [0. 0. 3.]]\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Understanding Diagonal Matrices",
+            "content": "\nA diagonal matrix is a square matrix in which the entries outside the main diagonal are all zero. The main diagonal is the set of entries extending from the top left to the bottom right of the matrix.\n\nIn this problem, you will write a function to convert a 1D numpy array (vector) into a diagonal matrix. The resulting matrix will have the elements of the input vector on its main diagonal, and zeros elsewhere.\n\nGiven a vector $$\\mathbf{x} = [x_1, x_2, \\ldots, x_n]$$, the corresponding diagonal matrix $$\\mathbf{D}$$ is:\n\n$$\n\\mathbf{D} = \\begin{bmatrix}\nx_1 & 0 & 0 & \\cdots & 0 \\\\\n0 & x_2 & 0 & \\cdots & 0 \\\\\n0 & 0 & x_3 & \\cdots & 0 \\\\\n\\vdots & \\vdots & \\vdots & \\ddots & \\vdots \\\\\n0 & 0 & 0 & \\cdots & x_n\n\\end{bmatrix}\n$$\n\nDiagonal matrices are important in various mathematical and scientific computations because of their simple structure and properties.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef make_diagonal(x : list[int | float]) -> list[list[int | float]]:\n    l = [[0] * len(x) for _ in range(len(x))]\n    for i in range(len(x)):\n        l[i][i] = x[i]\n    return np.array(l).tolist()\n\nx = np.array([1, 2, 3])\noutput = make_diagonal(x)\nprint(output)\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef make_diagonal(x : list[int | float]) -> list[list[int | float]]:\n    return np.identity(np.size(x)) * x\n\nx = np.array([1, 2, 3])\noutput = make_diagonal(x)\nprint(output)\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nThe custom implementation of the `make_diagonal` function takes a 1D numpy array `x` as input and returns a 2D list representing the diagonal matrix. Here's how it works:\n\n1. It initializes a 2D list `l` with dimensions `len(x) x len(x)`, filled with zeros.\n2. It then iterates through the range of `len(x)`.\n3. For each index `i`, it sets the element at position `[i][i]` (the diagonal) to the corresponding value from the input array `x`.\n4. Finally, it converts the 2D list to a numpy array and then back to a list using `np.array(l).tolist()`.\n\nThis implementation directly applies the definition of a diagonal matrix by creating a square matrix with zeros and placing the input vector elements along the main diagonal.\n\nThe NumPy implementation, on the other hand, utilizes NumPy's built-in functions for a more concise solution. It uses `np.identity()` to create an identity matrix of the same size as the input vector, and then multiplies it element-wise with the input vector using the `*` operator.\n\nBoth implementations produce the same result, but the NumPy version is more efficient, especially for larger inputs, as it leverages NumPy's optimized array operations.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

@@ -1,0 +1,92 @@
+{
+    "title": "Transformation Matrix from Basis B to C (Difficult) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Understanding Transformation Matrices](#learn-understanding-transformation-matrices)\n- [Solution](#solution)\n- [Code Explanation](#code-explanation)\n- [Resources](#resources)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Understanding Transformation Matrices",
+                    "url": "#learn-understanding-transformation-matrices"
+                },
+                {
+                    "text": "Solution",
+                    "url": "#solution"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                },
+                {
+                    "text": "Resources",
+                    "url": "#resources"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Transformation Matrix from Basis B to C](https://www.deep-ml.com/problem/Transformation%20Matrix%20from%20Basis%20B%20to%20C)\n\nGiven basis vectors in two different bases B and C for R^3, write a Python function to compute the transformation matrix P from basis B to C.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Transformation Matrix from Basis B to C",
+                    "url": "https://www.deep-ml.com/problem/Transformation%20Matrix%20from%20Basis%20B%20to%20C"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\nReasoning: The transformation matrix P from basis B to C can be found using matrix operations involving the inverse of matrix C.\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "B = [[1, 0, 0], \n     [0, 1, 0], \n     [0, 0, 1]]\nC = [[1, 2.3, 3], \n     [4.4, 25, 6], \n     [7.4, 8, 9]]\noutput: [[-0.6772, -0.0126, 0.2342],\n        [-0.0184, 0.0505, -0.0275],\n        [0.5732, -0.0345, -0.0569]]\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Understanding Transformation Matrices",
+            "content": "\nA transformation matrix allows us to convert the coordinates of a vector in one basis to coordinates in another basis. For bases B and C of a vector space, the transformation matrix P from B to C is calculated by:\n\n1. Inverse of Basis C: First, find the inverse of the matrix representing basis C, denoted $$C^{-1}$$.\n\n2. Matrix Multiplication: Multiply $$C^{-1}$$ by the matrix of basis B. The result is the transformation matrix P, where:\n\n   $$P = C^{-1} * B$$\n\nThis matrix P can be used to transform any vector coordinates from the B basis to the C basis.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solution",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\ndef transform_basis(B: list[list[int]], C: list[list[int]]) -> list[list[float]]:\n    return np.dot(np.linalg.inv(C), B)  # type: ignore\n\nB = [[1, 0, 0], \n    [0, 1, 0], \n    [0, 0, 1]]\n\nC = [[1, 2.3, 3], \n    [4.4, 25, 6], \n    [7.4, 8, 9]]\n\nprint(transform_basis(B=B, C=C))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nThe `transform_basis` function implements the transformation matrix calculation using NumPy's built-in methods. Here's a breakdown of the implementation:\n\n1. The function takes two parameters:\n   - `B`: A list of lists representing the basis vectors in the B coordinate system.\n   - `C`: A list of lists representing the basis vectors in the C coordinate system.\n\n2. `np.linalg.inv(C)`: This NumPy function calculates the inverse of matrix C.\n\n3. `np.dot(np.linalg.inv(C), B)`: The `np.dot` function performs matrix multiplication between the inverse of C and B, resulting in the transformation matrix P.\n\n4. The function returns the resulting transformation matrix.\n\nThis implementation leverages NumPy's efficient matrix operations, making it suitable for larger matrices and providing high numerical precision.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Resources",
+            "content": "\n- [Change of basis | Chapter 13, Essence of linear algebra](https://youtu.be/P2LTAUO1TdA?si=O8XAmMrfpZizOr81) by 3Blue1Brown\n\nThis video provides an excellent visual explanation of the change of basis concept, which is fundamental to understanding transformation matrices.\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Change of basis | Chapter 13, Essence of linear algebra",
+                    "url": "https://youtu.be/P2LTAUO1TdA?si=O8XAmMrfpZizOr81"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,122 @@
+{
+    "title": "Sigmoid Activation Function Understanding (Easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Understanding the Sigmoid Activation Function](#learn-understanding-the-sigmoid-activation-function)\n  - [Mathematical Definition](#mathematical-definition)\n  - [Characteristics](#characteristics)\n- [Solutions](#solutions)\n  - [Custom Implementation](#custom-implementation)\n  - [NumPy Implementation](#numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Understanding the Sigmoid Activation Function",
+                    "url": "#learn-understanding-the-sigmoid-activation-function"
+                },
+                {
+                    "text": "Mathematical Definition",
+                    "url": "#mathematical-definition"
+                },
+                {
+                    "text": "Characteristics",
+                    "url": "#characteristics"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "NumPy Implementation",
+                    "url": "#numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Sigmoid Activation Function Understanding](https://www.deep-ml.com/problem/Sigmoid%20Activation%20Function%20Understanding)\n\nWrite a Python function that computes the output of the sigmoid activation function given an input value z. The function should return the output rounded to four decimal places.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Sigmoid Activation Function Understanding",
+                    "url": "https://www.deep-ml.com/problem/Sigmoid%20Activation%20Function%20Understanding"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "input: z = 0\noutput: 0.5\nreasoning: The sigmoid function is defined as σ(z) = 1 / (1 + exp(-z)). For z = 0, exp(-0) = 1, hence the output is 1 / (1 + 1) = 0.5.\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Understanding the Sigmoid Activation Function",
+            "content": "\nThe sigmoid activation function is crucial in neural networks, especially for binary classification tasks. It maps any real-valued number into the (0, 1) interval, making it useful for modeling probability as an output.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Mathematical Definition",
+            "content": "\nThe sigmoid function is mathematically defined as:\n\n$$\n\\sigma(z) = \\frac{1}{1 + e^{-z}}\n$$\n\nWhere $z$ is the input to the function.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Characteristics",
+            "content": "\n- **Output Range**: The output is always between 0 and 1.\n- **Shape**: It has an \"S\" shaped curve.\n- **Gradient**: The function's gradient is highest near $z = 0$ and decreases toward either end of the z-axis.\n\nThis function is particularly useful for turning logits (raw prediction values) into probabilities in binary classification models.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import math\n\ndef sigmoid(z):\n    return round(1 / (1 + math.exp(-z)), 4)\n\n# Test the function\nprint(sigmoid(0))  # Should output 0.5\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef sigmoid(z):\n    return round(1 / (1 + np.exp(-z)), 4)\n\n# Test the function\nprint(sigmoid(0))  # Should output 0.5\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nBoth implementations of the `sigmoid` function take a single parameter `z`, which is the input to the sigmoid function. The function calculates the sigmoid value and rounds it to four decimal places as required.\n\n1. **Custom Implementation**:\n   - This version uses Python's built-in `math` module.\n   - It directly implements the sigmoid formula: $\\frac{1}{1 + e^{-z}}$.\n   - The `math.exp()` function is used to calculate $e^{-z}$.\n\n2. **NumPy Implementation**:\n   - This version uses the NumPy library, which is commonly used for numerical computations in Python.\n   - The implementation is very similar to the custom one, but it uses `np.exp()` instead of `math.exp()`.\n   - NumPy's implementation can be more efficient, especially when dealing with arrays of inputs.\n\nBoth implementations use the `round()` function to limit the output to four decimal places.\n\nThe main difference between these implementations is the library used for the exponential function. The NumPy version might be preferred in scenarios where you're already using NumPy in your project or when you need to apply the sigmoid function to arrays of values efficiently.\n\nThese implementations provide a straightforward and efficient way to calculate the sigmoid function, which is essential in many machine learning algorithms, particularly in neural networks for binary classification tasks.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

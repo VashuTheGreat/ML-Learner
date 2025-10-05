@@ -1,0 +1,116 @@
+{
+    "title": "Linear Regression Using Normal Equation (Easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Linear Regression Using the Normal Equation](#learn-linear-regression-using-the-normal-equation)\n- [Solutions](#solutions)\n  - [NumPy Implementation](#numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Linear Regression Using the Normal Equation",
+                    "url": "#learn-linear-regression-using-the-normal-equation"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "NumPy Implementation",
+                    "url": "#numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Linear Regression Using Normal Equation](https://www.deep-ml.com/problem/Linear%20Regression%20Using%20Normal%20Equation)\n\nWrite a Python function that performs linear regression using the normal equation. The function should take a matrix X (features) and a vector y (target) as input, and return the coefficients of the linear regression model. Round your answer to four decimal places, -0.0 is a valid result for rounding a very small number.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Linear Regression Using Normal Equation",
+                    "url": "https://www.deep-ml.com/problem/Linear%20Regression%20Using%20Normal%20Equation"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "input: X = [[1, 1], [1, 2], [1, 3]], y = [1, 2, 3]\noutput: [0.0, 1.0]\nreasoning: The linear model is y = 0.0 + 1.0*x, perfectly fitting the input data.\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Linear Regression Using the Normal Equation",
+            "content": "\nLinear regression aims to model the relationship between a scalar dependent variable $$y$$ and one or more explanatory variables (or independent variables) $$X$$. The normal equation provides an analytical solution to finding the coefficients $$\\theta$$ that minimize the cost function for linear regression.\n\nGiven a matrix $$X$$ (with each row representing a training example and each column a feature) and a vector $$y$$ (representing the target values), the normal equation is:\n\n$$\\theta = (X^TX)^{-1}X^Ty$$\n\nWhere:\n- $$X^T$$ is the transpose of $$X$$,\n- $$(X^TX)^{-1}$$ is the inverse of the matrix $$X^TX$$,\n- $$y$$ is the vector of target values.\n\n**Things to note**: This method does not require any feature scaling, and there's no need to choose a learning rate. However, computing the inverse of $$X^TX$$ can be computationally expensive if the number of features is very large.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Practical Implementation",
+            "content": "\nA practical implementation involves augmenting $$X$$ with a column of ones to account for the intercept term and then applying the normal equation directly to compute $$\\theta$$.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation (Step 1)",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef linear_regression_normal_equation(X: list[list[float]], y: list[float]) -> list[float]:\n    mat = np.dot(np.transpose(X), X)\n    mat = np.linalg.inv(mat)\n    mult = np.dot(np.transpose(X), y)\n    theta = np.dot(mat, mult)\n    return np.round(theta, 2)\n\nX = [[1, 1], [1, 2], [1, 3]]\ny = [1, 2, 3]\nprint(linear_regression_normal_equation(X=X, y=y))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation (Step 2)",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef linear_regression_normal_equation(X: list[list[float]], y: list[float]) -> list[float]:\n    X = np.array(X)\n    y = np.array(y).reshape(-1, 1)\n    X_transpose = X.T\n    theta = np.linalg.inv(X_transpose.dot(X)).dot(X_transpose).dot(y)\n    theta = np.round(theta, 4).flatten().tolist()\n    return theta\n\nX = [[1, 1], [1, 2], [1, 3]]\ny = [1, 2, 3]\nprint(linear_regression_normal_equation(X=X, y=y))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nBoth implementations use NumPy's built-in methods to solve the normal equation for linear regression, but they differ slightly in their approach:\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Step 1 Implementation:",
+            "content": "\n1. `np.dot(np.transpose(X), X)`: Calculates $$X^TX$$.\n2. `np.linalg.inv(mat)`: Computes $$(X^TX)^{-1}$$.\n3. `np.dot(np.transpose(X), y)`: Calculates $$X^Ty$$.\n4. `np.dot(mat, mult)`: Performs the final multiplication to get $$\\theta = (X^TX)^{-1}X^Ty$$.\n5. `np.round(theta, 2)`: Rounds the result to two decimal places.\n\nThis implementation directly applies the normal equation using separate steps for each matrix operation.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Step 2 Implementation:",
+            "content": "\n1. `X = np.array(X)` and `y = np.array(y).reshape(-1, 1)`: Converts input lists to NumPy arrays, reshaping y to a column vector.\n2. `X_transpose = X.T`: Computes the transpose of X.\n3. `np.linalg.inv(X_transpose.dot(X)).dot(X_transpose).dot(y)`: Applies the entire normal equation $$(X^TX)^{-1}X^Ty$$ in one line.\n4. `np.round(theta, 4).flatten().tolist()`: Rounds to four decimal places, flattens the result, and converts back to a list.\n\nThis implementation is more concise, combining multiple steps into a single line for the core calculation.\n\nBoth implementations effectively solve the normal equation, with the main differences being:\n1. The precision of rounding (2 vs 4 decimal places)\n2. The return type (NumPy array vs Python list)\n3. The structure of the calculation (separate steps vs combined operation)\n\nThe choice between these implementations might depend on specific requirements for precision, output format, and personal preference for code structure.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

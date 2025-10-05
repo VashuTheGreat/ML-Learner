@@ -1,0 +1,114 @@
+{
+    "title": "One-Hot Encoding of Nominal Values (easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Understanding One-Hot Encoding](#learn-understanding-one-hot-encoding)\n- [Solutions](#solutions)\n  - [Implementation 1](#implementation-1)\n  - [Implementation 2](#implementation-2)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Understanding One-Hot Encoding",
+                    "url": "#learn-understanding-one-hot-encoding"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Implementation 1",
+                    "url": "#implementation-1"
+                },
+                {
+                    "text": "Implementation 2",
+                    "url": "#implementation-2"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[One-Hot Encoding of Nominal Values](https://www.deep-ml.com/problem/One-Hot%20Encoding%20of%20Nominal%20Values)\n\nWrite a Python function to perform one-hot encoding of nominal values. The function should take in a 1D numpy array `x` of integer values and an optional integer `n_col` representing the number of columns for the one-hot encoded array. If `n_col` is not provided, it should be automatically determined from the input array.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "One-Hot Encoding of Nominal Values",
+                    "url": "https://www.deep-ml.com/problem/One-Hot%20Encoding%20of%20Nominal%20Values"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "x = np.array([0, 1, 2, 1, 0])\noutput = to_categorical(x)\nprint(output)\n# Output:\n# [[1. 0. 0.]\n#  [0. 1. 0.]\n#  [0. 0. 1.]\n#  [0. 1. 0.]\n#  [1. 0. 0.]]\n\nReasoning:\nEach element in the input array is transformed into a one-hot encoded vector,\nwhere the index corresponding to the value in the input array is set to 1, \nand all other indices are set to 0.\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Understanding One-Hot Encoding",
+            "content": "\nOne-hot encoding is a method used to represent categorical variables as binary vectors. This technique is useful in machine learning when dealing with categorical data that has no ordinal relationship.\n\nIn one-hot encoding, each category is represented by a binary vector with a length equal to the number of categories. The vector has a value of 1 at the index corresponding to the category and 0 at all other indices.\n\nFor example, if you have three categories: 0, 1, and 2, the one-hot encoded vectors would be:\n\n- 0: [1, 0, 0]\n- 1: [0, 1, 0]\n- 2: [0, 0, 1]\n\nThis method ensures that the model does not assume any ordinal relationship between categories, which is crucial for many machine learning algorithms. The one-hot encoding process can be mathematically represented as follows:\n\nGiven a category $x_i$ from a set of categories $C$, the one-hot encoded vector $\\mathbf{v}$ is:\n\n$$ \\mathbf{v}_i = \n\\begin{cases} \n1 & \\text{if } i = x_i \\\\\n0 & \\text{otherwise}\n\\end{cases}\n$$\n\nThis vector $\\mathbf{v}$ will have a length equal to the number of unique categories.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Implementation 1",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef to_categorical(x, n_col=None):\n    if n_col is None:\n        n_col = x.max() + 1  # Determine the number of columns from the input array\n\n    one_hot = np.zeros((x.size, n_col), dtype=int)\n    one_hot[np.arange(x.size), x] = 1\n\n    return one_hot\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Implementation 2",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef to_categorical(x, n_col=None):\n    # One-hot encoding of nominal values\n    # If n_col is not provided, determine the number of columns from the input array\n    if not n_col:\n        n_col = np.amax(x) + 1\n    # Initialize a matrix of zeros with shape (number of samples, n_col)\n    one_hot = np.zeros((x.shape[0], n_col))\n    # Set the appropriate elements to 1\n    one_hot[np.arange(x.shape[0]), x] = 1\n    return one_hot\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nBoth implementations achieve the same goal of performing one-hot encoding, but they have slight differences in their approach:\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Implementation 1:",
+            "content": "\n1. If `n_col` is not provided, it calculates the number of columns using `x.max() + 1`.\n2. It initializes a zero matrix `one_hot` with dimensions `(x.size, n_col)` and dtype `int`.\n3. It uses NumPy's advanced indexing to set the appropriate elements to 1.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Implementation 2:",
+            "content": "\n1. If `n_col` is not provided, it calculates the number of columns using `np.amax(x) + 1`.\n2. It initializes a zero matrix `one_hot` with dimensions `(x.shape[0], n_col)` as float (default NumPy dtype).\n3. It uses the same NumPy advanced indexing technique to set the appropriate elements to 1.\n\nThe main differences are:\n- Implementation 1 uses `x.max()`, while Implementation 2 uses `np.amax(x)` to determine the number of columns.\n- Implementation 1 explicitly sets the dtype to `int`, while Implementation 2 uses the default float dtype.\n- Implementation 1 uses `x.size` for the number of rows, while Implementation 2 uses `x.shape[0]`.\n\nBoth implementations efficiently use NumPy's vectorized operations to perform the one-hot encoding, making them fast and suitable for large arrays. The choice between the two would depend on specific requirements regarding dtype and any potential integration with existing code.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

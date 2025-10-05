@@ -1,0 +1,107 @@
+{
+    "title": "Leaky ReLU Activation Function (Easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Understanding the Leaky ReLU Activation Function](#learn-understanding-the-leaky-relu-activation-function)\n  - [Mathematical Definition](#mathematical-definition)\n  - [Characteristics](#characteristics)\n- [Solution](#solution)\n  - [Custom Implementation](#custom-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Understanding the Leaky ReLU Activation Function",
+                    "url": "#learn-understanding-the-leaky-relu-activation-function"
+                },
+                {
+                    "text": "Mathematical Definition",
+                    "url": "#mathematical-definition"
+                },
+                {
+                    "text": "Characteristics",
+                    "url": "#characteristics"
+                },
+                {
+                    "text": "Solution",
+                    "url": "#solution"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Leaky ReLU Activation Function](https://www.deep-ml.com/problem/Leaky%20ReLU)\n\nWrite a Python function `leaky_relu` that implements the Leaky Rectified Linear Unit (Leaky ReLU) activation function. The function should take a float `z` as input and an optional float `alpha`, with a default value of 0.01, as the slope for negative inputs. The function should return the value after applying the Leaky ReLU function.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Leaky ReLU Activation Function",
+                    "url": "https://www.deep-ml.com/problem/Leaky%20ReLU"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "print(leaky_relu(0)) \n# Output: 0\n\nprint(leaky_relu(1)) \n# Output: 1\n\nprint(leaky_relu(-1)) \n# Output: -0.01\n\nprint(leaky_relu(-2, alpha=0.1))\n# Output: -0.2\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Understanding the Leaky ReLU Activation Function",
+            "content": "\nThe Leaky ReLU (Leaky Rectified Linear Unit) activation function is a variant of the ReLU function used in neural networks. It addresses the \"dying ReLU\" problem by allowing a small, non-zero gradient when the input is negative. This small slope for negative inputs helps keep the function active and helps prevent neurons from becoming inactive.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Mathematical Definition",
+            "content": "\nThe Leaky ReLU function is mathematically defined as:\n\n$$\nf(z) = \\begin{cases} \nz & \\text{if } z > 0 \\\\\n\\alpha z & \\text{if } z \\leq 0 \n\\end{cases}\n$$\n\nWhere $z$ is the input to the function and $\\alpha$ is a small positive constant, typically $0.01$.\n\nIn this definition, the function returns $z$ for positive values, and for negative values, it returns $\\alpha z$, allowing a small gradient to pass through.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Characteristics",
+            "content": "\n- **Output Range**: The output is in the range $(-\\infty, \\infty)$. Positive values are retained, while negative values are scaled by the factor $\\alpha$, allowing them to be slightly negative.\n- **Shape**: The function has a similar \"L\" shaped curve as ReLU, but with a small negative slope on the left side for negative $z$, creating a small gradient for negative inputs.\n- **Gradient**: The gradient is 1 for positive values of $z$ and $\\alpha$ for non-positive values. This allows the function to remain active even for negative inputs, unlike ReLU, where the gradient is zero for negative inputs.\n\nThis function is particularly useful in deep learning models as it mitigates the issue of \"dead neurons\" in ReLU by ensuring that neurons can still propagate a gradient even when the input is negative, helping to improve learning dynamics in the network.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solution",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\nimport math\n\ndef leaky_relu(z: float, alpha: float = 0.01) -> float | int: # type: ignore\n    # Your code here\n    if z > 0:\n        return z\n    else:\n        return alpha * z\n\nprint(leaky_relu(0))\n# Output: 0\n\nprint(leaky_relu(1))\n# Output: 1\n\nprint(leaky_relu(-1))\n# Output: -0.01\n\nprint(leaky_relu(-2, alpha=0.1))\n# Output: -0.2\n\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nThe custom implementation of the `leaky_relu` function takes two parameters:\n\n- `z`: a float value representing the input to the function\n- `alpha`: an optional float value (default 0.01) representing the slope for negative inputs\n\nThe function works as follows:\n\n1. It checks if the input `z` is greater than 0.\n2. If `z` is positive, it returns `z` unchanged.\n3. If `z` is non-positive (zero or negative), it returns `alpha * z`.\n\nThis implementation directly applies the mathematical definition of the Leaky ReLU function. It preserves positive inputs and scales negative inputs by the factor `alpha`, allowing a small gradient to pass through for negative values.\n\nNote: The `# type: ignore` comment is used to suppress type checking warnings, as the function's return type annotation includes both `float` and `int`.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}

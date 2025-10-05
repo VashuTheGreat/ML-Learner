@@ -131,6 +131,32 @@ app.post("/airesponse", async (req, res) => {
     }
 });
 
+
+app.post("/run", async (req, res) => {
+    console.log("request received run")
+    try {
+        const flaskRes = await axios.post("http://127.0.0.1:5000/run", req.body);
+        res.json(flaskRes.data);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Flask server error" });
+    }
+});
+
+
+
+app.get("/problems", async (req, res) => {
+    console.log("📩 Request received at Node /problems");
+
+    try {
+        const flaskRes = await axios.get("http://127.0.0.1:5000/problems"); // GET now
+        res.json(flaskRes.data);
+    } catch (err) {
+        console.error("❌ Flask proxy error:", err.message);
+        res.status(500).json({ error: "Flask server error" });
+    }
+});
+
 app.get("/files", async (req, res) => {
     const fileTree = await generateFileTree(userDir);
     return res.json({ tree: fileTree });

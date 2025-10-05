@@ -1,0 +1,114 @@
+{
+    "title": "Random Shuffle of Dataset (Easy) ✔",
+    "sections": [
+        {
+            "title": "Table of Contents",
+            "content": "\n- [Problem Statement](#problem-statement)\n- [Example](#example)\n- [Learn: Understanding Dataset Shuffling](#learn-understanding-dataset-shuffling)\n- [Solutions](#solutions)\n  - [Custom Implementation](#custom-implementation)\n  - [NumPy Implementation](#numpy-implementation)\n- [Code Explanation](#code-explanation)\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Problem Statement",
+                    "url": "#problem-statement"
+                },
+                {
+                    "text": "Example",
+                    "url": "#example"
+                },
+                {
+                    "text": "Learn: Understanding Dataset Shuffling",
+                    "url": "#learn-understanding-dataset-shuffling"
+                },
+                {
+                    "text": "Solutions",
+                    "url": "#solutions"
+                },
+                {
+                    "text": "Custom Implementation",
+                    "url": "#custom-implementation"
+                },
+                {
+                    "text": "NumPy Implementation",
+                    "url": "#numpy-implementation"
+                },
+                {
+                    "text": "Code Explanation",
+                    "url": "#code-explanation"
+                }
+            ]
+        },
+        {
+            "title": "Problem Statement",
+            "content": "\n[Random Shuffle of Dataset](https://www.deep-ml.com/problem/Random%20Shuffle%20of%20Dataset)\n\nWrite a Python function to perform a random shuffle of the samples in two numpy arrays, X and y, while maintaining the corresponding order between them. The function should have an optional seed parameter for reproducibility.\n\n",
+            "code_blocks": [],
+            "links": [
+                {
+                    "text": "Random Shuffle of Dataset",
+                    "url": "https://www.deep-ml.com/problem/Random%20Shuffle%20of%20Dataset"
+                }
+            ]
+        },
+        {
+            "title": "Example",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "X = np.array([[1, 2], \n              [3, 4], \n              [5, 6], \n              [7, 8]])\ny = np.array([1, 2, 3, 4])\noutput: (array([[5, 6],\n                [1, 2],\n                [7, 8],\n                [3, 4]]), \n         array([3, 1, 4, 2]))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Learn: Understanding Dataset Shuffling",
+            "content": "\nRandom shuffling of a dataset is a common preprocessing step in machine learning to ensure that the data is randomly distributed before training a model. This helps to avoid any potential biases that may arise from the order in which data is presented to the model.\n\nHere's a step-by-step method to shuffle a dataset:\n\n1. Generate a Random Index Array: Create an array of indices corresponding to the number of samples in the dataset.\n2. Shuffle the Indices: Use a random number generator to shuffle the array of indices.\n3. Reorder the Dataset: Use the shuffled indices to reorder the samples in both X and y.\n\nThis method ensures that the correspondence between X and y is maintained after shuffling.\n\nMathematically, if we have a dataset $D = \\{(x_1, y_1), (x_2, y_2), ..., (x_n, y_n)\\}$, where $x_i$ are input features and $y_i$ are corresponding labels, shuffling can be represented as:\n\n$$D_{shuffled} = \\{(x_{\\pi(1)}, y_{\\pi(1)}), (x_{\\pi(2)}, y_{\\pi(2)}), ..., (x_{\\pi(n)}, y_{\\pi(n)})\\}$$\n\nWhere $\\pi$ is a random permutation of the indices $\\{1, 2, ..., n\\}$.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Solutions",
+            "content": "\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\nimport random\n\ndef shuffle_data(X: list[list[int]], y: list[int], seed=None):\n    if seed:\n        np.random.seed(seed)  # Set the random seed for reproducibility\n\n    x_len = len(X)\n    indices = list(range(x_len))  # Create a list of indices from 0 to len(X)-1\n    \n    np.random.shuffle(indices)  # Shuffle the list of indices\n\n    finalX = [X[i] for i in indices]  # Rearrange X according to the shuffled indices\n    finaly = [y[i] for i in indices]  # Rearrange y according to the shuffled indices\n\n    return finalX, finaly\n\nX = np.array([[1, 2], [3, 4], [5, 6], [7, 8]])\ny = np.array([1, 2, 3, 4])\nprint(shuffle_data(X=X, y=y))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n\n",
+            "code_blocks": [
+                {
+                    "language": "python",
+                    "code": "import numpy as np\n\ndef shuffle_data(X : list[list[int]], y : list[int], seed=None):\n    if seed:\n        np.random.seed(seed)\n    idx = np.arange(X.shape[0])\n    np.random.shuffle(idx)\n    return X[idx], y[idx]\n\nX = np.array([[1, 2], [3, 4], [5, 6], [7, 8]])\ny = np.array([1, 2, 3, 4])\nprint(shuffle_data(X=X, y=y))\n"
+                }
+            ],
+            "links": []
+        },
+        {
+            "title": "Code Explanation",
+            "content": "\nBoth implementations aim to shuffle the dataset while maintaining the correspondence between X and y. Let's break down each approach:\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "Custom Implementation",
+            "content": "\n1. The function `shuffle_data` takes three parameters: `X` (the feature matrix), `y` (the label array), and an optional `seed` for reproducibility.\n2. If a seed is provided, it's set using `np.random.seed(seed)`.\n3. We create a list of indices `indices` ranging from 0 to the length of X minus 1.\n4. The `np.random.shuffle(indices)` function is used to randomly shuffle these indices.\n5. We then create new lists `finalX` and `finaly` by rearranging the elements of X and y according to the shuffled indices.\n6. The function returns the shuffled `finalX` and `finaly`.\n\nThis method explicitly creates the shuffled indices and rearranges the data, which can be helpful for understanding the process.\n\n",
+            "code_blocks": [],
+            "links": []
+        },
+        {
+            "title": "NumPy Implementation",
+            "content": "\n1. The function signature is the same as the custom implementation.\n2. If a seed is provided, it's set using `np.random.seed(seed)`.\n3. We create an array of indices using `np.arange(X.shape[0])`.\n4. The `np.random.shuffle(idx)` function is used to randomly shuffle these indices in-place.\n5. We return `X[idx]` and `y[idx]`, which uses NumPy's advanced indexing to rearrange the data.\n\nThis method leverages NumPy's efficient array operations and can be faster, especially for larger datasets.\n\nBoth methods achieve the same result of randomly shuffling the dataset while maintaining the relationship between features and labels. The choice between them might depend on specific requirements, such as performance needs or integration with existing code.\n",
+            "code_blocks": [],
+            "links": []
+        }
+    ]
+}
