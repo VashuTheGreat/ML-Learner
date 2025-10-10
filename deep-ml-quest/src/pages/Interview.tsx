@@ -6,33 +6,49 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Brain, CheckCircle, Star } from "lucide-react";
 import { Mic, VideoOff, MicOff, User } from "lucide-react";
+import { Link } from "react-router-dom";
 
-interface Window {
-  SpeechRecognition: any;
-  webkitSpeechRecognition: any;
-}
 
 const Interview = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
   const [showResults, setShowResults] = useState(false);
-  const [micoff, setmicoff] = useState(false);
+  const [micoff, setmicoff] = useState(true);
   const [selected, setSelected] = useState("Girl");
   const [open, setOpen] = useState(false);
   const [listening, setListening] = useState(false);
   const [finalTranscript, setFinalTranscript] = useState("");
   const recognitionRef = useRef<any>(null);
   const [airesponse, setairesponse] = useState({});
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [type,settype]=useState("NN");
+
+  const Notes = () => {
+    console.log("Navigate to notes");
+  }
 
   const playMicOnSound = (callback?: () => void) => {
     const audio = new Audio("MicOn.mp3");
+    audio.volume = 0.3;
     audio.onended = () => {
       if (callback) callback();
     };
-    audio.play();
+    audio.play().catch(err => console.error("MicOn sound error:", err));
+  };
+
+  const stopCurrentAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    setIsSpeaking(false);
   };
 
   async function playAudio(audioDataBase64: string) {
+    stopCurrentAudio();
+    
     const audioBytes = atob(audioDataBase64);
     const arrayBuffer = new ArrayBuffer(audioBytes.length);
     const bufferView = new Uint8Array(arrayBuffer);
@@ -42,31 +58,74 @@ const Interview = () => {
     const blob = new Blob([bufferView], { type: "audio/mpeg" });
     const audioUrl = URL.createObjectURL(blob);
     const audio = new Audio(audioUrl);
+    audioRef.current = audio;
+    
+    setIsSpeaking(true);
+    setmicoff(true);
+    
     audio.onended = () => {
-      playMicOnSound(() => startListening());
+      setIsSpeaking(false);
+      audioRef.current = null;
+      if (!listening && micoff) {
+        playMicOnSound(() => {
+          setmicoff(false);
+          startListening();
+        });
+      }
     };
-    await audio.play();
+    
+    audio.onerror = () => {
+      setIsSpeaking(false);
+      audioRef.current = null;
+    };
+    
+    await audio.play().catch(err => {
+      console.error("Audio playback error:", err);
+      setIsSpeaking(false);
+      audioRef.current = null;
+    });
   }
 
-const getAIResponse = async (voice, userResponse) => {
-    console.log("🚀 getAIResponse called with:", voice, userResponse);
+ const getAIResponse = async (voice: string, userResponse: string) => {
+  console.log("🚀 getAIResponse called with:", voice, userResponse);
 
   try {
-    const user_id = localStorage.getItem("user_id") || crypto.randomUUID();
-    localStorage.setItem("user_id", user_id);
+    let user_id = localStorage.getItem("user_id");
+    if (!user_id) {
+      user_id = crypto.randomUUID();
+      localStorage.setItem("user_id", user_id);
+    }
+
+    const voiceParam =
+      voice.toLowerCase() === "boy"
+        ? "boy"
+        : voice.toLowerCase() === "girl"
+        ? "shimmer"
+        : "N";
 
     const response = await fetch("http://localhost:3000/airesponse", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ voice, userResponse, user_id }), // ✅ added user_id
+      body: JSON.stringify({
+        voice: voiceParam,
+        userResponse,
+        user_id,
+      }),
     });
 
     if (!response.ok) throw new Error("Network error");
     const data = await response.json();
+    console.log("AI Response received:", data);
+    settype(data.type);
     setairesponse(data);
-    if (data.audio_data) await playAudio(data.audio_data);
+
+    if (data.audio_data) {
+      await playAudio(data.audio_data);
+    }
   } catch (error) {
     console.error("Error fetching AI response:", error);
+    setIsSpeaking(false);
+    setmicoff(false);
   }
 };
 
@@ -78,50 +137,92 @@ const getAIResponse = async (voice, userResponse) => {
       alert("Speech Recognition not supported");
       return;
     }
+    
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    
     const recognition = new SpeechRecognition();
     recognition.lang = "en-US";
     recognition.interimResults = true;
     recognition.continuous = true;
+    
     let silenceTimer: NodeJS.Timeout;
+    let accumulatedTranscript = "";
+    
     recognition.onresult = (event: any) => {
       clearTimeout(silenceTimer);
       let interimTranscript = "";
+      
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) setFinalTranscript(transcript);
-        else interimTranscript += transcript;
+        if (event.results[i].isFinal) {
+          accumulatedTranscript += transcript + " ";
+          setFinalTranscript(accumulatedTranscript.trim());
+        } else {
+          interimTranscript += transcript;
+        }
       }
-      silenceTimer = setTimeout(() => stopListening(), 3000);
+      
+      silenceTimer = setTimeout(() => {
+        if (accumulatedTranscript.trim()) {
+          stopListening(accumulatedTranscript.trim());
+        }
+      }, 2000);
     };
-    recognition.onend = () => setListening(false);
+    
+    recognition.onend = () => {
+      setListening(false);
+      if (!micoff) {
+        recognitionRef.current = null;
+      }
+    };
+    
     recognition.onerror = (event: any) => {
       console.error("Speech recognition error:", event.error);
       setListening(false);
+      setmicoff(true);
     };
+    
     recognition.start();
     recognitionRef.current = recognition;
     setListening(true);
   };
 
-  const stopListening = () => {
-    recognitionRef.current?.stop();
+  const stopListening = (transcript?: string) => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
     setListening(false);
-    setmicoff(false);
-    if (finalTranscript.trim()) getAIResponse(selected, finalTranscript);
+    setmicoff(true);
+    
+    const textToSend = transcript || finalTranscript;
+    if (textToSend.trim()) {
+      const voiceParam =
+  selected.toLowerCase() === "boy"
+    ? "boy"
+    : selected.toLowerCase() === "girl"
+    ? "shimmer"
+    : "N";
+getAIResponse(voiceParam, textToSend);
+
+      setFinalTranscript("");
+    }
   };
 
-  // const ismicoff = () => {
-  //   setmicoff(!micoff);
-  //   if (listening) stopListening();
-  //   else playMicOnSound(() => startListening());
-  // };
-
   const ismicoff = () => {
-  setmicoff(!micoff);
-  if (listening) stopListening();
-  else startListening();
-};
-
+    if (isSpeaking) {
+      stopCurrentAudio();
+      setmicoff(false);
+      playMicOnSound(() => startListening());
+    } else if (listening) {
+      stopListening();
+    } else {
+      setmicoff(false);
+      playMicOnSound(() => startListening());
+    }
+  };
 
   const mcqQuestions = [
     {
@@ -401,9 +502,11 @@ const getAIResponse = async (voice, userResponse) => {
                           </div>
                         ))}
                       </div>
-                      <Button variant="outline" className="w-full mt-4">
+                      <Link  to={"/notes"} target="_blank">
+                      <Button variant="outline" className="w-full mt-4" onClick={Notes}>
                         Study This Topic
                       </Button>
+                      </Link>
                     </CardContent>
                   </Card>
                 ))}
@@ -415,18 +518,26 @@ const getAIResponse = async (voice, userResponse) => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
                 <Card
-                  className="h-[600px] flex flex-col bg-cover bg-center"
-                  style={{ backgroundImage: `url(${selected}.jpg)` }}
-                >
-                  <div className="relative inline-block text-left">
+  className="h-[600px] flex flex-col bg-cover bg-center relative"
+ style={{
+  backgroundImage:
+    type !== "NN"
+      ? `url("Normal.gif")`
+      : selected.includes(".gif")
+      ? `url(${selected})`
+      : `url(${selected}.jpg)`
+}}
+
+>
+                  <div className="absolute top-4 left-4 z-10">
                     <button
-                      className="px-4 py-2 bg-black text-white rounded-lg shadow hover:bg-gray-800"
+                      className="px-4 py-2 bg-black/80 text-white rounded-lg shadow hover:bg-black backdrop-blur-sm"
                       onClick={() => setOpen(!open)}
                     >
                       {selected}
                     </button>
                     {open && (
-                      <div className="absolute mt-2 w-full rounded-md bg-black shadow-lg z-10">
+                      <div className="absolute mt-2 w-full rounded-md bg-black/90 shadow-lg z-10 backdrop-blur-sm">
                         <ul className="py-1">
                           <li
                             className="px-4 py-2 hover:bg-gray-800 cursor-pointer text-white"
@@ -446,18 +557,34 @@ const getAIResponse = async (voice, userResponse) => {
                           >
                             Girl
                           </li>
+                          <li
+                            className="px-4 py-2 hover:bg-gray-800 cursor-pointer text-white"
+                            onClick={() => {
+                              setSelected("Normal.gif");
+                              setOpen(false);
+                            }}
+                          >
+                            Normal
+                          </li>
                         </ul>
                       </div>
                     )}
                   </div>
-                  <div className="relative w-full h-full">
+                  <div className="relative w-full h-full flex items-end justify-center pb-12 gap-8">
                     <Button
-                      className="absolute bottom-[50px] left-1/3 flex items-center justify-center w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg hover:scale-105 transition"
+                      className="flex items-center justify-center w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={ismicoff}
+                      disabled={false}
                     >
-                      {micoff ? <Mic className="w-7 h-7" /> : <MicOff className="w-7 h-7" />}
+                      {listening ? (
+                        <Mic className="w-7 h-7 animate-pulse" />
+                      ) : micoff ? (
+                        <MicOff className="w-7 h-7" />
+                      ) : (
+                        <Mic className="w-7 h-7" />
+                      )}
                     </Button>
-                    <Button className="absolute bottom-[50px] right-1/3 flex items-center justify-center w-16 h-16 rounded-full border-4 border-red-600 bg-red-600 text-white shadow-lg hover:bg-red-800 hover:scale-105 transition">
+                    <Button className="flex items-center justify-center w-16 h-16 rounded-full border-4 border-red-600 bg-red-600 text-white shadow-lg hover:bg-red-800 hover:scale-105 transition">
                       <VideoOff className="w-7 h-7" />
                     </Button>
                   </div>
@@ -468,12 +595,24 @@ const getAIResponse = async (voice, userResponse) => {
                 <Card>
                   <CardHeader>
                     <CardTitle>YOU</CardTitle>
-                    <CardDescription>👋Hello Answer the question</CardDescription>
+                    <CardDescription>
+                      {listening 
+                        ? "🎤 Listening..." 
+                        : isSpeaking 
+                        ? "🔊 AI Speaking..." 
+                        : "👋 Hello! Answer the question"}
+                    </CardDescription>
                   </CardHeader>
-                  <CardContent className="flex justify-center align-middle">
+                  <CardContent className="flex flex-col items-center gap-4">
                     <div className="flex justify-center items-center bg-white text-black rounded-full w-40 h-40 shadow-lg border-4 border-gray-200">
                       <User className="w-20 h-20 text-gray-700" />
                     </div>
+                    {finalTranscript && (
+                      <div className="w-full p-3 bg-muted rounded-lg text-sm">
+                        <p className="font-semibold mb-1">Your Response:</p>
+                        <p className="text-muted-foreground">{finalTranscript}</p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -508,8 +647,6 @@ const getAIResponse = async (voice, userResponse) => {
           </TabsContent>
         </Tabs>
       </div>
-
-      <p>{finalTranscript}</p>
     </div>
   );
 };
