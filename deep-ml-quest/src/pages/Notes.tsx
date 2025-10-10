@@ -108,7 +108,6 @@ const Notes = () => {
 
   return (
     <div className="min-h-screen transition-all duration-500 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Header */}
       <div className="sticky top-0 z-50 backdrop-blur-lg bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
@@ -127,7 +126,6 @@ const Notes = () => {
             </div>
           </div>
 
-          {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-400" />
             <input
@@ -141,7 +139,6 @@ const Notes = () => {
         </div>
       </div>
 
-      {/* PDF Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredPdfs.map((pdf, index) => (
@@ -149,14 +146,12 @@ const Notes = () => {
               key={index}
               className="group relative rounded-2xl overflow-hidden bg-white dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
             >
-              {/* Category Badge */}
               <div className="absolute top-4 right-4 z-10">
                 <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${categoryColors[pdf.category]} shadow-lg`}>
                   {pdf.category}
                 </span>
               </div>
 
-              {/* PDF Preview */}
               <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
                 <iframe
                   src={`/${encodeURIComponent(pdf.name)}`}
@@ -166,7 +161,6 @@ const Notes = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-white/80 dark:from-gray-800/80 via-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
 
-              {/* Content */}
               <div className="p-6">
                 <div className="flex items-start gap-3 mb-3">
                   <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
@@ -181,7 +175,6 @@ const Notes = () => {
                   {pdf.description}
                 </p>
 
-                {/* Action Button */}
                 <a
                   href={`/${encodeURIComponent(pdf.name)}`}
                   target="_blank"

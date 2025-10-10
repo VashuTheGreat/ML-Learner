@@ -9,7 +9,6 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-foreground mb-4">
             Get in Touch
@@ -20,7 +19,6 @@ const Contact = () => {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
           <Card className="border-border">
             <CardHeader>
               <CardTitle className="text-2xl text-foreground">Send us a Message</CardTitle>
@@ -76,7 +74,6 @@ const Contact = () => {
             </CardContent>
           </Card>
 
-          {/* Contact Info */}
           <div className="space-y-8">
             <Card className="border-border">
               <CardHeader>
@@ -111,7 +108,6 @@ const Contact = () => {
               </CardContent>
             </Card>
 
-            {/* Social Links */}
             <Card className="border-border">
               <CardHeader>
                 <CardTitle className="text-xl text-foreground">Follow Us</CardTitle>
@@ -134,7 +130,6 @@ const Contact = () => {
               </CardContent>
             </Card>
 
-            {/* FAQ */}
             <Card className="border-border">
               <CardHeader>
                 <CardTitle className="text-xl text-foreground">Quick Questions?</CardTitle>

@@ -16,6 +16,7 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import Solve from "./pages/Solve"
 import Notes from "./pages/Notes"
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
 
@@ -40,8 +41,9 @@ const App = () => (
                                 <Route path="/notes" element={<Notes />} />
 
                                 <Route path="/solve" element={<Solve />} />
+                                                                <Route path="/login" element={<Login />} />
 
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

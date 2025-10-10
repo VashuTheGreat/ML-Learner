@@ -5,7 +5,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Trophy, Target, Calendar, TrendingUp, BookOpen, Clock, Star, Award } from "lucide-react";
 
 const Dashboard = () => {
-  // Mock data
   const stats = {
     totalSolved: 47,
     totalProblems: 150,
@@ -58,7 +57,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <div className="bg-gradient-to-r from-primary/10 to-accent/10 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -70,9 +68,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -129,7 +125,6 @@ const Dashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Problems by Difficulty */}
           <Card>
             <CardHeader>
               <CardTitle>Problems by Difficulty</CardTitle>
@@ -155,7 +150,6 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Weekly Activity */}
           <Card>
             <CardHeader>
               <CardTitle>This Week's Activity</CardTitle>
@@ -176,7 +170,6 @@ const Dashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Monthly Progress */}
           <Card>
             <CardHeader>
               <CardTitle>Monthly Progress</CardTitle>
@@ -200,7 +193,6 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Recent Activity */}
           <Card>
             <CardHeader>
               <CardTitle>Recent Activity</CardTitle>

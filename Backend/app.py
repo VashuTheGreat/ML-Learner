@@ -31,7 +31,7 @@ datasetTargets = {
     "brain_networks": "network",    # classification
     "glue": "label",                # classification (text classification)
     "dowjones": "price",            # regression
-    "anagrams": "score"             # regression/classification (depending on usage)
+    "anagrams": "num3",           # regression/classification (depending on usage)
 }
 
 
@@ -71,8 +71,8 @@ def airesponse():
 @app.route('/problems', methods=['GET'])
 def problems():
     print("📩 GET request received at /problems")
-    data = fetchData()  # ✅ CALL the function
-    return jsonify(data)  # ✅ Return JSON response
+    data = fetchData()  
+    return jsonify(data)  
 
 
 

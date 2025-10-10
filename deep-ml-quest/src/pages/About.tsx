@@ -6,7 +6,6 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold text-foreground mb-4">
             About Deep ML Learner
@@ -17,7 +16,6 @@ const About = () => {
           </p>
         </div>
 
-        {/* Mission Cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           <Card className="border-border hover:shadow-lg transition-all duration-300">
             <CardHeader>
@@ -65,7 +63,6 @@ const About = () => {
           </Card>
         </div>
 
-        {/* Features Section */}
         <Card className="border-border">
           <CardHeader>
             <CardTitle className="text-2xl text-foreground flex items-center gap-2">

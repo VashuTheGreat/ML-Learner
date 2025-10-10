@@ -67,7 +67,7 @@ const Solve = ({ problemData }: { problemData?: any }) => {
 
   const handleRun = async () => {
     try {
-      const encodedCode = btoa(code); // Base64 encode
+      const encodedCode = btoa(code);
       const res = await fetch("http://localhost:3000/code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -82,7 +82,6 @@ const Solve = ({ problemData }: { problemData?: any }) => {
 
   return (
     <div className={`flex h-screen ${bgMain} ${textPrimary}`}>
-      {/* LEFT PANEL */}
       <div className={`w-1/2 flex flex-col border-r ${borderColor}`}>
         <div className={`p-4 border-b ${borderColor}`}>
           <div className="flex items-center justify-between mb-2">
@@ -145,9 +144,7 @@ const Solve = ({ problemData }: { problemData?: any }) => {
         </div>
       </div>
 
-      {/* RIGHT PANEL */}
       <div className={`w-1/2 flex flex-col ${bgSecondary}`}>
-        {/* Editor Header */}
         <div className={`flex items-center justify-between p-3 border-b ${borderColor}`}>
           <select className={`px-3 py-1.5 rounded ${bgMain} ${textPrimary} border ${borderColor} text-sm font-medium`}>
             <option>Python3</option>
@@ -161,7 +158,6 @@ const Solve = ({ problemData }: { problemData?: any }) => {
           </div>
         </div>
 
-        {/* Code Editor */}
         <div className="flex-1 p-4 overflow-hidden">
           <CodeMirror
             value={code}
@@ -172,7 +168,6 @@ const Solve = ({ problemData }: { problemData?: any }) => {
           />
         </div>
 
-        {/* Console */}
         <div className={`border-t ${borderColor} p-4`}>
           <h3 className="text-sm font-semibold">Console</h3>
           <div className={`${bgCode} p-3 rounded text-xs font-mono h-24 overflow-auto ${textSecondary}`}>
@@ -180,7 +175,6 @@ const Solve = ({ problemData }: { problemData?: any }) => {
           </div>
         </div>
 
-        {/* Footer */}
         <div className={`p-4 border-t ${borderColor} flex items-center justify-between`}>
           <button className={`px-4 py-2 rounded ${hoverBg} text-sm font-medium`} onClick={() => setCode("")}>
             Reset

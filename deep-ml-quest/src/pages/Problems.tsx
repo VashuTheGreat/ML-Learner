@@ -111,19 +111,16 @@ const Problems = () => {
     return matchesSearch && matchesDifficulty;
   });
 
-  // Pagination calculations
   const totalPages = Math.ceil(filteredProblems.length / PROBLEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * PROBLEMS_PER_PAGE;
   const endIndex = startIndex + PROBLEMS_PER_PAGE;
   const currentProblems = filteredProblems.slice(startIndex, endIndex);
 
-  // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, selectedDifficulty]);
 
   const handleSolveProblem = (problem: any) => {
-    // Store in sessionStorage for reliable data transfer
     sessionStorage.setItem('currentProblem', JSON.stringify(problem));
     sessionStorage.setItem('problemsData', JSON.stringify(problemsData));
     
@@ -157,7 +154,6 @@ const Problems = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-  {/* Header */}
   <div className="bg-gradient-to-r border-b border-border shadow-lg
                 dark:from-gray-800 dark:to-gray-900
                 from-blue-500 to-purple-600">
@@ -182,9 +178,7 @@ const Problems = () => {
 </div>
 
 
-  {/* Content */}
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    {/* Search + Filters */}
     <div className="flex flex-col md:flex-row gap-4 mb-8 bg-card p-6 rounded-xl shadow-sm">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -205,12 +199,10 @@ const Problems = () => {
       </Tabs>
     </div>
 
-    {/* Results count */}
     <div className="mb-4 text-sm text-muted-foreground">
       Showing {startIndex + 1}-{Math.min(endIndex, filteredProblems.length)} of {filteredProblems.length} problems
     </div>
 
-    {/* Problems Grid */}
     <div className="grid gap-4 mb-8">
       {currentProblems.map((problem, idx) => (
         <Card key={problem.id || idx} className="hover:shadow-lg transition-all duration-200 border-border bg-card">
@@ -269,7 +261,6 @@ const Problems = () => {
       ))}
     </div>
 
-    {/* Pagination */}
     {filteredProblems.length > 0 && (
       <div className="flex items-center justify-center gap-2 mt-8 bg-card p-6 rounded-xl shadow-sm">
         <Button

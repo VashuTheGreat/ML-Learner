@@ -24,26 +24,20 @@ const datasetGroups = {
     "titanic",
     "penguins",
     "anagrams",
-    "attention",
-    "dots",
-    "glue"
   ],
   regression: [
+        "attention",
+
     "mpg",
     "diamonds",
     "car_crashes",
     "tips",
     "anscombe",
     "brain_networks",
-    "dowjones",
-    "exercise",
-    "flights",
     "fmri",
     "geyser",
     "healthexp",
     "planets",
-    "seaice",
-    "taxis"
   ]
 };
 
@@ -163,7 +157,6 @@ const datasetGroups = {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <div className="bg-gradient-to-r from-primary/10 to-accent/10 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 py-12">
           <h1 className="text-3xl font-bold text-foreground mb-4">ML Playground</h1>
@@ -173,11 +166,9 @@ const datasetGroups = {
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* Model Configuration */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
@@ -199,7 +190,6 @@ const datasetGroups = {
                   </Select>
                 </div>
 
-                {/* Hyperparameters */}
                 {model && hyperparams && Object.keys(hyperparams).length > 0 && (
                   <div className="space-y-3">
                     <Label>Hyperparameters</Label>
@@ -226,7 +216,6 @@ const datasetGroups = {
               </CardContent>
             </Card>
 
-            {/* Dataset Selection */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -246,7 +235,6 @@ const datasetGroups = {
               </CardContent>
             </Card>
 
-            {/* Run Model */}
             <div className="space-y-3">
               <Button
                 onClick={handleRunModel}
@@ -260,10 +248,8 @@ const datasetGroups = {
             </div>
           </div>
 
-          {/* Results Panel */}
         <div className="lg:col-span-2 space-y-6">
   <Card>
-    {/* Card Header */}
     <CardHeader>
       <CardTitle className="flex items-center gap-2">
         <BarChart3 className="h-5 w-5" /> Model Performance
@@ -273,13 +259,11 @@ const datasetGroups = {
       </CardDescription>
     </CardHeader>
 
-    {/* Card Content */}
     
     <CardContent>
       {modelPerformance ? (
         <>
-          {/* Metrics Boxes */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg shadow">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4  rounded-lg shadow">
             {isClassification ? (
               <>
                 <div className="p-4 bg-blue-100 rounded-lg text-blue-800 font-semibold text-center">
@@ -313,7 +297,6 @@ const datasetGroups = {
             )}
           </div>
 
-          {/* Plots */}
           {modelPerformance.result?.plots?.length > 0 && (
             <div className="mt-6 space-y-4">
               {modelPerformance.result.plots.map((base64, index) => (
