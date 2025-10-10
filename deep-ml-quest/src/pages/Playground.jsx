@@ -24,28 +24,23 @@ const datasetGroups = {
     "titanic",
     "penguins",
     "anagrams",
-    "attention",
-    "dots",
-    "glue"
   ],
   regression: [
+        "attention",
+
     "mpg",
     "diamonds",
     "car_crashes",
     "tips",
     "anscombe",
     "brain_networks",
-    "dowjones",
-    "exercise",
-    "flights",
     "fmri",
     "geyser",
     "healthexp",
     "planets",
-    "seaice",
-    "taxis"
   ]
 };
+
 
 
    const classifiers = [
