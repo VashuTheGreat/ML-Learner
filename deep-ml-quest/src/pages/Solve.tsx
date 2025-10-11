@@ -1,10 +1,13 @@
 
 import { useState, useEffect, useRef } from "react";
+
 import { Badge } from "@/components/ui/badge";
 import { Play, Settings, Clock, BarChart2, BookOpen, ChevronLeft, ChevronRight, RotateCcw, CheckCircle2, XCircle } from "lucide-react";
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
 import { EditorView } from "@codemirror/view";
+import { useNavigate } from "react-router-dom";
+
 
 const ProblemList = ({ problems = [], onSelectProblem }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -142,7 +145,24 @@ const Solve = ({ problem: propProblem, onBack }) => {
   const [testResults, setTestResults] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
   
+  // Use ref to track if code has been initialized
+
   const codeInitialized = useRef(false);
+  const navigate = useNavigate();
+  const [session, setSession] = useState(null);
+    // 👇 Check session token
+    useEffect(() => {
+      const tokenData = sessionStorage.getItem("token");
+      if (tokenData) {
+        try {
+          const parsed = JSON.parse(tokenData);
+          setSession(parsed.user);
+        } catch {
+          setSession(null);
+        }
+      }
+    }, []);
+
 
   useEffect(() => {
     if (propProblem && !codeInitialized.current) {
@@ -299,9 +319,17 @@ const passed = arraysEqual(actualArray, expectedArray);
     }
   };
 
-  const handleSubmit = () => {
-    handleRun();
-  };
+const handleSubmit = async () => {
+  if (session) {
+    try {
+      await handleRun();
+    } catch (err) {
+      console.error("Action failed:", err);
+    }
+  } else {
+    navigate("/login");
+  }
+};
 
   const handleReset = () => {
     try {
@@ -580,6 +608,21 @@ const passed = arraysEqual(actualArray, expectedArray);
 const App = ({ problems = [], problemData = null }) => {
   const [selectedProblem, setSelectedProblem] = useState(null);
   const [allProblems, setAllProblems] = useState(problems);
+
+const navigate = useNavigate();
+  const [session, setSession] = useState(null);
+    // 👇 Check session token
+    useEffect(() => {
+      const tokenData = sessionStorage.getItem("token");
+      if (tokenData) {
+        try {
+          const parsed = JSON.parse(tokenData);
+          setSession(parsed.user);
+        } catch {
+          setSession(null);
+        }
+      }
+    }, []);
 
   useEffect(() => {
     if (problemData) {

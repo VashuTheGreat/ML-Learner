@@ -17,23 +17,43 @@ import NotFound from "./pages/NotFound";
 import Solve from "./pages/Solve"
 import Notes from "./pages/Notes"
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import React, { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+const App = () => {
+  const [token, setToken] = useState(false);
+
+  if(token){
+    sessionStorage.setItem("token", JSON.stringify(token));
+  }
+
+  useEffect(() => {
+    const storedToken = sessionStorage.getItem("token");
+    if (storedToken) {
+      setToken(JSON.parse(storedToken));
+    }
+  }, []);
+
+  return (
+    <>
+    <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
           <div className="min-h-screen flex flex-col bg-background">
-            <Navigation />
+            <Navigation token={token} />
             <main className="flex-1">
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/problems" element={<Problems />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route
+                  path="/dashboard"
+                  element={token ? <Dashboard /> : <Login setToken={setToken} />}
+                />
                 <Route path="/playground" element={<Playground />} />
                 <Route path="/interview" element={<Interview />} />
                 <Route path="/about" element={<About />} />
@@ -41,8 +61,10 @@ const App = () => (
                                 <Route path="/notes" element={<Notes />} />
 
                                 <Route path="/solve" element={<Solve />} />
-                                                                <Route path="/login" element={<Login />} />
 
+                <Route path="/solve" element={<Solve />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/login" element={<Login setToken={setToken} />} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
@@ -53,6 +75,7 @@ const App = () => (
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
-);
-
+  </>
+);    
+}
 export default App;
