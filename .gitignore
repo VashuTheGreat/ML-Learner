@@ -5,7 +5,6 @@ Backend/upload
 Backend/.ipynb_checkpoints
 Backend/.ipynb_checkpoints/
 Frontend/
-*.pdf
 # Logs
 deep-ml-quest/logs
 deep-ml-quest/*.log
