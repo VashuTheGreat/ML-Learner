@@ -9,6 +9,8 @@ import pydantic
 import os
 import base64
 from collections import defaultdict
+import pyttsx3
+import tempfile
 
 print("🚀 Starting script...")
 load_dotenv()
@@ -76,11 +78,41 @@ def response(state: History, chain, userInput) -> History:
     return state
 
 
+import pyttsx3
+import tempfile
+
+import pyttsx3
+import os
+import tempfile
+
 def speak(text: str, model: str = "playai-tts", voice: str = "Fritz-PlayAI", response_format="wav"):
     if not text.strip():
         return None
-    print("🗣️ Generating speech...")
+
+    print("🗣️ Generating speech with PlayAI TTS...")
+    if voice.lower() == "n":
+        try:
+            engine = pyttsx3.init()
+            engine.setProperty('rate', 175)
+            engine.setProperty('volume', 1.0)
+
+            temp_path = os.path.join(tempfile.gettempdir(), "tts_output.wav")
+
+            print(f"🛠️ Saving offline TTS to: {temp_path}")
+            engine.save_to_file(text, temp_path)
+            engine.runAndWait()
+
+            with open(temp_path, "rb") as f:
+                audio_bytes = f.read()
+
+            return {"audio_data": audio_bytes, "type": "N"}
+
+        except Exception as e3:
+            print(f"❌ Offline TTS failed: {e3}")
+            return None
+
     try:
+        # Try primary API model
         response = client.audio.speech.create(
             model=model,
             voice=voice,
@@ -88,41 +120,67 @@ def speak(text: str, model: str = "playai-tts", voice: str = "Fritz-PlayAI", res
             response_format=response_format
         )
         audio_bytes = response.read() if hasattr(response, "read") else response
-        return audio_bytes
+        return {"audio_data": audio_bytes, "type": "NN"}
+
     except Exception as e:
-        print(f"❌ Exception occurred in speak: {e}")
-        return None
+        print(f"⚠️ PlayAI TTS failed: {e}")
+        print("🎙️ Falling back to offline TTS (pyttsx3)...")
+
+        try:
+            engine = pyttsx3.init()
+            engine.setProperty('rate', 175)
+            engine.setProperty('volume', 1.0)
+
+            temp_path = os.path.join(tempfile.gettempdir(), "tts_fallback.wav")
+
+            print(f"🛠️ Saving fallback TTS to: {temp_path}")
+            engine.save_to_file(text, temp_path)
+            engine.runAndWait()
+
+            with open(temp_path, "rb") as f:
+                audio_bytes = f.read()
+
+            return {"audio_data": audio_bytes, "type": "N"}
+
+        except Exception as e2:
+            print(f"❌ Offline TTS failed: {e2}")
+            return None
 
 
-# 🔥 Global memory per user
+
+
 user_histories = defaultdict(History)
 
 
 def interview_flow(user_id, userInput, voice):
-    # Assign allowed voices
     if voice.lower() == "boy":
         voice = "Fritz-PlayAI"
+    elif voice.lower()=="n":
+        voice="N"
+
     else:
         voice = "Aaliyah-PlayAI"
 
-    # Get existing history
+
     state = user_histories[user_id]
 
     userInput = userInput.strip()
     if not userInput:
-        return {"airesponse": "", "audio_data": ""}
+        return {"airesponse": "", "audio_data": "","type":""}
 
     try:
         state_updated = response(state, llm, userInput)
         user_histories[user_id] = state_updated  # update memory
 
         last_ai_response = state_updated.hist[-1]["AI"]
-        audio_data = speak(last_ai_response, voice=voice)
+        audioDict = speak(last_ai_response, voice=voice)
+        audio_data=audioDict.get("audio_data")
+        type=audioDict.get("type")
 
         if audio_data:
             audio_b64 = base64.b64encode(audio_data).decode("utf-8")
-            return {"airesponse": last_ai_response, "audio_data": audio_b64}
-        return {"airesponse": last_ai_response, "audio_data": ""}
+            return {"airesponse": last_ai_response, "audio_data": audio_b64,"type":type}
+        return {"airesponse": last_ai_response, "audio_data": "","type":type}
     except Exception as e:
         print(f"❌ Error in interview_flow loop: {e}")
-        return {"airesponse": "", "audio_data": ""}
+        return {"airesponse": "", "audio_data": "","type":""}

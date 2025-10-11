@@ -1,444 +1,3 @@
-// import { useState, useEffect } from "react";
-// import { Badge } from "@/components/ui/badge";
-// import { Play, Settings, Clock, BarChart2, BookOpen, ChevronLeft, ChevronRight, RotateCcw, CheckCircle2, XCircle } from "lucide-react";
-// import CodeMirror from "@uiw/react-codemirror";
-// import { python } from "@codemirror/lang-python";
-// import { EditorView } from "@codemirror/view";
-
-// // Mock data for demonstration
-// const mockProblems = [
-//   {
-//     id: "1",
-//     title: "Matrix-Vector Dot Product",
-//     difficulty: "Easy",
-//     category: "Linear Algebra",
-//     acceptanceRate: 85,
-//     description: "Write a Python function that computes the dot product of a matrix and a vector.",
-//     starterCode: `def matrix_dot_vector(a: list[list[int|float]], b: list[int|float]) -> list[int|float]:
-//     # Return a list where each element is the dot product of a row of 'a' with 'b'.
-//     # If the number of columns in 'a' does not match the length of 'b', return -1.
-//     pass`,
-//     testCases: [
-//       {
-//         input: "matrix_dot_vector([[1, 2, 3], [2, 4, 5], [6, 8, 9]], [1, 2, 3])",
-//         expectedOutput: "[14, 25, 49]"
-//       },
-//       {
-//         input: "matrix_dot_vector([[1, 2], [2, 4], [6, 8], [12, 4]], [1, 2, 3])",
-//         expectedOutput: "-1"
-//       }
-//     ],
-//     example: {
-//       input: "a = [[1, 2], [2, 4]], b = [1, 2]",
-//       output: "[5, 10]",
-//       reasoning: "Row 1: (1 * 1) + (2 * 2) = 1 + 4 = 5; Row 2: (1 * 2) + (2 * 4) = 2 + 8 = 10"
-//     }
-//   },
-//   {
-//     id: "2",
-//     title: "Batch Iterator",
-//     difficulty: "Medium",
-//     category: "Data Processing",
-//     acceptanceRate: 72,
-//     description: "Create a batch iterator for machine learning training.",
-//     starterCode: `def batch_iterator(X, y=None, batch_size=64):
-//     # Your code here
-//     pass`,
-//     testCases: [
-//       {
-//         input: "list(batch_iterator([1,2,3,4,5,6], batch_size=2))",
-//         expectedOutput: "[[1, 2], [3, 4], [5, 6]]"
-//       }
-//     ]
-//   }
-// ];
-
-// const ProblemList = ({ onSelectProblem }) => {
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const [isDark, setIsDark] = useState(true);
-//   const problemsPerPage = 10;
-  
-//   const totalPages = Math.ceil(mockProblems.length / problemsPerPage);
-//   const startIdx = (currentPage - 1) * problemsPerPage;
-//   const currentProblems = mockProblems.slice(startIdx, startIdx + problemsPerPage);
-
-//   const getDifficultyColor = (difficulty) => {
-//     if (difficulty?.toLowerCase().includes('easy')) return 'bg-green-500';
-//     if (difficulty?.toLowerCase().includes('medium')) return 'bg-yellow-500';
-//     if (difficulty?.toLowerCase().includes('hard')) return 'bg-red-500';
-//     return 'bg-gray-500';
-//   };
-
-//   const bgMain = isDark ? 'bg-gray-900' : 'bg-white';
-//   const bgSecondary = isDark ? 'bg-gray-800' : 'bg-gray-50';
-//   const textPrimary = isDark ? 'text-gray-100' : 'text-gray-900';
-//   const textSecondary = isDark ? 'text-gray-400' : 'text-gray-600';
-//   const borderColor = isDark ? 'border-gray-700' : 'border-gray-200';
-//   const hoverBg = isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100';
-
-//   return (
-//     <div className={`min-h-screen ${bgMain} ${textPrimary}`}>
-//       {/* Header */}
-//       <div className={`border-b ${borderColor} ${bgSecondary}`}>
-//         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-//           <h1 className="text-2xl font-bold">ML Problem Set</h1>
-//           <button 
-//             onClick={() => setIsDark(!isDark)}
-//             className={`p-2 rounded ${hoverBg}`}
-//           >
-//             {isDark ? '☀️' : '🌙'}
-//           </button>
-//         </div>
-//       </div>
-
-//       {/* Problems Table */}
-//       <div className="max-w-7xl mx-auto px-6 py-8">
-//         <div className={`${bgSecondary} rounded-lg border ${borderColor} overflow-hidden`}>
-//           <table className="w-full">
-//             <thead className={`border-b ${borderColor}`}>
-//               <tr className={textSecondary}>
-//                 <th className="text-left px-6 py-4 font-medium">#</th>
-//                 <th className="text-left px-6 py-4 font-medium">Title</th>
-//                 <th className="text-left px-6 py-4 font-medium">Category</th>
-//                 <th className="text-left px-6 py-4 font-medium">Difficulty</th>
-//                 <th className="text-left px-6 py-4 font-medium">Acceptance</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {currentProblems.map((problem, idx) => (
-//                 <tr 
-//                   key={problem.id}
-//                   className={`border-b ${borderColor} ${hoverBg} cursor-pointer transition-colors`}
-//                   onClick={() => onSelectProblem(problem)}
-//                 >
-//                   <td className="px-6 py-4">{startIdx + idx + 1}</td>
-//                   <td className="px-6 py-4 font-medium">{problem.title}</td>
-//                   <td className="px-6 py-4">{problem.category}</td>
-//                   <td className="px-6 py-4">
-//                     <Badge className={`${getDifficultyColor(problem.difficulty)} text-white`}>
-//                       {problem.difficulty}
-//                     </Badge>
-//                   </td>
-//                   <td className="px-6 py-4">{problem.acceptanceRate}%</td>
-//                 </tr>
-//               ))}
-//             </tbody>
-//           </table>
-//         </div>
-
-//         {/* Pagination */}
-//         <div className="mt-6 flex items-center justify-center gap-2">
-//           <button
-//             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-//             disabled={currentPage === 1}
-//             className={`p-2 rounded ${hoverBg} disabled:opacity-50 disabled:cursor-not-allowed`}
-//           >
-//             <ChevronLeft size={20} />
-//           </button>
-          
-//           {[...Array(totalPages)].map((_, i) => (
-//             <button
-//               key={i + 1}
-//               onClick={() => setCurrentPage(i + 1)}
-//               className={`px-4 py-2 rounded font-medium transition-colors ${
-//                 currentPage === i + 1 
-//                   ? 'bg-blue-600 text-white' 
-//                   : `${hoverBg}`
-//               }`}
-//             >
-//               {i + 1}
-//             </button>
-//           ))}
-          
-//           <button
-//             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-//             disabled={currentPage === totalPages}
-//             className={`p-2 rounded ${hoverBg} disabled:opacity-50 disabled:cursor-not-allowed`}
-//           >
-//             <ChevronRight size={20} />
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// const Solve = ({ problem: propProblem, onBack }) => {
-//   const [problem, setProblem] = useState(propProblem || null);
-//   const [activeTab, setActiveTab] = useState("description");
-//   const [code, setCode] = useState("");
-//   const [isDark, setIsDark] = useState(true);
-//   const [output, setOutput] = useState("");
-//   const [testResults, setTestResults] = useState([]);
-//   const [isRunning, setIsRunning] = useState(false);
-
-//   useEffect(() => {
-//     if (problem && problem.starterCode) {
-//       setCode(problem.starterCode);
-//     }
-//   }, [problem]);
-
-//   if (!problem) return null;
-
-//   const bgMain = isDark ? 'bg-gray-900' : 'bg-white';
-//   const bgSecondary = isDark ? 'bg-gray-800' : 'bg-gray-50';
-//   const bgCode = isDark ? 'bg-gray-950' : 'bg-gray-100';
-//   const textPrimary = isDark ? 'text-gray-100' : 'text-gray-900';
-//   const textSecondary = isDark ? 'text-gray-400' : 'text-gray-600';
-//   const borderColor = isDark ? 'border-gray-700' : 'border-gray-200';
-//   const hoverBg = isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-100';
-//   const tabActive = isDark ? 'border-blue-500 text-blue-500' : 'border-blue-600 text-blue-600';
-//   const tabInactive = isDark ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900';
-
-//   const getDifficultyColor = (difficulty) => {
-//     if (difficulty?.toLowerCase().includes('easy')) return 'bg-green-500';
-//     if (difficulty?.toLowerCase().includes('medium')) return 'bg-yellow-500';
-//     if (difficulty?.toLowerCase().includes('hard')) return 'bg-red-500';
-//     return 'bg-gray-500';
-//   };
-
-//   const handleRun = async () => {
-//     setIsRunning(true);
-//     setOutput("Running tests...\n");
-//     setTestResults([]);
-
-//     try {
-//       const results = [];
-      
-//       for (let i = 0; i < problem.testCases.length; i++) {
-//         const testCase = problem.testCases[i];
-//         const testCode = `${code}\n\nprint(${testCase.input})`;
-        
-//         // Simulate code execution
-//         await new Promise(resolve => setTimeout(resolve, 500));
-        
-//         // Mock execution result
-//         const passed = Math.random() > 0.3;
-//         const actualOutput = passed ? testCase.expectedOutput : "Error or wrong output";
-        
-//         results.push({
-//           testNum: i + 1,
-//           input: testCase.input,
-//           expected: testCase.expectedOutput,
-//           actual: actualOutput,
-//           passed
-//         });
-//       }
-      
-//       setTestResults(results);
-//       const passedCount = results.filter(r => r.passed).length;
-//       setOutput(`Completed: ${passedCount}/${results.length} test cases passed\n\n${
-//         results.map(r => 
-//           `Test ${r.testNum}: ${r.passed ? '✓ PASSED' : '✗ FAILED'}\n` +
-//           `Input: ${r.input}\n` +
-//           `Expected: ${r.expected}\n` +
-//           `Got: ${r.actual}\n`
-//         ).join('\n')
-//       }`);
-      
-//     } catch (err) {
-//       setOutput(`Error: ${err.message}`);
-//     } finally {
-//       setIsRunning(false);
-//     }
-//   };
-
-//   const handleSubmit = () => {
-//     handleRun();
-//   };
-
-//   return (
-//     <div className={`flex h-screen ${bgMain} ${textPrimary}`}>
-//       {/* LEFT PANEL */}
-//       <div className={`w-1/2 flex flex-col border-r ${borderColor}`}>
-//         {/* Header */}
-//         <div className={`p-4 border-b ${borderColor}`}>
-//           <div className="flex items-center justify-between mb-3">
-//             <button 
-//               onClick={onBack}
-//               className={`px-3 py-1 rounded ${hoverBg} text-sm flex items-center gap-1`}
-//             >
-//               <ChevronLeft size={16} /> Back
-//             </button>
-//             <button 
-//               onClick={() => setIsDark(!isDark)}
-//               className={`p-2 rounded ${hoverBg}`}
-//             >
-//               {isDark ? '☀️' : '🌙'}
-//             </button>
-//           </div>
-//           <h1 className="text-xl font-bold mb-2">{problem.title}</h1>
-//           <div className="flex items-center gap-3 text-sm">
-//             <Badge className={`${getDifficultyColor(problem.difficulty)} text-white`}>
-//               {problem.difficulty}
-//             </Badge>
-//             <span className={textSecondary}>{problem.category}</span>
-//             <span className={textSecondary}>Acceptance: {problem.acceptanceRate}%</span>
-//           </div>
-//         </div>
-
-//         {/* Tabs */}
-//         <div className={`flex border-b ${borderColor} px-4`}>
-//           <button
-//             className={`px-4 py-3 font-medium border-b-2 transition-colors ${
-//               activeTab === "description" ? tabActive : `border-transparent ${tabInactive}`
-//             }`}
-//             onClick={() => setActiveTab("description")}
-//           >
-//             Description
-//           </button>
-//           <button
-//             className={`px-4 py-3 font-medium border-b-2 transition-colors ${
-//               activeTab === "editorial" ? tabActive : `border-transparent ${tabInactive}`
-//             }`}
-//             onClick={() => setActiveTab("editorial")}
-//           >
-//             Editorial
-//           </button>
-//           <button
-//             className={`px-4 py-3 font-medium border-b-2 transition-colors ${
-//               activeTab === "solutions" ? tabActive : `border-transparent ${tabInactive}`
-//             }`}
-//             onClick={() => setActiveTab("solutions")}
-//           >
-//             Solutions
-//           </button>
-//         </div>
-
-//         {/* Content */}
-//         <div className="flex-1 overflow-y-auto p-6">
-//           {activeTab === "description" && (
-//             <div className="space-y-6">
-//               <div>
-//                 <h2 className="text-lg font-semibold mb-3">Problem Description</h2>
-//                 <p className={textSecondary}>{problem.description}</p>
-//               </div>
-
-//               {problem.example && (
-//                 <div>
-//                   <h2 className="text-lg font-semibold mb-3">Example</h2>
-//                   <div className={`${bgSecondary} p-4 rounded-lg space-y-2`}>
-//                     <div><span className="font-medium">Input:</span> {problem.example.input}</div>
-//                     <div><span className="font-medium">Output:</span> {problem.example.output}</div>
-//                     {problem.example.reasoning && (
-//                       <div><span className="font-medium">Explanation:</span> {problem.example.reasoning}</div>
-//                     )}
-//                   </div>
-//                 </div>
-//               )}
-
-//               <div>
-//                 <h2 className="text-lg font-semibold mb-3">Test Cases</h2>
-//                 <div className="space-y-3">
-//                   {problem.testCases.map((tc, i) => (
-//                     <div key={i} className={`${bgSecondary} p-4 rounded-lg`}>
-//                       <div className="font-medium mb-1">Test Case {i + 1}</div>
-//                       <div className={`${textSecondary} text-sm space-y-1`}>
-//                         <div>Input: <code className={`${bgCode} px-2 py-0.5 rounded`}>{tc.input}</code></div>
-//                         <div>Expected: <code className={`${bgCode} px-2 py-0.5 rounded`}>{tc.expectedOutput}</code></div>
-//                       </div>
-//                     </div>
-//                   ))}
-//                 </div>
-//               </div>
-//             </div>
-//           )}
-
-//           {activeTab === "editorial" && (
-//             <div className={`p-6 text-center ${bgSecondary} rounded-lg`}>
-//               <BookOpen size={48} className="mx-auto mb-4 opacity-50" />
-//               <p className={textSecondary}>Editorial coming soon!</p>
-//             </div>
-//           )}
-
-//           {activeTab === "solutions" && (
-//             <div className={`p-6 text-center ${bgSecondary} rounded-lg`}>
-//               <p className={textSecondary}>Solutions will be available after you solve the problem.</p>
-//             </div>
-//           )}
-//         </div>
-//       </div>
-
-//       {/* RIGHT PANEL */}
-//       <div className={`w-1/2 flex flex-col ${bgSecondary}`}>
-//         {/* Editor Header */}
-//         <div className={`flex items-center justify-between p-3 border-b ${borderColor}`}>
-//           <select className={`px-3 py-1.5 rounded ${bgMain} ${textPrimary} border ${borderColor} text-sm`}>
-//             <option>Python3</option>
-//           </select>
-//           <button 
-//             onClick={() => setCode(problem.starterCode)}
-//             className={`p-2 rounded ${hoverBg}`}
-//             title="Reset Code"
-//           >
-//             <RotateCcw size={18} />
-//           </button>
-//         </div>
-
-//         {/* Code Editor */}
-//         <div className="flex-1 overflow-hidden">
-//           <CodeMirror
-//             value={code}
-//             height="100%"
-//             theme={isDark ? "dark" : "light"}
-//             extensions={[python(), EditorView.lineWrapping]}
-//             onChange={(value) => setCode(value)}
-//             className="h-full"
-//           />
-//         </div>
-
-//         {/* Console */}
-//         <div className={`border-t ${borderColor} flex flex-col`} style={{ height: '40%' }}>
-//           <div className="p-3 border-b border-gray-700">
-//             <h3 className="text-sm font-semibold flex items-center gap-2">
-//               Console
-//               {testResults.length > 0 && (
-//                 <span className="text-xs">
-//                   ({testResults.filter(r => r.passed).length}/{testResults.length} passed)
-//                 </span>
-//               )}
-//             </h3>
-//           </div>
-//           <div className={`flex-1 ${bgCode} p-4 overflow-auto`}>
-//             <pre className={`text-xs font-mono ${textSecondary} whitespace-pre-wrap`}>
-//               {output || "Click 'Run' to test your code..."}
-//             </pre>
-//           </div>
-//         </div>
-
-//         {/* Footer */}
-//         <div className={`p-4 border-t ${borderColor} flex items-center justify-end gap-3`}>
-//           <button 
-//             onClick={handleRun}
-//             disabled={isRunning}
-//             className={`px-5 py-2 rounded ${hoverBg} text-sm font-medium flex items-center gap-2 border ${borderColor} disabled:opacity-50`}
-//           >
-//             <Clock size={16} /> {isRunning ? 'Running...' : 'Run'}
-//           </button>
-//           <button 
-//             onClick={handleSubmit}
-//             disabled={isRunning}
-//             className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium flex items-center gap-2 disabled:opacity-50"
-//           >
-//             <Play size={16} /> Submit
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// const App = () => {
-//   const [selectedProblem, setSelectedProblem] = useState(null);
-
-//   return selectedProblem ? (
-//     <Solve problem={selectedProblem} onBack={() => setSelectedProblem(null)} />
-//   ) : (
-//     <ProblemList onSelectProblem={setSelectedProblem} />
-//   );
-// };
-
-// export default App;
 
 import { useState, useEffect, useRef } from "react";
 
@@ -455,7 +14,6 @@ const ProblemList = ({ problems = [], onSelectProblem }) => {
   const [isDark, setIsDark] = useState(true);
   const problemsPerPage = 10;
   
-  // If no problems provided, show message
   if (!problems || problems.length === 0) {
     const bgMain = isDark ? 'bg-gray-900' : 'bg-white';
     const textPrimary = isDark ? 'text-gray-100' : 'text-gray-900';
@@ -494,7 +52,6 @@ const ProblemList = ({ problems = [], onSelectProblem }) => {
 
   return (
     <div className={`min-h-screen ${bgMain} ${textPrimary}`}>
-      {/* Header */}
       <div className={`border-b ${borderColor} ${bgSecondary}`}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">ML Problem Set</h1>
@@ -507,7 +64,6 @@ const ProblemList = ({ problems = [], onSelectProblem }) => {
         </div>
       </div>
 
-      {/* Problems Table */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className={`${bgSecondary} rounded-lg border ${borderColor} overflow-hidden`}>
           <table className="w-full">
@@ -542,7 +98,6 @@ const ProblemList = ({ problems = [], onSelectProblem }) => {
           </table>
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="mt-6 flex items-center justify-center gap-2">
             <button
@@ -610,11 +165,9 @@ const Solve = ({ problem: propProblem, onBack }) => {
 
 
   useEffect(() => {
-    // Only initialize once when problem is first loaded
     if (propProblem && !codeInitialized.current) {
       setProblem(propProblem);
       
-      // Decode starter code if it's base64
       try {
         const starterCode = propProblem.starter_code 
           ? atob(propProblem.starter_code)
@@ -647,13 +200,10 @@ const Solve = ({ problem: propProblem, onBack }) => {
     return 'bg-gray-500';
   };
 
-  // Parse test cases
   const testCases = problem.test_cases || problem.testCases || [];
   
-  // Parse example
   const example = problem.example || null;
 
-  // Get description - decode if base64
   const description = problem.description 
     ? (() => {
         try {
@@ -665,7 +215,6 @@ const Solve = ({ problem: propProblem, onBack }) => {
       })()
     : "No description available";
 
-  // Get learn section - decode if base64
   const learnSection = problem.learn_section 
     ? (() => {
         try {
@@ -677,7 +226,6 @@ const Solve = ({ problem: propProblem, onBack }) => {
       })()
     : null;
 
-  // Get solution - decode if base64
   const solution = problem.solution 
     ? (() => {
         try {
@@ -701,11 +249,9 @@ const Solve = ({ problem: propProblem, onBack }) => {
         const testInput = testCase.test || testCase.input;
         const expectedOutput = testCase.expected_output || testCase.expectedOutput;
         
-        // Combine user code with test input
         const testCode = `${code}\n\n${testInput}`;
         
         try {
-          // Base64 encode the combined code
           const encodedCode = btoa(testCode);
           console.log("Sending code to backend:", { code: encodedCode });
           
@@ -724,7 +270,16 @@ const Solve = ({ problem: propProblem, onBack }) => {
           
           const actualOutput = (data.output || data.error || "No output").trim();
           const expectedTrimmed = (expectedOutput || "").toString().trim();
-          const passed = actualOutput === expectedTrimmed;
+function arraysEqual(a, b) {
+  if (!a || !b) return false;
+  if (a.length !== b.length) return false;
+  return a.every((val, idx) => Math.abs(val - b[idx]) < 1e-6);
+}
+
+const actualArray = actualOutput.match(/-?\d+(\.\d+)?/g).map(Number);
+const expectedArray = expectedTrimmed.match(/-?\d+(\.\d+)?/g).map(Number);
+
+const passed = arraysEqual(actualArray, expectedArray);
           
           results.push({
             testNum: i + 1,
@@ -789,9 +344,7 @@ const handleSubmit = async () => {
 
   return (
     <div className={`flex h-screen ${bgMain} ${textPrimary}`}>
-      {/* LEFT PANEL */}
       <div className={`w-1/2 flex flex-col border-r ${borderColor}`}>
-        {/* Header */}
         <div className={`p-4 border-b ${borderColor}`}>
           <div className="flex items-center justify-between mb-3">
             <button 
@@ -816,7 +369,6 @@ const handleSubmit = async () => {
           </div>
         </div>
 
-        {/* Tabs */}
         <div className={`flex border-b ${borderColor} px-4`}>
           <button
             className={`px-4 py-3 font-medium border-b-2 transition-colors ${
@@ -844,7 +396,6 @@ const handleSubmit = async () => {
           </button>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
           {activeTab === "description" && (
             <div className="space-y-6">
@@ -921,9 +472,7 @@ const handleSubmit = async () => {
         </div>
       </div>
 
-      {/* RIGHT PANEL */}
       <div className={`w-1/2 flex flex-col ${bgSecondary}`}>
-        {/* Editor Header */}
         <div className={`flex items-center justify-between p-3 border-b ${borderColor}`}>
           <select className={`px-3 py-1.5 rounded ${bgMain} ${textPrimary} border ${borderColor} text-sm`}>
             <option>Python3</option>
@@ -937,7 +486,6 @@ const handleSubmit = async () => {
           </button>
         </div>
 
-        {/* Code Editor */}
         <div className="flex-1 overflow-hidden">
           <CodeMirror
             value={code}
@@ -949,7 +497,6 @@ const handleSubmit = async () => {
           />
         </div>
 
-        {/* Console */}
         <div className={`border-t ${borderColor} flex flex-col`} style={{ height: '40%' }}>
           <div className="p-3 border-b border-gray-700">
             <h3 className="text-sm font-semibold flex items-center gap-2">
@@ -963,12 +510,80 @@ const handleSubmit = async () => {
           </div>
           <div className={`flex-1 ${bgCode} p-4 overflow-auto`}>
             <pre className={`text-xs font-mono ${textSecondary} whitespace-pre-wrap`}>
-              {output || "Click 'Run' to test your code..."}
+       
+     <div className="space-y-4">
+  {testResults && testResults.length > 0 ? (
+    testResults.map((r, index) => (
+      <div
+        key={index}
+        className={`border rounded-md p-4 shadow-sm ${
+          isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-300"
+        }`}
+      >
+        <div
+          className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+            r.passed ? "bg-green-500 text-white" : "bg-red-500 text-white"
+          }`}
+        >
+          Test {r.testNum}: {r.passed ? "✓ PASSED" : "✗ FAILED"}
+        </div>
+
+        <div className="mt-4">
+          <span className={`font-medium ${isDark ? "text-gray-200" : "text-gray-700"}`}>
+            Input:
+          </span>
+          <pre
+            className={`mt-1 bg-gray-100 rounded p-2 text-sm ${
+              isDark ? "bg-gray-900 text-gray-100" : "bg-gray-100 text-gray-900"
+            } whitespace-pre-wrap`}
+          >
+            {r.input}
+          </pre>
+        </div>
+
+        <div className="mt-4">
+          <span className={`font-medium ${isDark ? "text-gray-200" : "text-gray-700"}`}>
+            Expected:
+          </span>
+          <pre
+            className={`mt-1 bg-gray-100 rounded p-2 text-sm ${
+              isDark ? "bg-gray-900 text-gray-100" : "bg-gray-100 text-gray-900"
+            } whitespace-pre-wrap`}
+          >
+            {r.expected}
+          </pre>
+        </div>
+
+        <div className="mt-4">
+          <span className={`font-medium ${isDark ? "text-gray-200" : "text-gray-700"}`}>
+            Got:
+          </span>
+          <pre
+            className={`mt-1 bg-gray-100 rounded p-2 text-sm ${
+              isDark ? "bg-gray-900 text-gray-100" : "bg-gray-100 text-gray-900"
+            } whitespace-pre-wrap`}
+          >
+            {r.actual}
+          </pre>
+        </div>
+      </div>
+    ))
+  ) : (
+    <div
+      className={`text-center p-4 rounded ${
+        isDark ? "text-red-400" : "text-red-600"
+      }`}
+    >
+      Click 'Run' to test your code...
+    </div>
+  )}
+</div>
+
+
             </pre>
           </div>
         </div>
 
-        {/* Footer */}
         <div className={`p-4 border-t ${borderColor} flex items-center justify-end gap-3`}>
           <button 
             onClick={handleRun}
@@ -1010,13 +625,11 @@ const navigate = useNavigate();
     }, []);
 
   useEffect(() => {
-    // First check if problemData prop is provided
     if (problemData) {
       setSelectedProblem(problemData);
       return;
     }
 
-    // Check sessionStorage for currentProblem
     try {
       const storedProblem = sessionStorage.getItem('currentProblem');
       if (storedProblem) {
@@ -1028,7 +641,6 @@ const navigate = useNavigate();
       console.error("Error loading problem from sessionStorage:", error);
     }
 
-    // Check sessionStorage for all problems if not provided via props
     if (!problems || problems.length === 0) {
       try {
         const storedProblems = sessionStorage.getItem('problemsData');
@@ -1045,7 +657,6 @@ const navigate = useNavigate();
   const handleBack = () => {
     setSelectedProblem(null);
     sessionStorage.removeItem('currentProblem');
-    // Redirect back to problems page
     window.location.href = '/problems';
   };
 
