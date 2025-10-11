@@ -15,7 +15,16 @@ import {
   Star
 } from "lucide-react";
 
+import { useNavigate } from "react-router-dom";
+
+
+
 const Index = () => {
+  const navigate = useNavigate();
+
+const handleClick = () => {
+  navigate("/problems");
+};
   const features = [
     {
       icon: Code,
@@ -175,11 +184,11 @@ const Index = () => {
             Join our community of learners and start your journey to becoming an ML expert today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-lg px-8 py-4 group">
-              Start Learning Free
+            <Button size="lg" onClick={() => navigate("/playground")} className="text-lg px-8 py-4 group">
+              Start Learning 
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-4">
+            <Button variant="outline" size="lg" onClick={() => navigate("/problems")} className="text-lg px-8 py-4">
               View Problems
             </Button>
           </div>
