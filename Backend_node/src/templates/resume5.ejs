@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body{font-family:sans-serif;background:#f3f4f6}
+.hero{background:#2563eb;color:white;padding:60px}
+.section{max-width:900px;margin:auto;padding:40px}
+.card{background:white;padding:20px;border-radius:12px;margin-bottom:20px}
+.meta p{margin:4px 0}
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <h1><%= data.name %></h1>
+  <p><%= data.title %></p>
+  <div class="meta">
+    <p>📧 <%= data.email %> | 📞 <%= data.phone %> | 📍 <%= data.location %></p>
+  </div>
+</div>
+
+<div class="section">
+
+  <!-- Summary -->
+  <div class="card">
+    <h2>Summary</h2>
+    <p><%= data.summary %></p>
+  </div>
+
+  <!-- Skills -->
+  <div class="card">
+    <h2>Technical Skills</h2>
+    <p><%= data.skills.join(" • ") %></p>
+  </div>
+
+  <!-- Soft Skills -->
+  <div class="card">
+    <h2>Soft Skills</h2>
+    <p><%= data.soft_skills.join(" • ") %></p>
+  </div>
+
+  <!-- Projects -->
+  <div class="card">
+    <h2>Projects</h2>
+    <% data.projects.forEach(p=>{ %>
+      <p><b><%= p.title %></b></p>
+      <p><%= p.description %></p>
+      <small>Tech: <%= p.tech_stack.join(", ") %></small>
+      <hr>
+    <% }) %>
+  </div>
+
+  <!-- Experience -->
+  <div class="card">
+    <h2>Experience</h2>
+    <% data.experience.forEach(e=>{ %>
+      <p><b><%= e.role %></b> — <%= e.company %></p>
+      <small><%= e.duration %></small>
+      <p><%= e.description %></p>
+      <hr>
+    <% }) %>
+  </div>
+
+  <!-- Education -->
+  <div class="card">
+    <h2>Education</h2>
+    <% data.education.forEach(ed=>{ %>
+      <p><b><%= ed.degree %></b></p>
+      <p><%= ed.institute %> | <%= ed.year %></p>
+    <% }) %>
+  </div>
+
+  <!-- Certifications -->
+  <div class="card">
+    <h2>Certifications</h2>
+    <% data.certifications.forEach(c=>{ %>
+      <p>🏅 <%= c %></p>
+    <% }) %>
+  </div>
+
+  <!-- Achievements -->
+  <div class="card">
+    <h2>Achievements</h2>
+    <% data.achievements.forEach(a=>{ %>
+      <p>⭐ <%= a %></p>
+    <% }) %>
+  </div>
+
+  <!-- Links -->
+  <div class="card">
+    <h2>Links</h2>
+    <% Object.entries(data.someImportantUrls).forEach(([k,v])=>{ %>
+      <p>
+        🔗 <a href="<%= v %>" target="_blank"><%= k %></a>
+      </p>
+    <% }) %>
+  </div>
+
+</div>
+
+</body>
+</html>

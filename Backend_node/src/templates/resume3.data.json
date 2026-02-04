@@ -1,0 +1,34 @@
+{
+    "personal": {
+        "name": "Alice Williams",
+        "title": "Graphic Designer",
+        "email": "alice.williams@example.com",
+        "portfolio": "www.alicewilliams.design"
+    },
+    "skills": ["Adobe Photoshop", "Adobe Illustrator", "Figma", "UI/UX Design", "Typography"],
+    "awards": [
+        "Best Graphic Designer 2023 - Design Hub",
+        "Top 10 Portfolio of the Year - Creative Network"
+    ],
+    "projects": [
+        {
+            "name": "Brand Identity for EcoLife",
+            "desc": "Developed a complete brand identity including logo, color palette, and brand guidelines for an eco-friendly startup.",
+            "type": "Branding"
+        },
+        {
+            "name": "Mobile App UI for Foodie",
+            "desc": "Designed the user interface for a food delivery application focusing on user experience and accessibility.",
+            "type": "UI/UX"
+        }
+    ],
+    "references": [
+        {
+            "name": "Michael Scott",
+            "position": "Creative Director",
+            "company": "Design Studio",
+            "email": "michael.scott@designstudio.com",
+            "phone": "+1 555 987 6543"
+        }
+    ]
+}

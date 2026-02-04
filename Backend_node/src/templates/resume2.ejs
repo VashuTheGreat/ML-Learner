@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body{background:linear-gradient(120deg,#6366f1,#0ea5e9);font-family:sans-serif}
+.card{max-width:900px;margin:40px auto;background:rgba(255,255,255,.15);
+backdrop-filter:blur(10px);padding:40px;border-radius:20px;color:white}
+.badge{background:rgba(0,0,0,.3);padding:6px 12px;border-radius:15px;margin:5px;display:inline-block}
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;gap:20px;">
+    <img src="<%= data.avatar %>" alt="Avatar" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.3)">
+    <div>
+      <h1><%= data.name %></h1>
+      <p><%= data.title %></p>
+      <p>
+        📧 <%= data.email %> | 📞 <%= data.phone %> | 📍 <%= data.location %>
+      </p>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <h2>Summary</h2>
+  <p><%= data.summary %></p>
+
+  <!-- Skills -->
+  <h2>Technical Skills</h2>
+  <% data.skills.forEach(s=>{ %>
+    <span class="badge"><%= s %></span>
+  <% }) %>
+
+  <!-- Soft Skills -->
+  <h2>Soft Skills</h2>
+  <% data.soft_skills.forEach(s=>{ %>
+    <span class="badge"><%= s %></span>
+  <% }) %>
+
+  <!-- Languages -->
+  <h2>Languages</h2>
+  <% data.languages.forEach(l=>{ %>
+    <span class="badge"><%= l %></span>
+  <% }) %>
+
+  <!-- Education -->
+  <h2>Education</h2>
+  <% data.education.forEach(e=>{ %>
+    <p><b><%= e.degree %></b></p>
+    <p><%= e.institute %> | <%= e.year %></p>
+  <% }) %>
+
+  <!-- Experience -->
+  <h2>Experience</h2>
+  <% data.experience.forEach(exp=>{ %>
+    <p><b><%= exp.role %></b> — <%= exp.company %></p>
+    <p><i><%= exp.duration %></i></p>
+    <p><%= exp.description %></p>
+  <% }) %>
+
+  <!-- Projects -->
+  <h2>Projects</h2>
+  <% data.projects.forEach(p=>{ %>
+    <p><b><%= p.title %></b></p>
+    <p><%= p.description %></p>
+    <div>
+      <% p.tech_stack.forEach(t=>{ %>
+        <span class="badge"><%= t %></span>
+      <% }) %>
+    </div>
+  <% }) %>
+
+  <!-- Certifications -->
+  <h2>Certifications</h2>
+  <% data.certifications.forEach(c=>{ %>
+    <p>🏅 <%= c %></p>
+  <% }) %>
+
+  <!-- Achievements -->
+  <h2>Achievements</h2>
+  <% data.achievements.forEach(a=>{ %>
+    <p>⭐ <%= a %></p>
+  <% }) %>
+
+  <!-- Important Links -->
+  <h2>Important Links</h2>
+  <p>
+    🔗 GitHub: <a href="<%= data.someImportantUrls.GitHub %>" target="_blank" style="color:white"><%= data.someImportantUrls.GitHub %></a>
+  </p>
+  <p>
+    🔗 LinkedIn: <a href="<%= data.someImportantUrls.LinkedIn %>" target="_blank" style="color:white"><%= data.someImportantUrls.LinkedIn %></a>
+  </p>
+  <p>
+    🔗 Portfolio: <a href="<%= data.someImportantUrls.Portfolio %>" target="_blank" style="color:white"><%= data.someImportantUrls.Portfolio %></a>
+  </p>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+{
+  "avatar":"http://res.cloudinary.com/dkluatpz0/image/upload/v1768889203/jc4palybrshhbmsjtzpz.jpg",
+  "name": "Vansh Sharma",
+  "title": "Software Engineer | AIML Student",
+  "email": "vansh.sharma@email.com",
+  "phone": "+91-9876543210",
+  "location": "Delhi, India",
+
+  "summary":
+    "Passionate Software Engineer and AIML student with hands-on experience in full-stack development, machine learning, and system-level programming. Loves building products from scratch and experimenting with new technologies.",
+
+  "skills": [
+    "JavaScript",
+    "Python",
+    "C / C++",
+    "React",
+    "Node.js",
+    "Express",
+    "Machine Learning",
+    "Deep Learning",
+    "MongoDB",
+    "Docker"
+  ],
+
+  "soft_skills": [
+    "Problem Solving",
+    "Team Collaboration",
+    "Communication",
+    "Adaptability"
+  ],
+
+  "languages": ["English", "Hindi"],
+
+  "education": [
+    {
+      "degree": "B.Tech in Computer Science (AIML)",
+      "institute": "ABC Institute of Technology",
+      "year": "2024 - 2028"
+    }
+  ],
+
+  "experience": [
+    {
+      "role": "Software Development Intern",
+      "company": "TechNova Solutions",
+      "duration": "June 2025 – Aug 2025",
+      "description":
+        "Worked on backend APIs using Node.js and Express, optimized database queries, and collaborated with the frontend team to deliver scalable features."
+    },
+    {
+      "role": "Freelance Developer",
+      "company": "Self-Employed",
+      "duration": "2024 – Present",
+      "description":
+        "Built full-stack applications, automation scripts, and custom tools for clients using modern web technologies."
+    }
+  ],
+
+  "projects": [
+    {
+      "title": "AI Resume Builder",
+      "description":
+        "A web application that generates multiple resume templates dynamically using AI and user data.",
+      "tech_stack": ["React", "Node.js", "EJS", "OpenAI API"]
+    },
+    {
+      "title": "Food Delivery Time Prediction",
+      "description":
+        "Machine learning model to classify deliveries as fast or delayed using clustering and neural networks.",
+      "tech_stack": ["Python", "Scikit-Learn", "TensorFlow"]
+    }
+  ],
+
+  "certifications": [
+    "Machine Learning Specialization – Coursera",
+    "Full Stack Web Development – Udemy"
+  ],
+
+  "achievements": [
+    "Top 5 finalist in college hackathon",
+    "Built a custom programming language (VashuScript)"
+  ],
+
+  "someImportantUrls": {
+    "GitHub": "https://github.com/vanshsharma",
+    "LinkedIn": "https://linkedin.com/in/vanshsharma",
+    "Portfolio": "https://vanshsharma.dev"
+  }
+
+
+}

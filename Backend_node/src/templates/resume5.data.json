@@ -1,0 +1,27 @@
+{
+    "personal": {
+        "name": "Emily Davis",
+        "title": "Business Analyst",
+        "email": "emily.davis@example.com",
+        "phone": "+1 555 246 8101"
+    },
+    "experience": {
+        "total": "10 Years",
+        "companies": ["Global Solutions", "Data Insights", "Strategic Partners"]
+    },
+    "summary": "Dedicated Business Analyst with a decade of experience in optimizing business processes and driving strategic growth through data-driven insights.",
+    "skills": ["Data Analysis", "Strategic Planning", "Process Improvement", "SQL", "Tableau", "Stakeholder Management"],
+    "certifications": [
+        "Certified Business Analysis Professional (CBAP)",
+        "Project Management Professional (PMP)"
+    ],
+    "references": [
+        {
+            "name": "Sarah Johnson",
+            "position": "Director of Operations",
+            "company": "Global Solutions",
+            "email": "sarah.johnson@globalsolutions.com",
+            "phone": "+1 555 369 2580"
+        }
+    ]
+}

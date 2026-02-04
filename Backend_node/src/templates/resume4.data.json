@@ -1,0 +1,43 @@
+{
+    "personal": {
+        "name": "David Miller"
+    },
+    "about": "Motivated high school student with a strong interest in technology and community service. Seeking to leverage my skills in a part-time role.",
+    "experience": [
+        {
+            "role": "Volunteer Tutor",
+            "duration": "2022 - Present",
+            "company": "Local Library"
+        },
+        {
+            "role": "Camp Counselor",
+            "duration": "Summer 2022",
+            "company": "City Summer Camp"
+        }
+    ],
+    "skills": ["Python", "Java", "Public Speaking", "Teamwork"],
+    "training": [
+        {
+            "name": "First Aid & CPR Certified",
+            "provider": "Red Cross"
+        }
+    ],
+    "license": "Driver's License (Class C)",
+    "education": {
+        "year": "2021 - 2025 (Expected)",
+        "school": "Central High School"
+    },
+    "awards": [
+        {
+            "name": "Honor Roll",
+            "school": "Central High School"
+        }
+    ],
+    "volunteering": [
+        {
+            "name": "Food Bank Volunteer",
+            "desc": "Assisted in sorting and distributing food to families in need."
+        }
+    ],
+    "interests": "Coding, Basketball, Playing Guitar"
+}

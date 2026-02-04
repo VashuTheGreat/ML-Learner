@@ -1,0 +1,547 @@
+import User from "../models/user.model.js"
+import asyncHandler from "../utils/asyncHandler.js"
+import ApiError from "../utils/ApiError.js"
+import ApiResponse from "../utils/ApiResponse.js"
+import { expressRepre } from "@vashuthegreat/vexpress"
+import client from "../utils/RedisClient.js"
+import validator from "validator"
+import { uploadOnCloudinary,deleteOnCloudinary } from "../utils/cloudinary.utils.js"
+
+
+const token_option={ httpOnly: true, secure: true };
+
+const generateAccessRefreshToken = async (user) => {
+    const refreshToken = await user.generateRefreshToken();
+    const accessToken = await user.generateAccessToken();
+    return {accessToken, refreshToken}
+}
+
+async function ValidateAnything(dict){
+    for(const [key,val] of Object.entries(dict)){
+        // Skip validation if value is null or undefined
+        if(val === null || val === undefined) continue;
+        
+        if(key.toLowerCase()=='email'){
+            if(!validator.isEmail(val) || val.trim()==''){
+                throw new ApiError(400,"Invalid email");
+            }
+        }
+        else if(key.toLowerCase()=='password'){
+            if(val.trim()=='' || val.length<6) {
+                throw new ApiError(400,"password must be at least 6 characters long");
+            }
+        }
+        else if(key.toLowerCase()=='url'){
+            if(!validator.isURL(val) || val.trim()==''){
+                throw new ApiError(400,"Invalid url");
+            }
+        }
+    }
+}
+
+
+export const createUser = expressRepre({
+    summary: "create user",
+    body: { fullName: "Vansh Sharma", email: "vanshsharma123@gmail.com", password: "122344544" },
+    response: "To create a user",
+}, asyncHandler(async(req,res)=>{
+    const {fullName, email, password} = req.body;
+    console.log(req.body)
+    
+    if(!fullName || !email || !password){
+        throw new ApiError(400,"All fields are required");
+    }
+
+    await ValidateAnything({email, password});
+
+    // Check if user already exists by email
+    const existingUser = await User.findOne({email});
+    console.log(existingUser)
+    if (existingUser){
+        throw new ApiError(400,"email already taken, please choose another");
+    }
+    
+   
+    
+    const createdUser = await User.create({fullName, email, password});
+    
+    if(!createdUser){
+        throw new ApiError(500,"Failed to create user");
+    }
+    
+    const {accessToken, refreshToken} = await generateAccessRefreshToken(createdUser);
+    
+    createdUser.refreshToken = refreshToken;
+    await createdUser.save();
+    
+    // Remove password from response
+    const userResponse = await User.findById(createdUser._id).select("-password");
+    
+    console.log("user created", userResponse);
+    
+    res
+        .cookie("refreshToken", refreshToken, token_option)
+        .cookie("accessToken", accessToken, token_option)
+        .json(new ApiResponse(200, userResponse, "User created successfully"));
+}))
+
+
+export const updateUser = expressRepre({
+    summary: "update user",
+    body: {
+        fullName: null,
+        password: null,
+    },
+    response: "user updated and the updated user "
+}, asyncHandler(async (req,res)=>{
+    const {fullName, password} = req.body;
+    
+    if(fullName && !fullName.trim()){
+        throw new ApiError(400,"Full name cannot be empty")
+    }
+
+    await ValidateAnything({password});
+
+    
+    const user_id = req.user?._id;  // Changed from .id to ._id
+    
+    if(!user_id){
+        throw new ApiError(401,"Unauthorized - User ID not found in token");
+    }
+    
+    const userInstance = await User.findById(user_id);
+    
+    if(!userInstance){
+        throw new ApiError(404,"User not found");
+    }
+    
+    if (fullName) userInstance.fullName = fullName;
+    if (password) userInstance.password = password;
+    
+    await userInstance.save();
+    
+    const userResponse = await User.findById(user_id).select("-password");
+    
+    console.log("user updated", userResponse);
+    res.json(new ApiResponse(200, userResponse, "User updated successfully"));
+}))
+
+
+export const login = expressRepre({
+    summary: "login user by either email or email and password",
+    body: {
+        email: null,
+        password: null,
+    },
+    response: "user "
+}, asyncHandler(async (req,res)=>{
+    const {password, email} = req.body;
+    
+    
+    
+    if(!password){
+        throw new ApiError(400,"Password is required");
+    }
+    
+    if(!email){
+        throw new ApiError(400,"email is required");
+    }
+
+    await ValidateAnything({password, email});
+    
+    const userInstance = await User.findOne({email});
+    
+    
+    
+    
+    if(!userInstance){
+        throw new ApiError(404,"User not found");
+    }
+    
+    const isPasswordValid = await userInstance.isPasswordCorrect(password);
+    if(!isPasswordValid){
+        throw new ApiError(401,"Invalid credentials");
+    }
+
+    const {accessToken, refreshToken} = await generateAccessRefreshToken(userInstance);
+
+    userInstance.refreshToken = refreshToken;
+    await userInstance.save();
+    
+    const userResponse = await User.findById(userInstance._id).select("-password");
+    
+    
+    
+    res
+        .cookie("refreshToken", refreshToken, token_option)
+        .cookie("accessToken", accessToken, token_option)
+        .json(new ApiResponse(200, userResponse, "User logged in successfully"));
+}))
+
+export const Logout=expressRepre({
+    summary: "logout user ",
+
+    response: "user logedout "
+
+},
+asyncHandler(async (req,res)=>{
+    const user = await User.findById(req.user?._id);
+    if(!user){
+        throw new ApiError(404,"User not found");
+    }
+    user.refreshToken = null;
+    await user.save();
+    res.clearCookie("refreshToken", token_option)
+    .clearCookie("accessToken", token_option)
+    .json(new ApiResponse(200, "User logged out successfully"));
+})
+)
+
+
+export const uploadAvatar=expressRepre(
+    {
+        summary: "upload avatar",
+        FormData:{
+            avatar: "avatar.png"
+        },
+        response: "avatar uploaded"
+    },
+    asyncHandler(async (req,res)=>{
+        const user=await User.findById(req.user?._id);
+        if(!user){
+            throw new ApiError(404,"User not found");
+        }
+        if (user.avatar){
+            throw new ApiError(400,"Avatar already exists");
+        }
+
+        const avatar=req.files?.avatar[0]
+        
+        console.log(avatar)
+        if (!avatar){
+            throw new ApiError(400,"Avatar is required");
+        }
+
+        const avatarUrl=await uploadOnCloudinary(avatar.path);
+        if (!avatarUrl){
+            throw new ApiError(500,"Failed to upload avatar");
+        }
+
+        user.avatar=avatarUrl.url;
+        await user.save();
+
+        res.status(200).json(new ApiResponse(200, user, "Avatar uploaded successfully"));
+        
+    })
+)
+
+export const deleteAvatar=expressRepre(
+    {
+        summary: "delete avatar",
+        response: "avatar deleted"
+    },
+    asyncHandler(async (req,res)=>{
+        const user=await User.findById(req.user?._id);
+        if(!user){
+            throw new ApiError(404,"User not found");
+        }
+
+        if (!user.avatar){
+            throw new ApiError(400,"Avatar not found");
+        }
+
+        await deleteOnCloudinary(user.avatar);
+        
+        // Directly update the database to set profileImage to NULL
+        user.avatar = null;
+        await user.save();
+
+        res.status(200).json(new ApiResponse(200, await User.findById(user._id).select("-password"), "Avatar deleted successfully"));
+        
+    })
+)
+
+
+
+
+export const addResume=expressRepre(
+    {
+        summary: "upload resume",
+        query:{
+            resume_id: "695a221e9e5f6b6f4690190e"
+        },
+        response: "resume uploaded list of links"
+    },
+    asyncHandler(async (req,res)=>{
+        const user=await User.findById(req.user?._id);
+        if(!user){
+            throw new ApiError(404,"User not found");
+        }
+       
+
+        const resume=req.query?.resume_id
+        
+        console.log(resume)
+        if (!resume){
+            throw new ApiError(400,"Resume is required");
+        }
+
+        // const resumeUrl=await uploadOnCloudinary(resume.path);
+        // if (!resumeUrl){
+        //     throw new ApiError(500,"Failed to upload resume");
+        // }
+
+        user.resumes.push(resume);
+        await user.save();
+
+        res.status(200).json(new ApiResponse(200, user, "Resume uploaded successfully"));
+        
+    })
+)
+
+
+export const addAboutUser=expressRepre(
+    {
+        summary: "add about user list of strings",
+       body:{
+        aboutUser: "user persuing btech user is ai engineer user is ai enthusiasm"
+       },
+        response: "about user added list of strings"
+    },
+    asyncHandler(async (req,res)=>{
+        const aboutUser=req.body.aboutUser
+        
+        console.log(aboutUser)
+        if (!aboutUser){
+            throw new ApiError(400,"About user is required");
+        }
+        const user=await User.findByIdAndUpdate(req.user?._id,{aboutUser},{new:true});
+        if(!user){
+            throw new ApiError(404,"User not found");
+        }
+       
+
+        
+
+        
+
+        res.status(200).json(new ApiResponse(200, user, "About user added successfully"));
+        
+    })
+)
+
+
+export const deleteResume=expressRepre(
+    {
+        summary: "delete resume",
+        params:{
+            idx: 0
+        },
+        response: "resume deleted"
+    },
+    asyncHandler(async (req,res)=>{
+        const user=await User.findById(req.user?._id);
+        const idx=req.params.idx;
+        if(!user){
+            throw new ApiError(404,"User not found");
+        }
+        
+
+        if (user.resumes.length-1<idx){
+            throw new ApiError(400,"Resume not found");
+        }
+
+        
+        // Directly update the database to set profileImage to NULL
+        user.resumes.splice(idx,1);
+        await user.save();
+
+        res.status(200).json(new ApiResponse(200, await User.findById(user._id).select("-password"), "Resume deleted successfully"));
+        
+    })
+)
+
+export const getUserById = expressRepre(
+  {
+    summary: "send userId get userDetails",
+    params: { id: '695a4de254a474d609d097ae' },
+    response: "userData",
+  },
+  asyncHandler(async (req, res) => {
+    const _id = req.params.id;
+    console.log(req.params)
+    if (!_id) {
+      throw new ApiError(400, "User id is required");
+    }
+
+    const user = await User.findById(_id).select("-password -refresstoken").lean();
+    if (!user) {
+      throw new ApiError(404, "User does not exist");
+    }
+
+    res.status(200).json(new ApiResponse(200, user, "User fetched successfully"));
+  })
+);
+
+
+export const getUser=expressRepre(
+    {
+        summary:"simply hit get if logged in",
+    
+        response:"userData"
+    },
+    asyncHandler(
+        async(req,res)=>{
+            const _id=req.user?._id
+            console.log(req.user._id)
+            if(!_id){
+                throw new ApiError(400,"user id is required")
+            }
+            const user=await User.findById(_id).select("-password -refresstoken")
+            if(!user){
+                throw new ApiError(300,"User does not exist")
+            }
+            
+
+            res.status(200).json(new ApiResponse(200,user,"user fetched successfully"))
+        }
+    )
+)
+
+export const updateUserData=expressRepre(
+    {
+        summary:"Update user data json",
+        body:{
+            "temp_data":`{
+  "personal": {
+    "name": "John Doe",
+    "title": "Software Engineer",
+    "phone": "+1 234 567 890",
+    "email": "john.doe@example.com",
+    "location": "San Francisco, CA",
+    "image": {
+      "enabled": true,
+      "url": ""
+    }
+  },
+  "summary": "Experienced software engineer with a strong background in full-stack development and a passion for building scalable applications.",
+  "education": {
+    "year": "2016 - 2020",
+    "college": "University of California, Berkeley",
+    "degree": "Bachelor of Science in Computer Science"
+  },
+  "skills": {
+    "technical": [
+      "JavaScript",
+      "Node.js",
+      "React",
+      "MongoDB",
+      "Docker"
+    ],
+    "soft": [
+      "Leadership",
+      "Communication",
+      "Problem Solving"
+    ]
+  },
+  "languages": [
+    "English",
+    "Spanish"
+  ],
+  "experience": {
+    "details": [
+      {
+        "role": "Senior Developer",
+        "duration": "2021 - Present",
+        "company": "Tech Solutions Inc.",
+        "responsibilities": [
+          "Lead a team of 5 developers in building a high-traffic e-commerce platform.",
+          "Implemented microservices architecture using Node.js and AWS.",
+          "Optimized database queries, reducing response time by 30%."
+        ]
+      },
+      {
+        "role": "Junior Developer",
+        "duration": "2020 - 2021",
+        "company": "Startup Hub",
+        "responsibilities": [
+          "Developed and maintained RESTful APIs for a mobile application.",
+          "Collaborated with UI/UX designers to implement responsive web interfaces.",
+          "Participated in code reviews and unit testing."
+        ]
+      }
+    ]
+  },
+  "references": [
+    {
+      "name": "Jane Smith",
+      "company": "Tech Solutions Inc.",
+      "position": "CTO",
+      "phone": "+1 987 654 321",
+      "email": "jane.smith@techsolutions.com"
+    }
+  ]
+}`
+        },
+        response:"updated user"
+
+    },
+    asyncHandler(async (req,res)=>{
+        const {temp_data}=req.body;
+        const user_id=req.user?._id
+        if (!temp_data){
+            throw new ApiError("temp_data is required")
+        }
+        console.log(temp_data)
+        const user=await User.findByIdAndUpdate(user_id,{temp_data:temp_data},{new:true})
+        if (!user){
+            throw new ApiError("User not found")
+        }
+        return res.status(200).json(new ApiResponse(200,user))
+
+
+    })
+
+)
+
+
+
+
+
+export const refreshAccessToken=expressRepre({
+    summary:"Use this get route for refreshing tokens",
+    response:"Token refreshed"
+},asyncHandler(async (req,res)=>{
+
+    const incommingRefreshToken=req.cookies.refreshToken||req.body.refreshToken;
+
+    if(!incommingRefreshToken) throw new ApiError(401,"unautherized request");
+
+    const decoded_token=jwt.verify(incommingRefreshToken,process.env.REFRESH_TOKEN_SECRET);
+
+    const user=await User.findById(decoded_token?._id);
+
+    if(incommingRefreshToken!==user?.refreshAccessToken){
+        throw new ApiError(401,"Refresh token is expired or used");
+
+    }
+
+    const {accessToken,newRefreshToken}=await generateAccessRefereshToken(user);
+    user.refreshToken = newRefreshToken;
+    await user.save({validateBeforeSave:false});
+
+    return res.status(200)
+    .cookie("accessToken",accessToken,token_option)
+    .cookie("refreshToken",newRefreshToken,token_option)
+    .json(
+        new ApiResponse(
+            200,
+            {accessToken,refreshToken:newRefreshToken},
+            "Access token refreshed"
+        )
+    )
+    
+
+
+
+}))

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body{margin:0;font-family:Poppins,Arial}
+.container{display:flex;min-height:100vh}
+.sidebar{width:30%;background:#111827;color:#fff;padding:30px}
+.main{width:70%;padding:40px}
+h1{margin:0}
+.section{margin-bottom:30px}
+.tag{display:inline-block;background:#374151;padding:5px 10px;border-radius:20px;margin:5px}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="sidebar">
+    <h1><%= data.name %></h1>
+    <p><%= data.title %></p>
+    <hr>
+
+    <h3>Skills</h3>
+    <% data.skills.forEach(s=>{ %>
+      <span class="tag"><%= s %></span>
+    <% }) %>
+
+    <h3>Links</h3>
+    <% Object.entries(data.someImportantUrls).forEach(([k,v])=>{ %>
+      <p><a style="color:#9ca3af" href="<%= v %>"><%= k %></a></p>
+    <% }) %>
+  </div>
+
+  <div class="main">
+    <div class="section">
+      <h2>Profile</h2>
+      <p><%= data.summary %></p>
+    </div>
+
+    <div class="section">
+      <h2>Experience</h2>
+      <% data.experience.forEach(e=>{ %>
+        <p><b><%= e.role %></b> — <%= e.company %></p>
+        <small><%= e.duration %></small>
+        <p><%= e.description %></p>
+      <% }) %>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

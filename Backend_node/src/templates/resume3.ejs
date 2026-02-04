@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body{font-family:Arial;background:#f9fafb;padding:40px}
+.timeline{border-left:4px solid #3b82f6;padding-left:30px}
+.item{margin-bottom:30px;position:relative}
+.dot{width:14px;height:14px;background:#3b82f6;border-radius:50%;
+position:absolute;margin-left:-39px;top:6px}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<h1><%= data.name %></h1>
+<p><%= data.title %></p>
+<p>
+  📧 <%= data.email %> | 📞 <%= data.phone %> | 📍 <%= data.location %>
+</p>
+
+<!-- Experience Timeline -->
+<h2>Experience</h2>
+<div class="timeline">
+  <% data.experience.forEach(e=>{ %>
+    <div class="item">
+      <div class="dot"></div>
+      <h3><%= e.role %> — <%= e.company %></h3>
+      <small><%= e.duration %></small>
+      <p><%= e.description %></p>
+    </div>
+  <% }) %>
+</div>
+
+<!-- Education -->
+<h2>Education</h2>
+<% data.education.forEach(ed=>{ %>
+  <p>
+    <b><%= ed.degree %></b><br>
+    <%= ed.institute %> | <%= ed.year %>
+  </p>
+<% }) %>
+
+<!-- Skills (optional but useful in timeline style resume) -->
+<h2>Skills</h2>
+<% data.skills.forEach(s=>{ %>
+  <span style="display:inline-block;background:#e5edff;color:#1e40af;
+  padding:6px 12px;border-radius:12px;margin:4px;font-size:12px;">
+    <%= s %>
+  </span>
+<% }) %>
+
+</body>
+</html>

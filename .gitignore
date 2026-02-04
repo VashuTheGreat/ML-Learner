@@ -1,0 +1,70 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.egg-info/
+.venv/
+env/
+venv/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+dist/
+build/
+
+# Node Package Manager
+package-lock.json
+yarn.lock
+bun.lockb
+
+# Temporary files
+temp/
+tmp/
+.cache/
+
+# OS Files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+
+# Testing
+coverage/
+.nyc_output/
+
+# Redis
+dump.rdb
+
+# Claude/AI artifacts
+.claude/

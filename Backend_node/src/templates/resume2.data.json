@@ -1,0 +1,31 @@
+{
+    "personal": {
+        "name": "Jane Smith",
+        "title": "Product Manager",
+        "email": "jane.smith@example.com"
+    },
+    "languages": ["English", "French", "German"],
+    "summary": "Strategic Product Manager with 8+ years of experience in the tech industry. Proven track record of leading cross-functional teams to deliver high-impact products.",
+    "skills": {
+        "technical": ["Agile Methodology", "Scrum", "Product Roadmap", "Market Research"],
+        "tools": ["Jira", "Confluence", "Trello", "Google Analytics"]
+    },
+    "certifications": [
+        "Certified Scrum Master (CSM)",
+        "Professional Product Manager (PPM)"
+    ],
+    "achievements": [
+        "Increased user engagement by 25% through the implementation of a new feature set.",
+        "Successfully launched 3 major products within 18 months.",
+        "Reduced product development lifecycle by 15%."
+    ],
+    "references": [
+        {
+            "name": "Robert Brown",
+            "company": "Global Tech",
+            "position": "VP of Product",
+            "email": "robert.brown@globaltech.com",
+            "phone": "+1 555 123 4567"
+        }
+    ]
+}
