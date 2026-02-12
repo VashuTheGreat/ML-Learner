@@ -1,5 +1,7 @@
 from src.app import app
 import uvicorn as uv
+from src.logger import *
+from src.constants import SERVER_HOST, SERVER_PORT, RELOAD, RELOAD_EXCLUDES
 
-if __name__=="__main__":
-    uv.run("main:app", host="127.0.0.1", port=8000, reload=True, reload_excludes=["temp/*"])
+if __name__ == "__main__":
+    uv.run("main:app", host=SERVER_HOST, port=SERVER_PORT, reload=RELOAD, reload_excludes=RELOAD_EXCLUDES)

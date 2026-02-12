@@ -1,42 +1,57 @@
-from langchain_community.document_loaders import DirectoryLoader,PyPDFLoader
-# import faiss
-# from langchain_community.docstore.in_memory import InMemoryDocstore
-# from langchain_community.vectorstores import FAISS
 import os
+import sys
+import logging
+from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
 from src.utils.common_LLm import llm as summerizer_llm
-from src.prompts.resumeSummary_prompts import prompt as ResumeSummaryPrompt
-# embedding_function=OllamaEmbeddings(model="gemma2:2b")
-# embedding_dim = len(embedding_function.embed_query("hello world"))
-# index = faiss.IndexFlatL2(embedding_dim)
-
-# vector_store = FAISS(
-#     embedding_function=embedding_function,
-#     index=index,
-#     docstore=InMemoryDocstore(),
-# )
+from src.prompts import resumeSummary_prompts as ResumeSummaryPrompt
+from src.exception import MyException
 
 # ------------- Documents loader --------------
 async def document_loader(file_path=""):
-    if not os.path.exists(file_path):
-        raise FileNotFoundError(f"file not found at location {file_path}")
-    
-    loader=PyPDFLoader(file_path=file_path)
-    documents=loader.load()
-    return documents
-
-
+    logging.info(f"Entering document_loader with file_path: {file_path}")
+    try:
+        if not os.path.exists(file_path):
+            logging.error(f"File not found: {file_path}")
+            raise FileNotFoundError(f"file not found at location {file_path}")
+        
+        loader = PyPDFLoader(file_path=file_path)
+        documents = loader.load()
+        logging.info(f"Successfully loaded {len(documents)} document pages")
+        return documents
+    except Exception as e:
+        raise MyException(e, sys)
 
 async def get_summary(file_path):
-    docs=await document_loader(file_path=file_path)
-    prompt=ResumeSummaryPrompt.formate(
-        resume_content=docs[0].page_content
-    )
-    res=await summerizer_llm.ainvoke(prompt)
-    print(res)
-    return res.content
+    logging.info(f"Entering get_summary with file_path: {file_path}")
+    try:
+        docs = await document_loader(file_path=file_path)
+        if not docs:
+            logging.warning("No documents loaded for summary")
+            return ""
+            
+        prompt = ResumeSummaryPrompt.format(
+            resume_content=docs[0].page_content
+        )
+        
+        logging.info("Invoking LLM for resume summary")
+        res = await summerizer_llm.ainvoke(prompt)
+        
+        logging.debug(f"LLM Response: {res}")
+        logging.info("Exiting get_summary")
+        return res.content
+    except Exception as e:
+        raise MyException(e, sys)
 
-# if __name__=="__main__":
-#     import asyncio
-#     asyncio.run(main()) 
+if __name__ == "__main__":
+    import asyncio
+    async def main():
+        logging.info("Running get_summary_using_resume_pdf.py main")
+        try:
+            # Example usage if needed
+            # summary = await get_summary("path/to/resume.pdf")
+            # print(summary)
+            pass
+        except Exception as e:
+            logging.error(f"Error in main: {str(e)}")
     
-
+    asyncio.run(main())

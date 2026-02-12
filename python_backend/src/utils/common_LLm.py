@@ -1,5 +1,7 @@
 from langchain_aws import ChatBedrockConverse
+from src.constants import LLM_MODEL_ID, LLM_REGION
+
 llm = ChatBedrockConverse(
-    model_id="us.meta.llama3-3-70b-instruct-v1:0",
-    region_name="us-east-1"
+    model_id=LLM_MODEL_ID,
+    region_name=LLM_REGION
 )

@@ -6,7 +6,14 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "aiosqlite>=0.22.1",
+    "fastapi>=0.128.8",
+    "from-root>=1.3.0",
+    "langchain>=1.2.10",
+    "langchain-aws>=1.2.5",
+    "langchain-community>=0.4.1",
     "langgraph>=1.0.7",
     "langgraph-checkpoint-sqlite>=3.0.3",
     "python-multipart>=0.0.22",
+    "uvicorn>=0.40.0",
+    "vconsoleprint>=1.0.2",
 ]

@@ -2,7 +2,7 @@
 import time
 import sqlite3
 from typing import List, Annotated, Optional
-
+import logging
 from pydantic import BaseModel
 
 from langgraph.graph import StateGraph, START, END
@@ -19,31 +19,25 @@ from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
 import asyncio
 import aiosqlite
-from src.prompts.interview_prompts import prompt as QuestionGeneraterPrompt,prompt2 as Chat_prompt
+from src.prompts import interview_prompts1 as QuestionGeneraterPrompt,interview_prompts2 as Chat_prompt
 from src.utils.common_LLm import llm
 # ===================== SQLITE CHECKPOINTER =====================
-conn = sqlite3.connect("db.sqlite", check_same_thread=False)
-# checkpointer = SqliteSaver(conn)
+_checkpointer = None
 
-# checkpointer=None
-async def init_checkpointer():
-    conn = await aiosqlite.connect("db.sqlite")
-    checkpointer = AsyncSqliteSaver(conn)
-    return checkpointer
+async def get_checkpointer():
+    global _checkpointer
+    if _checkpointer is None:
+        conn = await aiosqlite.connect("db.sqlite")
+        _checkpointer = AsyncSqliteSaver(conn)
+    return _checkpointer
 
-checkpointer=None
-# checkpointer=asyncio.run(init_checkpointer())
-
+from src.models.interview_model import ChatState
 
 # ===================== LLM =====================
 llm = llm
 
 # ===================== STATE =====================
-class ChatState(BaseModel):
-    messages: Annotated[List[BaseMessage], add_messages]
-    topic: Optional[str] = None
-    time_remaining: int  # in seconds
-    questions_generated: bool = False
+
 
 # ===================== TOOL =====================
 @tool
@@ -106,14 +100,23 @@ async def chat(state: ChatState):
     }
 
 # ===================== GRAPH =====================
-graph = StateGraph(ChatState)
-graph.add_node("chat", chat)
-graph.add_edge(START, "chat")
-graph.add_edge("chat", END)
-graph = graph.compile(checkpointer=checkpointer)
+builder = StateGraph(ChatState)
+builder.add_node("chat", chat)
+builder.add_edge(START, "chat")
+builder.add_edge("chat", END)
 
-# ===================== HELPER FUNCTION =====================
+_compiled_graph = None
+
+async def get_graph():
+    global _compiled_graph
+    if _compiled_graph is None:
+        cp = await get_checkpointer()
+        _compiled_graph = builder.compile(checkpointer=cp)
+    return _compiled_graph
+
+# ===================== Chat Interviewer FUNCTION =====================
 async def chat_interviewer(thread_id: str, time_remain: int, topic: str, user_input: str):
+    graph = await get_graph()
     result = await graph.ainvoke(
         {
             "messages": [HumanMessage(content=user_input)],
@@ -125,15 +128,36 @@ async def chat_interviewer(thread_id: str, time_remain: int, topic: str, user_in
     return result
 
 
-async def load_conversation(thread_id:str):
+async def load_conversation(thread_id: str):
+    graph = await get_graph()
     state = await graph.aget_state(config={'configurable': {'thread_id': thread_id}})
     return state.values.get('messages', [])
 
 async def deleteThread(thread_id: str):
     try:
-        # If checkpointer is async
-        await checkpointer.adelete_thread(thread_id=thread_id)
+        cp = await get_checkpointer()
+        # Check if thread exists first
+        state = await cp.aget_tuple(config={'configurable': {'thread_id': thread_id}})
+        if state is None:
+            logging.info(f"Thread {thread_id} not found, nothing to delete.")
+            return False
+            
+        await cp.adelete_thread(thread_id=thread_id)
+        logging.info(f"Thread {thread_id} deleted successfully.")
         return True
     except Exception as e:
-        print("Error deleting thread:", e)
+        logging.error(f"Error deleting thread {thread_id}: {e}")
         return False
+
+async def close_checkpointer():
+    global _checkpointer
+    if _checkpointer is not None:
+        try:
+            logging.info("Closing checkpointer database connection...")
+            # AsyncSqliteSaver has a 'conn' attribute which is an aiosqlite connection
+            if hasattr(_checkpointer, 'conn') and _checkpointer.conn:
+                await _checkpointer.conn.close()
+            _checkpointer = None
+            logging.info("Checkpointer connection closed.")
+        except Exception as e:
+            logging.error(f"Error closing checkpointer: {e}")

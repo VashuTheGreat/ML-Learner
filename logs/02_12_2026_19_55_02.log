@@ -1,0 +1,8 @@
+[ 2026-02-12 19:55:02,154 ] asyncio - DEBUG - Using selector: SelectSelector
+[ 2026-02-12 19:55:10,345 ] root - INFO - Entered in the initiate SchemaPipeline method
+[ 2026-02-12 19:55:10,346 ] root - INFO - Entering interview controller
+[ 2026-02-12 19:55:10,346 ] root - INFO - Entering generate_interview_schema
+[ 2026-02-12 19:55:10,347 ] root - INFO - Loading cached interviews from artifact\interview.json
+[ 2026-02-12 19:55:10,349 ] root - ERROR - Error occurred in python script: [C:\Users\vansh\Projects\ML-Learner\python_backend\src\components\dummyInterviews.py] at line number [26]: [Errno 2] No such file or directory: 'artifact\\interview.json'
+[ 2026-02-12 19:55:10,350 ] root - ERROR - Error occurred in python script: [C:\Users\vansh\Projects\ML-Learner\python_backend\src\controllers\interview_controller.py] at line number [18]: Error occurred in python script: [C:\Users\vansh\Projects\ML-Learner\python_backend\src\components\dummyInterviews.py] at line number [26]: [Errno 2] No such file or directory: 'artifact\\interview.json'
+[ 2026-02-12 19:55:10,351 ] root - ERROR - Error occurred in python script: [C:\Users\vansh\Projects\ML-Learner\python_backend\src\pipelines\interviewSchemaPipeline.py] at line number [24]: Error occurred in python script: [C:\Users\vansh\Projects\ML-Learner\python_backend\src\controllers\interview_controller.py] at line number [18]: Error occurred in python script: [C:\Users\vansh\Projects\ML-Learner\python_backend\src\components\dummyInterviews.py] at line number [26]: [Errno 2] No such file or directory: 'artifact\\interview.json'
