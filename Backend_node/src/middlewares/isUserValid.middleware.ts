@@ -14,21 +14,19 @@ export const verifyJWT=asyncHandler(async (req,res,next)=>{
      
     const decoded_token = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as any;
     
-    console.log('🔍 Decoded token:', decoded_token);
+    console.log(' Decoded token:', decoded_token);
 
 let user;
     const st_to_red=`user:${token}`;
 
     try {
-             user = await client.get(st_to_red); // Fetch user from Redis
-             if (user) { // Only parse if user data was retrieved
-                 user = JSON.parse(user as string); // Type assertion for JSON.parse
-             }
-
-        
+        user = await client.get(st_to_red); // Fetch user from Redis
+        if (user) { 
+            user = JSON.parse(user as string); 
+            console.log(" User fetched from Redis");
+        }
     } catch (error) {
-        console.log("Value ddn't fetched in redis")
-        
+        // Silently falling back to database
     }
 
 
@@ -36,16 +34,15 @@ let user;
         
         user=await User.findById(decoded_token?._id)
         
-try {
-    // console.log(user)
-            const res=await client.set(st_to_red,JSON.stringify(user))
-            
-            await client.expire(st_to_red,30)
-    console.log("User seted in catch",res)
-} catch (error) {
-    console.log("Error while seting to redis",error)
-    
-}
+        try {
+            if (user) {
+                await client.set(st_to_red, JSON.stringify(user));
+                await client.expire(st_to_red, 30);
+                console.log(" User cached in Redis");
+            }
+        } catch (error) {
+            // Silently failing to cache
+        }
     }
 
 

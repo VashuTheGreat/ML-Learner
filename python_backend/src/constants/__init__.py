@@ -1,5 +1,6 @@
 import os
 
+
 # Application Configuration
 APP_TITLE = "Interview Cracker"
 APP_DESCRIPTION = "Interview Cracker Backend API"
@@ -7,7 +8,7 @@ APP_VERSION = "1.0.0"
 
 # Server Configuration
 SERVER_HOST = "0.0.0.0"
-SERVER_PORT = 8000
+SERVER_PORT = os.getenv("PORT") if os.getenv("PORT")!=None else 8000
 RELOAD = True
 RELOAD_EXCLUDES = ["temp/*"]
 
