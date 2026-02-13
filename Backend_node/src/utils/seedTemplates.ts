@@ -8,7 +8,11 @@ dotenv.config({
     path: "./.env"
 });
 
-const seedTemplates = async () => {
+const seedTemplates = async function seedTemplates() {
+    if (!process.env.MONGODB_URI) {
+        console.error("MONGODB_URI is not defined");
+        return;
+    }
     try {
         await mongoose.connect(`${process.env.MONGODB_URI}/interviewcracker`);
         console.log("Connected to MongoDB");
@@ -18,7 +22,9 @@ const seedTemplates = async () => {
 
         for (const file of files) {
             if (file.endsWith(".ejs")) {
-                const id = file.match(/resume(\d+)\.ejs/)[1];
+                const match = file.match(/resume(\d+)\.ejs/);
+                if (!match) continue;
+                const id = match[1];
                 const templatePath = path.join(templatesDir, file);
                 const dataPath = path.join(templatesDir, `resume${id}.data.js`);
 

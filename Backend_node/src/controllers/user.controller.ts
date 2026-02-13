@@ -5,34 +5,35 @@ import ApiResponse from "../utils/ApiResponse.js"
 import { expressRepre } from "@vashuthegreat/vexpress"
 import client from "../utils/RedisClient.js"
 import validator from "validator"
+import jwt from "jsonwebtoken"
 import { uploadOnCloudinary,deleteOnCloudinary } from "../utils/cloudinary.utils.js"
 
 
 const token_option={ httpOnly: true, secure: true };
 
-const generateAccessRefreshToken = async (user) => {
+const generateAccessRefreshToken = async (user: any) => {
     const refreshToken = await user.generateRefreshToken();
     const accessToken = await user.generateAccessToken();
     return {accessToken, refreshToken}
 }
 
-async function ValidateAnything(dict){
+async function ValidateAnything(dict: Record<string, any>){
     for(const [key,val] of Object.entries(dict)){
         // Skip validation if value is null or undefined
         if(val === null || val === undefined) continue;
         
         if(key.toLowerCase()=='email'){
-            if(!validator.isEmail(val) || val.trim()==''){
+            if(!validator.isEmail(String(val)) || (String(val)).trim()==''){
                 throw new ApiError(400,"Invalid email");
             }
         }
         else if(key.toLowerCase()=='password'){
-            if(val.trim()=='' || val.length<6) {
+            if(String(val).trim()=='' || String(val).length<6) {
                 throw new ApiError(400,"password must be at least 6 characters long");
             }
         }
         else if(key.toLowerCase()=='url'){
-            if(!validator.isURL(val) || val.trim()==''){
+            if(!validator.isURL(String(val)) || (String(val)).trim()==''){
                 throw new ApiError(400,"Invalid url");
             }
         }
@@ -158,7 +159,7 @@ export const login = expressRepre({
         throw new ApiError(404,"User not found");
     }
     
-    const isPasswordValid = await userInstance.isPasswordCorrect(password);
+    const isPasswordValid = await (userInstance as any).isPasswordCorrect(password);
     if(!isPasswordValid){
         throw new ApiError(401,"Invalid credentials");
     }
@@ -215,7 +216,7 @@ export const uploadAvatar=expressRepre(
             throw new ApiError(400,"Avatar already exists");
         }
 
-        const avatar=req.files?.avatar[0]
+        const avatar = (req.files as any)?.avatar?.[0];
         
         console.log(avatar)
         if (!avatar){
@@ -341,19 +342,18 @@ export const deleteResume=expressRepre(
     },
     asyncHandler(async (req,res)=>{
         const user=await User.findById(req.user?._id);
-        const idx=req.params.idx;
+        const { idx } = req.params as { idx: string };
         if(!user){
             throw new ApiError(404,"User not found");
         }
         
 
-        if (user.resumes.length-1<idx){
-            throw new ApiError(400,"Resume not found");
+        if (user.resumes.length - 1 < Number(idx)) {
+            throw new ApiError(400, "Resume not found");
         }
 
-        
         // Directly update the database to set profileImage to NULL
-        user.resumes.splice(idx,1);
+        user.resumes.splice(Number(idx), 1);
         await user.save();
 
         res.status(200).json(new ApiResponse(200, await User.findById(user._id).select("-password"), "Resume deleted successfully"));
@@ -368,7 +368,7 @@ export const getUserById = expressRepre(
     response: "userData",
   },
   asyncHandler(async (req, res) => {
-    const _id = req.params.id;
+    const { id: _id } = req.params as { id: string };
     console.log(req.params)
     if (!_id) {
       throw new ApiError(400, "User id is required");
@@ -490,12 +490,12 @@ export const updateUserData=expressRepre(
         const {temp_data}=req.body;
         const user_id=req.user?._id
         if (!temp_data){
-            throw new ApiError("temp_data is required")
+            throw new ApiError(400, "temp_data is required")
         }
         console.log(temp_data)
         const user=await User.findByIdAndUpdate(user_id,{temp_data:temp_data},{new:true})
         if (!user){
-            throw new ApiError("User not found")
+            throw new ApiError(404, "User not found")
         }
         return res.status(200).json(new ApiResponse(200,user))
 
@@ -517,18 +517,20 @@ export const refreshAccessToken=expressRepre({
 
     if(!incommingRefreshToken) throw new ApiError(401,"unautherized request");
 
-    const decoded_token=jwt.verify(incommingRefreshToken,process.env.REFRESH_TOKEN_SECRET);
+    const decoded_token = jwt.verify(incommingRefreshToken, process.env.REFRESH_TOKEN_SECRET as string) as jwt.JwtPayload;
 
-    const user=await User.findById(decoded_token?._id);
+    const user = await User.findById(decoded_token?._id);
 
-    if(incommingRefreshToken!==user?.refreshAccessToken){
-        throw new ApiError(401,"Refresh token is expired or used");
+    if (incommingRefreshToken !== user?.refreshToken) {
+        throw new ApiError(401, "Refresh token is expired or used");
 
     }
 
-    const {accessToken,newRefreshToken}=await generateAccessRefereshToken(user);
-    user.refreshToken = newRefreshToken;
-    await user.save({validateBeforeSave:false});
+    const { accessToken, refreshToken: newRefreshToken } = await generateAccessRefreshToken(user);
+    if (user) {
+        user.refreshToken = newRefreshToken;
+        await user.save({ validateBeforeSave: false });
+    }
 
     return res.status(200)
     .cookie("accessToken",accessToken,token_option)

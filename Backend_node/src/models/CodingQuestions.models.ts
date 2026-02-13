@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 
-const coding_schema=mongoose.Schema({
+const coding_schema = new mongoose.Schema({
     recently_solved:[
         {
             type:String,

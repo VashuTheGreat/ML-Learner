@@ -4,6 +4,7 @@ import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
 // import { Query } from "mongoose";
+import { Request, Response } from "express";  
 
 export const createInterview = expressRepre(
   {
@@ -17,7 +18,7 @@ export const createInterview = expressRepre(
     },
     response: "interview scheduled"
   },
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req:Request, res:Response) => {
     const { companyName, topic, job_Role, time, status } = req.body;
     const user_id = req.user?._id;
 

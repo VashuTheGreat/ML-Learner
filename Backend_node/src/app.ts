@@ -8,6 +8,7 @@ import InterviewRouter from "./routes/interviews.routes.js";
 import performanceRouter from "./routes/performance.routes.js"
 import questionRouter from "./routes/question.routes.js";
 import CodingSchemaRouter from "./routes/coding.routes.js"
+import { Request, Response } from "express";
 connectdb()
 const app=new Vexpress();
 app.setupDocs();
@@ -30,7 +31,7 @@ app.use("/api/performance",performanceRouter);
 app.use("/api/question",questionRouter);
 app.use("/api/codingSchema",CodingSchemaRouter)
 
-app.use("/",(req,res)=>{
+app.use("/",(req:Request,res:Response)=>{
     res.status(200).json({message:"Hello World"})
 })
 export default app;

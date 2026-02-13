@@ -4,14 +4,15 @@ import asyncHandler from "../utils/asyncHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { Query } from "mongoose";
 import connectsql from "../db/connectsql.js";
+import { Request,Response } from "express";
 import fs from "fs"
 
-let db;
+let db:any;
 (async () => {
     db = await connectsql();
 })();
 
-async function runquery(query, params = []) {
+async function runquery(query: string, params: any[] = []) {
     const [res]=await db.execute(query, params)
     return res
     
@@ -58,12 +59,12 @@ export const get_available_categories=expressRepre(
         response:"avalable categories"
 
     },
-    asyncHandler(async (req,res)=>{
+    asyncHandler(async (req:Request,res:Response)=>{
         const data=await runquery(`select distinct category from questions `);
 
-        const categories=[]
+        const categories:string[]=[]
 
-        data.forEach(element => {
+        data.forEach((element:any) => {
             categories.push(element.category)
 
             
@@ -93,8 +94,8 @@ export const fetch_questionById=expressRepre({
         "question_id":"1"
     },
     response:"a question"
-},asyncHandler(async (req,res)=>{
-    const {question_id}=req.params;
+},asyncHandler(async (req:Request,res:Response)=>{
+    const { question_id } = req.params as { question_id: any };
 
 
     const data=await runquery(`select * from questions where id=?`, [question_id])
@@ -110,8 +111,8 @@ export const fetch_questionBycategory=expressRepre({
         "category":"Linear Algebra"
     },
     response:"a question"
-},asyncHandler(async (req,res)=>{
-    let {category}=req.params;
+},asyncHandler(async (req:Request,res:Response)=>{
+    let { category } = req.params as { category: string };
 
 category=category.toLowerCase()
     const data=await runquery(`select * from questions where category=?`, [category])
@@ -128,8 +129,8 @@ export const fetch_questionByDifficulty=expressRepre({
         "difficulty":"easy"
     },
     response:"a question"
-},asyncHandler(async (req,res)=>{
-    let {difficulty}=req.params;
+},asyncHandler(async (req:Request,res:Response)=>{
+    let { difficulty } = req.params as { difficulty: string };
 
 difficulty=difficulty.toLowerCase()
     const data=await runquery(`select * from questions where difficulty=?`, [difficulty])

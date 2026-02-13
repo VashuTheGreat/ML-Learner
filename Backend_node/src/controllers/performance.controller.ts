@@ -135,9 +135,7 @@ export const getInterviewPerformance = expressRepre(
 
     const existingPerformance = await Performance.findOne({ interview_id });
     if (!existingPerformance) {
-          return res.status(400).json(new ApiError(400,"interview performance not found"))
-
-    
+        throw new ApiError(404, "interview performance not found");
     }
       return res
         .status(200)

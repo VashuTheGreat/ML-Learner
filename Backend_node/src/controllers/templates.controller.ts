@@ -20,7 +20,7 @@ export const createTemplate=expressRepre(
     asyncHandler(
         async(req,res)=>{
             const {temp_data,title}=req.body
-            const files = req.files;
+            const files = req.files as any;
 
             const templateFile = files?.template?.[0];
             const tempDataFile = files?.temp_data?.[0];
@@ -90,7 +90,7 @@ export const getTemplates=expressRepre(
     },
     asyncHandler(
         async(req,res)=>{
-            const id=req.params.id
+            const { id } = req.params as { id: string };
             if (!id){
                 throw new ApiError(400,"Invalid template id")
             }
@@ -125,11 +125,11 @@ export const getAllTemplates = expressRepre(
 
       if (!templateData || templateData.length === 0) {
         // agar collection empty ho
-        return res.status(404).json(new ApiResponse(404, [], "No templates found"));
+          throw new ApiError(400, "interview performance not found");;
       }
-      const final_response=[]
-      templateData.map((template)=>{
-        final_response.push({...template,to_render:reder_html(template.template,template.temp_data)})
+      const final_response: any[] = []
+      templateData.map((template: any) => {
+        final_response.push({ ...template, to_render: reder_html(template.template, template.temp_data) })
       })
 
     //   console.log(final_response)
@@ -224,7 +224,7 @@ export const getTemplate_by_data=expressRepre(
     },
     asyncHandler(
         async(req,res)=>{
-          const userAvatar=req.user._doc.avatar
+          const userAvatar = (req.user as any)?.avatar;
             const id=req.body.template_id
             if (!id){
                 throw new ApiError(400,"Invalid template id")

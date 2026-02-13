@@ -7,12 +7,12 @@ cloudinary.config({
     api_secret: process.env.API_SECRET
 });
 
-async function uploadOnCloudinary(localFilePath) {
+async function uploadOnCloudinary(localFilePath: string) {
     try {
         if (!localFilePath) return null;
 
         // Determine file type from extension
-        const fileExt = localFilePath.split('.').pop().toLowerCase();
+        const fileExt = localFilePath.split('.').pop()?.toLowerCase();
         const resourceType = fileExt === 'pdf' ? 'raw' : 'auto'; // PDFs -> raw, others -> auto
 
         const uploadResult = await cloudinary.uploader.upload(localFilePath, {
@@ -36,8 +36,11 @@ async function uploadOnCloudinary(localFilePath) {
     }
 }
 
-async function deleteOnCloudinary(url){
-    const public_id = url.split("/").pop().split(".").shift();
+async function deleteOnCloudinary(url: string){
+    const public_id = url.split("/").pop()?.split(".").shift();
+    if(!public_id){
+        throw new Error("Invalid file path")
+    }
     try{
         await cloudinary.uploader.destroy(public_id); 
         console.log("File deleted:", public_id);

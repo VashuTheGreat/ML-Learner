@@ -12,7 +12,7 @@ export const verifyJWT=asyncHandler(async (req,res,next)=>{
 
     if (!token) throw new ApiError(401,"Unauthorized request")
      
-    const decoded_token=jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
+    const decoded_token = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as any;
     
     console.log('🔍 Decoded token:', decoded_token);
 
@@ -20,8 +20,10 @@ let user;
     const st_to_red=`user:${token}`;
 
     try {
-             user= await client.get(st_to_red);
-             user=JSON.parse(user)
+             user = await client.get(st_to_red); // Fetch user from Redis
+             if (user) { // Only parse if user data was retrieved
+                 user = JSON.parse(user as string); // Type assertion for JSON.parse
+             }
 
         
     } catch (error) {
@@ -54,8 +56,8 @@ try {
 
     // Set both the user object and the _id from token
     req.user = {
-        ...user,
-        _id: decoded_token._id
+        ...(user as any),
+        _id: (decoded_token as any)._id
     };
     
     console.log('✅ req.user set with _id:', req.user._id);

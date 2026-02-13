@@ -4,6 +4,7 @@ import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import Coding from "../models/CodingQuestions.models.js";
+import { Request, Response } from "express";
 
 
 export const create_coding_schema = expressRepre(
@@ -12,11 +13,11 @@ export const create_coding_schema = expressRepre(
     response: "coding performance"
   },
 
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req:Request, res:Response) => {
     const user = req.user;
     if (!user) throw new ApiError(400, "User not found");
 
-    let coding = await Coding.find({ user: user._id });
+    let coding:any = await Coding.find({ user: user._id });
 
     if (coding && coding.length > 0) {
       return res.status(200).json(
@@ -42,7 +43,7 @@ export const get_coding_schema = expressRepre(
     response: "coding performance"
   },
 
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req:Request, res:Response) => {
     const user = req.user;
     if (!user) throw new ApiError(400, "User not found");
 
@@ -72,7 +73,7 @@ export const update_coding_schema = expressRepre(
     response: "coding performance"
   },
 
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req:Request, res:Response) => {
     const user_id = req.user?._id;
     if (!user_id) throw new ApiError(400, "User not found");
 

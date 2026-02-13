@@ -22,6 +22,13 @@ const userSchema = new mongoose.Schema(
         required:[true,"email is required"],
         unique:true
     },
+    username: {
+        type: String,
+        required: [true, "username is required"],
+        unique: true,
+        trim: true,
+        lowercase: true
+    },
     refreshToken: {
         type: String
     },
@@ -39,7 +46,7 @@ userSchema.pre("save", async function () {
     this.password = await bcrypt.hash(this.password, 10)
 })
 
-userSchema.methods.isPasswordCorrect = async function(password){
+userSchema.methods.isPasswordCorrect = async function(password:any){
     return await bcrypt.compare(password, this.password)
 }
 
@@ -51,7 +58,7 @@ userSchema.methods.generateAccessToken = function(){
             username: this.username,
             fullName: this.fullName
         },
-        process.env.ACCESS_TOKEN_SECRET,
+        process.env.ACCESS_TOKEN_SECRET as string,
         {
             expiresIn: process.env.ACCESS_TOKEN_EXPIRY
         }
@@ -63,7 +70,7 @@ userSchema.methods.generateRefreshToken = function(){
             _id: this._id,
             
         },
-        process.env.REFRESH_TOKEN_SECRET,
+        process.env.REFRESH_TOKEN_SECRET as string,
         {
             expiresIn: process.env.REFRESH_TOKEN_EXPIRY
         }
