@@ -1,0 +1,4 @@
+[ 2026-02-13 17:55:52,602 ] root - INFO - Logger initialized. Logging to logs\02_13_2026_17_55_52.log
+[ 2026-02-13 17:55:52,608 ] asyncio - DEBUG - Using selector: SelectSelector
+[ 2026-02-13 17:56:08,472 ] root - INFO - Entering submit controller (async)
+[ 2026-02-13 17:56:08,474 ] root - ERROR - Error occurred in python script: [C:\Users\vansh\Projects\ML-Learner\python_backend\src\controllers\coding_controllers.py] at line number [10]: 'tuple' object has no attribute 'exc_info'

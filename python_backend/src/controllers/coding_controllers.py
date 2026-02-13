@@ -7,7 +7,7 @@ from src.exception import MyException
 async def submit(sub: Submission):
     logging.info("Entering submit controller (async)")
     try:
-        result = run_code(sub)
+        result = await run_code(sub)
         logging.info("Code execution completed")
         return {"data": result}
     except Exception as e:

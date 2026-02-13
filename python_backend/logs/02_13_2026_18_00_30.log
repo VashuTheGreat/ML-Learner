@@ -1,0 +1,2 @@
+[ 2026-02-13 18:00:30,254 ] root - INFO - Logger initialized. Logging to logs\02_13_2026_18_00_30.log
+[ 2026-02-13 18:00:30,263 ] asyncio - DEBUG - Using selector: SelectSelector

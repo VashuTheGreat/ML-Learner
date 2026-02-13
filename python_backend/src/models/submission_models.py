@@ -1,6 +1,6 @@
 from pydantic import BaseModel,Field
 class Submission(BaseModel):
-    code: str = "ZGVmIGFkZChhLCBiKToKICAgIHJldHVybiBhICsgYgo="
+    code: str = "Y2xhc3MgU29sdXRpb246CiAgICBkZWYgYWRkKHNlbGYsIGEsIGIpOgogICAgICAgIHJldHVybiBhICsgYgo="
     function_name: str = "add"
     test_cases: list = Field(default= [
         {"test": (2, 3), "expected_output": 6},

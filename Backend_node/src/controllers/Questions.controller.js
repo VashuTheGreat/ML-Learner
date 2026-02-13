@@ -46,8 +46,8 @@ export const add_questions=expressRepre(
         response:"question added"
     },
     asyncHandler(async (req,res)=>{
-        const {id,title,difficulty,category,problem_description,starter_code,example_input,example_output,example_reasoning,learn_content,solution_code,test_cases}=req.body;
-        const data=await runquery(`insert into questions (id,title,difficulty,category,problem_description,starter_code,example_input,example_output,example_reasoning,learn_content,solution_code,test_cases) values (?,?,?,?,?,?,?,?,?,?,?,?)`, [id,title,difficulty,category,problem_description,starter_code,example_input,example_output,example_reasoning,learn_content,solution_code, JSON.stringify(test_cases)])
+        const {id,title,difficulty,category,problem_description,starter_code,example_input,example_output,example_reasoning,learn_content,solution_code,test_cases,function_name}=req.body;
+        const data=await runquery(`insert into questions (id,title,difficulty,category,problem_description,starter_code,example_input,example_output,example_reasoning,learn_content,solution_code,test_cases,function_name) values (?,?,?,?,?,?,?,?,?,?,?,?,?)`, [id,title,difficulty,category,problem_description,starter_code,example_input,example_output,example_reasoning,learn_content,solution_code, JSON.stringify(test_cases), function_name])
         res.status(200).json(new ApiResponse(200,data))
     })
 )

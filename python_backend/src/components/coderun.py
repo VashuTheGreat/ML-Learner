@@ -1,94 +1,43 @@
 import io
 import base64
 import contextlib
+import importlib.util
+import os
+from src.exception import MyException
+import sys
+import os
+import uuid
+from src.utils.main_utils import write_file, delete_file
 
-def run_code(sub):
-    code_to_write = base64.b64decode(sub.code).decode("utf-8")
-    out_put = []
-
-    # Prepare execution context with common libraries
-    ctx = {}
+async def run_code(sub):
     try:
-        import numpy as np
-        ctx['np'] = np
-        ctx['numpy'] = np
-    except ImportError: pass
-    try:
-        from tinygrad.tensor import Tensor
-        ctx['Tensor'] = Tensor
-    except ImportError: pass
-    try:
-        import torch
-        ctx['torch'] = torch
-    except ImportError: pass
-
-    # Custom print to handle Tensors/Numpy arrays
-    def to_list(obj):
-        # tinygrad Tensor
-        try:
-            from tinygrad.tensor import Tensor
-            if isinstance(obj, Tensor):
-                return obj.tolist()
-        except Exception:
-            pass
-
-        # numpy array or torch tensor
-        if hasattr(obj, 'detach'):  # torch
-            try:
-                return obj.detach().cpu().tolist()
-            except Exception:
-                pass
-
-        if hasattr(obj, 'numpy'):  # numpy-like
-            try:
-                res = obj.numpy()
-                return res.tolist() if hasattr(res, 'tolist') else res
-            except Exception:
-                pass
-
-        return obj
-
-
-    def custom_print(*args, **kwargs):
-        new_args = [to_list(arg) for arg in args]
-        print(*new_args, **kwargs)
-
-    ctx['print'] = custom_print
-
-    import ast
-    def get_clean_result(actual_str, expected):
-        try:
-            actual_obj = ast.literal_eval(actual_str)
-            expected_obj = expected if not isinstance(expected, str) else ast.literal_eval(expected)
-            return actual_obj == expected_obj, actual_obj
-        except Exception:
-            def normalize(s):
-                import re
-                s = re.sub(r'\s+', '', str(s))
-                return s.replace("'", '"').replace(",]", "]").replace(",}", "}")
-            return normalize(actual_str) == normalize(expected), actual_str
-
-    for test in sub.test_cases:
-        test_input = test["test"]
-        result_display = ""
-        is_true = False
+        code_to_write = base64.b64decode(sub.code).decode("utf-8")
+        file_path = os.path.join("src", "code_run", f"Solution_{uuid.uuid4()}.py")
         
-        try:
-            f = io.StringIO()
-            with contextlib.redirect_stdout(f):
-                exec(code_to_write + "\n" + test_input, ctx)
-            
-            raw_result = f.getvalue().strip()
-            is_true, result_display = get_clean_result(raw_result, test["expected_output"])
-        except Exception as e:
-            result_display = f"Error: {e}"
-            is_true = False
+        await write_file(file_path, code_to_write)
 
-        out_put.append({
-            "test_input": test_input,
-            "test_res": result_display,
-            "expected_res": test["expected_output"],
-            "pass": is_true
-        })
-
-    return out_put
+        # Dynamically load the module
+        spec = importlib.util.spec_from_file_location("Solution", file_path)
+        solution_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(solution_module)
+        
+        solution = solution_module.Solution()
+        res=[]
+        for test in sub.test_cases:
+            func = getattr(solution, sub.function_name)
+            if isinstance(test['test'], (list, tuple)):
+                output = func(*test['test'])
+            else:
+                output = func(test['test'])
+            is_true=output==test['expected_output']
+            res.append({
+                "test_input": test['test'],
+                "test_res": output,
+                "expected_res": test['expected_output'],
+                "pass": is_true
+            })
+            await delete_file(file_path)
+        return res
+    except Exception as e:
+        await delete_file(file_path)
+        raise MyException(e, sys)
