@@ -45,3 +45,4 @@ LOCATION: Bangalore, India
 SKILLS: Python, Django, REST APIs, PostgreSQL
 SUMMARY: Backend developer with experience building scalable APIs and database-driven applications.
 """
+MODEL_TRAIN_API_PREFIX="/api/train"

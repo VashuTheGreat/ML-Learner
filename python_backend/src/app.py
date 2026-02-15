@@ -4,7 +4,8 @@ from contextlib import asynccontextmanager
 from src.constants import (
     APP_TITLE, APP_DESCRIPTION, APP_VERSION,
     USER_API_PREFIX, CODING_API_PREFIX, INTERVIEW_API_PREFIX,
-    PERFORMANCE_API_PREFIX, THREAD_API_PREFIX, HEALTH_API_PREFIX
+    PERFORMANCE_API_PREFIX, THREAD_API_PREFIX, HEALTH_API_PREFIX,
+    MODEL_TRAIN_API_PREFIX
 )
 
 from src.routes.user_router import router as UserRouter
@@ -14,6 +15,8 @@ from src.routes.performance_router import router as PerformanceRouter
 from src.routes.deleteThread_router import router as DeleteThreadRouter
 from src.routes.health_router import router as HealthRouter
 from src.components.interview import close_checkpointer
+from src.routes.modelTraining_router import router as ModelTrainRouter
+from src.routes.ModelTrainConfig_router import router as ModelTrainConfigRouter
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -43,6 +46,8 @@ app.include_router(InterviewRouter, prefix=INTERVIEW_API_PREFIX)
 app.include_router(PerformanceRouter, prefix=PERFORMANCE_API_PREFIX)
 app.include_router(DeleteThreadRouter, prefix=THREAD_API_PREFIX)
 app.include_router(HealthRouter, prefix=HEALTH_API_PREFIX)
+app.include_router(ModelTrainRouter, prefix=MODEL_TRAIN_API_PREFIX)
+app.include_router(ModelTrainConfigRouter, prefix=MODEL_TRAIN_API_PREFIX)
 
 @app.get("/")
 async def root():
