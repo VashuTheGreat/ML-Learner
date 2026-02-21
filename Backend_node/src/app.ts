@@ -9,8 +9,9 @@ import performanceRouter from "./routes/performance.routes.js"
 import questionRouter from "./routes/question.routes.js";
 import CodingSchemaRouter from "./routes/coding.routes.js"
 import { Request, Response } from "express";
-
-import {rateLimit} from 'express-rate-limit'
+import { rateLimit } from 'express-rate-limit'
+import { RedisStore } from 'rate-limit-redis'
+import redisClient from "./utils/RedisClient.js"
 
 import logger from "./logger/create.logger.js"
 logger.info("Connecting to MongoDB...");
@@ -35,7 +36,7 @@ interface Limiter {
   standardHeaders: 'draft-6' | 'draft-7' | 'draft-8' | boolean;
   legacyHeaders: boolean;
   ipv6Subnet?: number;  // Optional, defaults to 56
-  // store?: RateLimitStore;  // Optional for Redis/MemoryStore
+  store?: any;  // Use any here to avoid typing issues with RedisStore
 }
 
 // console.log(process.env)
@@ -45,6 +46,10 @@ const limiter = rateLimit({
   standardHeaders: process.env.standardHeaders as 'draft-6' | 'draft-7' | 'draft-8' | boolean,
   legacyHeaders: process.env.legacyHeaders === 'true',
   ipv6Subnet: Number(process.env.ipv6Subnet),
+  store: new RedisStore({
+    // @ts-expect-error - ioredis typing conflict with rate-limit-redis
+    sendCommand: async (...args: string[]) => redisClient.call(args[0], ...args.slice(1)),
+  }),
 } satisfies Limiter);  
 
 
@@ -62,7 +67,7 @@ app.use("/api/question",questionRouter);
 app.use("/api/codingSchema",CodingSchemaRouter)
 
 app.use("/",async (req:Request,res:Response)=>{
-    await new Promise(resolve=>setTimeout(resolve,2000))
+    // await new Promise(resolve=>setTimeout(resolve,2000))
     res.status(200).json({message:"Hello World"})
 })
 export default app;
