@@ -11,11 +11,13 @@ import CodingSchemaRouter from "./routes/coding.routes.js"
 import { Request, Response } from "express";
 
 import {rateLimit} from 'express-rate-limit'
+
+import logger from "./logger/create.logger.js"
 connectdb()
 const app=new Vexpress();
 app.setupDocs();
 
-
+logger.info("Server is starting at http://localhost:8000")
 app.use(cors({
     origin:['http://localhost:5173','http://localhost:5174','http://localhost:8080','*']
     ,credentials:true

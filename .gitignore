@@ -68,3 +68,6 @@ dump.rdb
 
 # Claude/AI artifacts
 .claude/
+
+
+*.log
