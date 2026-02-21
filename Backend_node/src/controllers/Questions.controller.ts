@@ -6,6 +6,7 @@ import { Query } from "mongoose";
 import connectsql from "../db/connectsql.js";
 import { Request,Response } from "express";
 import fs from "fs"
+import logger from "../logger/create.logger.js";
 
 let db:any;
 (async () => {
@@ -48,6 +49,7 @@ export const add_questions=expressRepre(
     },
     asyncHandler(async (req,res)=>{
         const {id,title,difficulty,category,problem_description,starter_code,example_input,example_output,example_reasoning,learn_content,solution_code,test_cases,function_name}=req.body;
+        logger.info(`Adding question: ${title} (ID: ${id})`);
         const data=await runquery(`insert into questions (id,title,difficulty,category,problem_description,starter_code,example_input,example_output,example_reasoning,learn_content,solution_code,test_cases,function_name) values (?,?,?,?,?,?,?,?,?,?,?,?,?)`, [id,title,difficulty,category,problem_description,starter_code,example_input,example_output,example_reasoning,learn_content,solution_code, JSON.stringify(test_cases), function_name])
         res.status(200).json(new ApiResponse(200,data))
     })
@@ -96,6 +98,7 @@ export const fetch_questionById=expressRepre({
     response:"a question"
 },asyncHandler(async (req:Request,res:Response)=>{
     const { question_id } = req.params as { question_id: any };
+    logger.info(`Fetching question by ID: ${question_id}`);
 
 
     const data=await runquery(`select * from questions where id=?`, [question_id])

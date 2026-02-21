@@ -5,6 +5,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 
 import jwt from "jsonwebtoken"
 import client from "../utils/RedisClient.js";
+import logger from "../logger/create.logger.js";
 
 
 export const verifyJWT=asyncHandler(async (req,res,next)=>{
@@ -14,7 +15,7 @@ export const verifyJWT=asyncHandler(async (req,res,next)=>{
      
     const decoded_token = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as any;
     
-    console.log(' Decoded token:', decoded_token);
+    logger.info(`JWT verification attempt for user: ${decoded_token?._id}`);
 
 let user;
     const st_to_red=`user:${token}`;
@@ -23,7 +24,7 @@ let user;
         user = await client.get(st_to_red); // Fetch user from Redis
         if (user) { 
             user = JSON.parse(user as string); 
-            console.log(" User fetched from Redis");
+            logger.info("User fetched from Redis");
         }
     } catch (error) {
         // Silently falling back to database
@@ -38,7 +39,7 @@ let user;
             if (user) {
                 await client.set(st_to_red, JSON.stringify(user));
                 await client.expire(st_to_red, 30);
-                console.log(" User cached in Redis");
+                logger.info("User cached in Redis");
             }
         } catch (error) {
             // Silently failing to cache
@@ -57,7 +58,7 @@ let user;
         _id: (decoded_token as any)._id
     };
     
-    console.log('✅ req.user set with _id:', req.user._id);
+    logger.info(`Authentication successful for user: ${req.user._id}`);
     
     next();
 })

@@ -5,6 +5,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
 // import { Query } from "mongoose";
 import { Request, Response } from "express";  
+import logger from "../logger/create.logger.js";
 
 export const createInterview = expressRepre(
   {
@@ -22,6 +23,8 @@ export const createInterview = expressRepre(
     const { companyName, topic, job_Role, time, status } = req.body;
     const user_id = req.user?._id;
 
+    logger.info(`Scheduling interview for user ${user_id} at ${companyName}`);
+
     if (!companyName || !topic || !job_Role || !time || !status) {
       throw new ApiError(400, "All fields are required");
     }
@@ -35,6 +38,7 @@ const interview = await Interview.findOne({
 });
 
 if (interview) {
+  logger.info("Interview already exists");
   return res
     .status(200)
     .json(new ApiResponse(200, interview, "Interview already exists"));
@@ -49,6 +53,7 @@ const newInterview = await Interview.create({
   status
 });
 
+logger.info(`Interview created successfully: ${newInterview._id}`);
 return res
   .status(201)
   .json(new ApiResponse(201, newInterview, "Interview created successfully"));
@@ -68,6 +73,8 @@ export const updateInterviewStatus = expressRepre(
   },
   asyncHandler(async (req, res) => {
     const { id, status } = req.body;
+
+    logger.info(`Updating interview ${id} status to ${status}`);
 
     if (!id || !status) {
       throw new ApiError(400, "All fields are required");
@@ -103,6 +110,8 @@ export const getUserInterviews = expressRepre(
       throw new ApiError(400, "user required");
     }
 
+    logger.info(`Fetching interviews for user: ${user._id}`);
+
     const interview = await Interview.find(
       {user_id:user?._id}
     );
@@ -129,7 +138,7 @@ export const getInterviewById = expressRepre(
   },
   asyncHandler(async (req, res) => {
     const { id } = req.query;
-    console.log(id)
+    logger.info(`Fetching interview by id: ${id}`);
 
     if (!id ) {
       throw new ApiError(400, "All fields are required");

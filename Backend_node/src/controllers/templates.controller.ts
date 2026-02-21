@@ -6,6 +6,7 @@ import Template from "../models/templates.models.js";
 import reder_html from "../helper/ejsEmbeder.helper.js"
 import fs from "fs";
 import path from "path";
+import logger from "../logger/create.logger.js";
 
 export const createTemplate=expressRepre(
     {
@@ -91,6 +92,7 @@ export const getTemplates=expressRepre(
     asyncHandler(
         async(req,res)=>{
             const { id } = req.params as { id: string };
+            logger.info(`Fetching template by ID: ${id}`);
             if (!id){
                 throw new ApiError(400,"Invalid template id")
             }
@@ -139,7 +141,7 @@ export const getAllTemplates = expressRepre(
         .json(new ApiResponse(200, final_response, "Templates fetched successfully"));
 
     } catch (err) {
-      console.error("Error fetching templates:", err);
+      logger.error("Error fetching templates:", err);
       // database ya server error
       throw new ApiError(500, "Internal Server Error");
     }

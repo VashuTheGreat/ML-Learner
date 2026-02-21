@@ -7,6 +7,7 @@ import client from "../utils/RedisClient.js"
 import validator from "validator"
 import jwt from "jsonwebtoken"
 import { uploadOnCloudinary,deleteOnCloudinary } from "../utils/cloudinary.utils.js"
+import logger from "../logger/create.logger.js"
 
 
 const token_option={ httpOnly: true, secure: true };
@@ -47,7 +48,7 @@ export const createUser = expressRepre({
     response: "To create a user",
 }, asyncHandler(async(req,res)=>{
     const {fullName, email, password} = req.body;
-    console.log(req.body)
+    logger.info(`Creating user with email: ${email}`);
     
     if(!fullName || !email || !password){
         throw new ApiError(400,"All fields are required");
@@ -57,7 +58,6 @@ export const createUser = expressRepre({
 
     // Check if user already exists by email
     const existingUser = await User.findOne({email});
-    console.log(existingUser)
     if (existingUser){
         throw new ApiError(400,"email already taken, please choose another");
     }
@@ -78,7 +78,7 @@ export const createUser = expressRepre({
     // Remove password from response
     const userResponse = await User.findById(createdUser._id).select("-password");
     
-    console.log("user created", userResponse);
+    logger.info(`User created successfully: ${userResponse?._id}`);
     
     res
         .cookie("refreshToken", refreshToken, token_option)
@@ -123,7 +123,7 @@ export const updateUser = expressRepre({
     
     const userResponse = await User.findById(user_id).select("-password");
     
-    console.log("user updated", userResponse);
+    logger.info(`User updated: ${user_id}`);
     res.json(new ApiResponse(200, userResponse, "User updated successfully"));
 }))
 
@@ -137,6 +137,7 @@ export const login = expressRepre({
     response: "user "
 }, asyncHandler(async (req,res)=>{
     const {password, email} = req.body;
+    logger.info(`Login attempt for email: ${email}`);
     
     
     
@@ -195,6 +196,7 @@ asyncHandler(async (req,res)=>{
     res.clearCookie("refreshToken", token_option)
     .clearCookie("accessToken", token_option)
     .json(new ApiResponse(200, "User logged out successfully"));
+    logger.info(`User logged out: ${req.user?._id}`);
 })
 )
 

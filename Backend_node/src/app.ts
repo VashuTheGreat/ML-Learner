@@ -13,8 +13,10 @@ import { Request, Response } from "express";
 import {rateLimit} from 'express-rate-limit'
 
 import logger from "./logger/create.logger.js"
+logger.info("Connecting to MongoDB...");
 connectdb()
 const app=new Vexpress();
+logger.info("Setting up documentation...");
 app.setupDocs();
 
 logger.info("Server is starting at http://localhost:8000")

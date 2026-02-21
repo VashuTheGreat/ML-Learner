@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
+import logger from "../logger/create.logger.js";
 
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
@@ -15,11 +16,12 @@ async function uploadOnCloudinary(localFilePath: string) {
         const fileExt = localFilePath.split('.').pop()?.toLowerCase();
         const resourceType = fileExt === 'pdf' ? 'raw' : 'auto'; // PDFs -> raw, others -> auto
 
+        logger.info(`Uploading file to Cloudinary: ${localFilePath}`);
         const uploadResult = await cloudinary.uploader.upload(localFilePath, {
             resource_type: "auto"
         });
 
-        console.log("File uploaded:", uploadResult);
+        logger.info("File uploaded successfully to Cloudinary", { public_id: uploadResult.public_id });
 
         // Delete file from local server
         fs.unlinkSync(localFilePath);
@@ -27,7 +29,7 @@ async function uploadOnCloudinary(localFilePath: string) {
         return uploadResult;
 
     } catch (err) {
-        console.log("Cloudinary upload error:", err);
+        logger.error("Cloudinary upload error:", err);
 
         // Delete temp file even if upload fails
         if (fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
@@ -42,10 +44,11 @@ async function deleteOnCloudinary(url: string){
         throw new Error("Invalid file path")
     }
     try{
+        logger.info(`Deleting file from Cloudinary: ${public_id}`);
         await cloudinary.uploader.destroy(public_id); 
-        console.log("File deleted:", public_id);
+        logger.info(`File deleted from Cloudinary: ${public_id}`);
     } catch(e) {
-        console.log("Cloudinary delete error:", e);
+        logger.error("Cloudinary delete error:", e);
     }
 }
 

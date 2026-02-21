@@ -1,5 +1,6 @@
 import { Redis } from "ioredis";
 import dotenv from "dotenv";
+import logger from "../logger/create.logger.js";
 
 dotenv.config();
 
@@ -13,8 +14,8 @@ const client = new Redis(process.env.REDIS_URL || "redis://localhost:6379", {
 
 // Silent error listener to prevent "Unhandled error event" crashes 
 // while keeping the console clean as requested by the user.
-client.on("error", () => {
-    // Silently handle connection errors
+client.on("error", (err) => {
+    logger.error("Redis connection error:", err);
 });
 
 export default client;

@@ -1,4 +1,5 @@
 import mysql from "mysql2/promise"
+import logger from "../logger/create.logger.js";
 
 
 async function connectsql() {
@@ -9,11 +10,11 @@ async function connectsql() {
   password:"Vansh@1234mysql",
   database:"ml_learner"
 })
-    console.log("mysql connected");
+    logger.info("mysql connected");
     return db
         
     } catch (error) {
-        console.log("mysql connection failed");
+        logger.error("mysql connection failed", error);
     }
 
     

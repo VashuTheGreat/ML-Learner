@@ -6,6 +6,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 import Coding from "../models/CodingQuestions.models.js";
 import { Request, Response } from "express";
 
+import logger from "../logger/create.logger.js";
 
 export const create_coding_schema = expressRepre(
   {
@@ -14,6 +15,7 @@ export const create_coding_schema = expressRepre(
   },
 
   asyncHandler(async (req:Request, res:Response) => {
+    logger.info("Entered in the create coding schema")
     const user = req.user;
     if (!user) throw new ApiError(400, "User not found");
 
@@ -30,6 +32,7 @@ export const create_coding_schema = expressRepre(
     if (!coding)
       throw new ApiError(500, "Error while initialising coding");
 
+    logger.info("Exited from the create coding schema")
     return res.status(200).json(
       new ApiResponse(200, coding, "coding schema created")
     );
@@ -101,7 +104,7 @@ export const update_coding_schema = expressRepre(
       )
     );
 
-    console.log("values to update:", parameters_to_update);
+    logger.info(`Updating coding schema for user: ${user_id}`, { parameters_to_update });
 
     const coding = await Coding.findOneAndUpdate(
       { user: user_id },           

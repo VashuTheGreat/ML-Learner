@@ -1,9 +1,11 @@
 import multer from "multer";
 import fs from "fs";
+import logger from "../logger/create.logger.js";
 const uploadPath="./public/temp";
 
 if(!fs.existsSync(uploadPath)){
     fs.mkdirSync(uploadPath,{recursive:true})
+    logger.info(`Created upload directory: ${uploadPath}`);
 }
 
 // using multer

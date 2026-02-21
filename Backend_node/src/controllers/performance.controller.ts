@@ -5,6 +5,7 @@ import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
+import logger from "../logger/create.logger.js";
 
 export const createPerformance = expressRepre(
   {
@@ -52,6 +53,8 @@ export const createPerformance = expressRepre(
       throw new ApiError(400, "Required fields are missing");
     }
 
+    logger.info(`Creating performance for interview: ${interview_id}`);
+
     if (!mongoose.Types.ObjectId.isValid(interview_id)) {
       throw new ApiError(400, "Invalid interview_id format");
     }
@@ -63,6 +66,7 @@ export const createPerformance = expressRepre(
 
     const existingPerformance = await Performance.findOne({ interview_id });
     if (existingPerformance) {
+      logger.info(`Performance already exists for interview: ${interview_id}`);
       return res
         .status(200)
         .json(
@@ -93,6 +97,7 @@ export const createPerformance = expressRepre(
       throw new ApiError(500, "Failed to create performance");
     }
 
+    logger.info(`Performance created successfully: ${performance._id}`);
     res
       .status(201)
       .json(
@@ -125,6 +130,8 @@ export const getInterviewPerformance = expressRepre(
     if (!interview_id) {
       throw new ApiError(400, "Required fields are missing");
     }
+
+    logger.info(`Fetching performance for interview: ${interview_id}`);
 
    
 
