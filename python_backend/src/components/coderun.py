@@ -23,21 +23,23 @@ async def run_code(sub):
         
         solution = solution_module.Solution()
         res=[]
-        for test in sub.test_cases:
-            func = getattr(solution, sub.function_name)
-            if isinstance(test['test'], (list, tuple)):
-                output = func(*test['test'])
-            else:
-                output = func(test['test'])
-            is_true=output==test['expected_output']
-            res.append({
-                "test_input": test['test'],
-                "test_res": output,
-                "expected_res": test['expected_output'],
-                "pass": is_true
-            })
+        try:
+            for test in sub.test_cases:
+                func = getattr(solution, sub.function_name)
+                if isinstance(test['test'], (list, tuple)):
+                    output = func(*test['test'])
+                else:
+                    output = func(test['test'])
+                is_true=output==test['expected_output']
+                res.append({
+                    "test_input": test['test'],
+                    "test_res": output,
+                    "expected_res": test['expected_output'],
+                    "pass": is_true
+                })
+        finally:
             await delete_file(file_path)
+            
         return res
     except Exception as e:
-        await delete_file(file_path)
         raise MyException(e, sys)

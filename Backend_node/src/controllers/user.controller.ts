@@ -44,7 +44,7 @@ async function ValidateAnything(dict: Record<string, any>){
 
 export const createUser = expressRepre({
     summary: "create user",
-    body: { fullName: "Vansh Sharma", email: "vanshsharma123@gmail.com", password: "122344544" },
+    body: { fullName: "Vansh Sharma", username:"vashuthegreat",email: "vanshsharma123@gmail.com", password: "122344544" },
     response: "To create a user",
 }, asyncHandler(async(req,res)=>{
     const {fullName, email, password, username} = req.body;
@@ -284,7 +284,7 @@ export const addResume=expressRepre(
     {
         summary: "upload resume",
         query:{
-            resume_id: "695a221e9e5f6b6f4690190e"
+            resume_id: "696c7ba53a981f5c038d009b"
         },
         response: "resume uploaded list of links"
     },
@@ -379,7 +379,7 @@ export const deleteResume=expressRepre(
 export const getUserById = expressRepre(
   {
     summary: "send userId get userDetails",
-    params: { id: '695a4de254a474d609d097ae' },
+    params: { id: '699a9bd773755482caa5996f' },
     response: "userData",
   },
   asyncHandler(async (req, res) => {
@@ -440,53 +440,61 @@ export const updateUserData=expressRepre(
     }
   },
   "summary": "Experienced software engineer with a strong background in full-stack development and a passion for building scalable applications.",
-  "education": {
-    "year": "2016 - 2020",
-    "college": "University of California, Berkeley",
-    "degree": "Bachelor of Science in Computer Science"
-  },
-  "skills": {
-    "technical": [
-      "JavaScript",
-      "Node.js",
-      "React",
-      "MongoDB",
-      "Docker"
-    ],
-    "soft": [
-      "Leadership",
-      "Communication",
-      "Problem Solving"
-    ]
-  },
+  "education": [
+    {
+      "year": "2016 - 2020",
+      "institute": "University of California, Berkeley",
+      "degree": "Bachelor of Science in Computer Science"
+    }
+  ],
+  "skills": [
+    "JavaScript",
+    "Node.js",
+    "React",
+    "MongoDB",
+    "Docker",
+    "Leadership",
+    "Communication",
+    "Problem Solving"
+  ],
+  "soft_skills": [
+    "Leadership",
+    "Communication",
+    "Problem Solving"
+  ],
   "languages": [
     "English",
     "Spanish"
   ],
-  "experience": {
-    "details": [
-      {
-        "role": "Senior Developer",
-        "duration": "2021 - Present",
-        "company": "Tech Solutions Inc.",
-        "responsibilities": [
-          "Lead a team of 5 developers in building a high-traffic e-commerce platform.",
-          "Implemented microservices architecture using Node.js and AWS.",
-          "Optimized database queries, reducing response time by 30%."
-        ]
-      },
-      {
-        "role": "Junior Developer",
-        "duration": "2020 - 2021",
-        "company": "Startup Hub",
-        "responsibilities": [
-          "Developed and maintained RESTful APIs for a mobile application.",
-          "Collaborated with UI/UX designers to implement responsive web interfaces.",
-          "Participated in code reviews and unit testing."
-        ]
-      }
-    ]
-  },
+  "experience": [
+    {
+      "role": "Senior Developer",
+      "duration": "2021 - Present",
+      "company": "Tech Solutions Inc.",
+      "description": "Lead a team of 5 developers in building a high-traffic e-commerce platform. Implemented microservices architecture using Node.js and AWS. Optimized database queries, reducing response time by 30%."
+    },
+    {
+      "role": "Junior Developer",
+      "duration": "2020 - 2021",
+      "company": "Startup Hub",
+      "description": "Developed and maintained RESTful APIs for a mobile application. Collaborated with UI/UX designers to implement responsive web interfaces. Participated in code reviews and unit testing."
+    }
+  ],
+  "projects": [
+    {
+      "title": "AI Resume Builder",
+      "description": "A web application that generates multiple resume templates dynamically using AI and user data.",
+      "tech_stack": ["React", "Node.js", "EJS"]
+    }
+  ],
+  "certifications": [
+    "AWS Certified Developer",
+    "Full Stack Web Development"
+  ],
+  "achievements": [
+    "Employee of the Month",
+    "Winner of Hackathon 2023"
+  ],
   "references": [
     {
       "name": "Jane Smith",
@@ -495,7 +503,12 @@ export const updateUserData=expressRepre(
       "phone": "+1 987 654 321",
       "email": "jane.smith@techsolutions.com"
     }
-  ]
+  ],
+  "someImportantUrls": {
+    "GitHub": "https://github.com/johndoe",
+    "LinkedIn": "https://linkedin.com/in/johndoe",
+    "Portfolio": "https://johndoe.com"
+  }
 }`
         },
         response:"updated user"

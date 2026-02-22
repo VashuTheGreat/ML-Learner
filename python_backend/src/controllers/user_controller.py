@@ -11,11 +11,22 @@ async def create_schema(userDetails: userDetails):
     logging.info("Entering create_schema controller")
     try:
         logging.debug(f"User details: {userDetails}")
-        schema = await create_resume_schema(userDetails=userDetails.userDetails)
-        schema = schema['ai_generated_schema']
-        logging.info("Schema created successfully")
+        graph_result = await create_resume_schema(userDetails=userDetails.userDetails)
+        
+        # Extract the schema from the graph result
+        if isinstance(graph_result, dict):
+            schema = graph_result.get('ai_generated_schema')
+        else:
+            schema = getattr(graph_result, 'ai_generated_schema', None)
+            
+        if schema is None:
+            logging.error("Failed to generate schema: ai_generated_schema is None")
+        else:
+            logging.info("Schema created successfully")
+            
         return schema
     except Exception as e:
+        logging.error(f"Error in create_schema: {str(e)}")
         raise MyException(e, sys)
 
 async def uploadResume(file: UploadFile):

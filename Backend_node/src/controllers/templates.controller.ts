@@ -86,7 +86,7 @@ export const createTemplate=expressRepre(
 export const getTemplates=expressRepre(
     {
         summary: "get templates",
-        params:{id:'695a221e9e5f6b6f4690190e'},
+        params:{id:'696c7ba53a981f5c038d009b'},
         response: "templates"
     },
     asyncHandler(
@@ -152,7 +152,7 @@ export const getAllTemplates = expressRepre(
 export const getTemplate_by_data=expressRepre(
     {
         summary: "get filled template with data",
-        body:{template_id:'695a221e9e5f6b6f4690190e',temp_data:`{
+        body:{template_id:'696c7ba53a981f5c038d009b',temp_data:`{
   "personal": {
     "name": "John Doe",
     "title": "Software Engineer",
@@ -165,53 +165,61 @@ export const getTemplate_by_data=expressRepre(
     }
   },
   "summary": "Experienced software engineer with a strong background in full-stack development and a passion for building scalable applications.",
-  "education": {
-    "year": "2016 - 2020",
-    "college": "University of California, Berkeley",
-    "degree": "Bachelor of Science in Computer Science"
-  },
-  "skills": {
-    "technical": [
-      "JavaScript",
-      "Node.js",
-      "React",
-      "MongoDB",
-      "Docker"
-    ],
-    "soft": [
-      "Leadership",
-      "Communication",
-      "Problem Solving"
-    ]
-  },
+  "education": [
+    {
+      "year": "2016 - 2020",
+      "institute": "University of California, Berkeley",
+      "degree": "Bachelor of Science in Computer Science"
+    }
+  ],
+  "skills": [
+    "JavaScript",
+    "Node.js",
+    "React",
+    "MongoDB",
+    "Docker",
+    "Leadership",
+    "Communication",
+    "Problem Solving"
+  ],
+  "soft_skills": [
+    "Leadership",
+    "Communication",
+    "Problem Solving"
+  ],
   "languages": [
     "English",
     "Spanish"
   ],
-  "experience": {
-    "details": [
-      {
-        "role": "Senior Developer",
-        "duration": "2021 - Present",
-        "company": "Tech Solutions Inc.",
-        "responsibilities": [
-          "Lead a team of 5 developers in building a high-traffic e-commerce platform.",
-          "Implemented microservices architecture using Node.js and AWS.",
-          "Optimized database queries, reducing response time by 30%."
-        ]
-      },
-      {
-        "role": "Junior Developer",
-        "duration": "2020 - 2021",
-        "company": "Startup Hub",
-        "responsibilities": [
-          "Developed and maintained RESTful APIs for a mobile application.",
-          "Collaborated with UI/UX designers to implement responsive web interfaces.",
-          "Participated in code reviews and unit testing."
-        ]
-      }
-    ]
-  },
+  "experience": [
+    {
+      "role": "Senior Developer",
+      "duration": "2021 - Present",
+      "company": "Tech Solutions Inc.",
+      "description": "Lead a team of 5 developers in building a high-traffic e-commerce platform. Implemented microservices architecture using Node.js and AWS. Optimized database queries, reducing response time by 30%."
+    },
+    {
+      "role": "Junior Developer",
+      "duration": "2020 - 2021",
+      "company": "Startup Hub",
+      "description": "Developed and maintained RESTful APIs for a mobile application. Collaborated with UI/UX designers to implement responsive web interfaces. Participated in code reviews and unit testing."
+    }
+  ],
+  "projects": [
+    {
+      "title": "AI Resume Builder",
+      "description": "A web application that generates multiple resume templates dynamically using AI and user data.",
+      "tech_stack": ["React", "Node.js", "EJS"]
+    }
+  ],
+  "certifications": [
+    "AWS Certified Developer",
+    "Full Stack Web Development"
+  ],
+  "achievements": [
+    "Employee of the Month",
+    "Winner of Hackathon 2023"
+  ],
   "references": [
     {
       "name": "Jane Smith",
@@ -220,7 +228,12 @@ export const getTemplate_by_data=expressRepre(
       "phone": "+1 987 654 321",
       "email": "jane.smith@techsolutions.com"
     }
-  ]
+  ],
+  "someImportantUrls": {
+    "GitHub": "https://github.com/johndoe",
+    "LinkedIn": "https://linkedin.com/in/johndoe",
+    "Portfolio": "https://johndoe.com"
+  }
 }`},
         response: "template with filled data"
     },

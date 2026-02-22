@@ -55,8 +55,13 @@ Reference for questions: the 10 generated questions provided earlier."""
 resumeGeneration_prompts=PromptTemplate.from_template(
         template="""
         You are a professional resume generator.
-        Using the following user details, generate a complete ResumeSchema output in valid JSON.
-        Make sure all fields of ResumeSchema are included.
+        Analyze the provided UserDetails and populate the ResumeSchema tool accurately.
+        
+        Rules:
+        1. Ensure all relevant fields from the user details are mapped to the schema.
+        2. Do NOT provide any conversational response, preamble, or separate JSON text. 
+        3. ONLY use the tool for output.
+        4. If a piece of information is missing, leave the field as null/empty as per the schema; do not use strings like "null" or "N/A".
         
         UserDetails: {userDetails}
         """,

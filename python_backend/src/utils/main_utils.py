@@ -17,7 +17,11 @@ async def read_file(file_path):
 
 async def delete_file(file_path):
     try:
-        os.remove(file_path)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        else:
+            import logging
+            logging.debug(f"File {file_path} not found, skipping deletion")
     except Exception as e:
         raise MyException(e, sys)
 
