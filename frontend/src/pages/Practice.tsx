@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import questionApi, { type Question } from '../Services/questionApi';
-import { BookOpen, Code, ChevronRight, Filter, Star, Search } from 'lucide-react';
+import { BookOpen, Code, ChevronRight, Filter, Star, Search, CheckCircle2 } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { cn } from '@/lib/utils';
+import { type CodingSchema } from '../Services/questionApi';
 
 const Practice: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
@@ -13,7 +14,23 @@ const Practice: React.FC = () => {
     const [activeDifficulty, setActiveDifficulty] = useState("All");
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
+    const [solvedIds, setSolvedIds] = useState<string[]>([]);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchSolvedStatus = async () => {
+            try {
+                const res = await questionApi.getCodingSchema();
+                if (res.success && res.data) {
+                    const schema = Array.isArray(res.data) ? res.data[0] : res.data;
+                    setSolvedIds(schema.all_questions_solved || []);
+                }
+            } catch (error) {
+                console.warn("Coding schema not found");
+            }
+        };
+        fetchSolvedStatus();
+    }, []);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -202,13 +219,25 @@ const Practice: React.FC = () => {
                                 <div className="flex items-center gap-6">
                                     <div className="hidden sm:flex flex-col items-end mr-4">
                                         <span className="text-xs text-muted-foreground uppercase tracking-widest font-bold mb-1">Status</span>
-                                        <span className="text-sm font-medium text-green-500 flex items-center gap-1.5">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                                            Available
-                                        </span>
+                                        {solvedIds.includes(String(q.id)) ? (
+                                            <span className="text-sm font-bold text-green-500 flex items-center gap-1.5 bg-green-500/10 px-3 py-1 rounded-lg border border-green-500/20">
+                                                <CheckCircle2 size={14} />
+                                                Solved
+                                            </span>
+                                        ) : (
+                                            <span className="text-sm font-medium text-blue-400 flex items-center gap-1.5 bg-blue-400/10 px-3 py-1 rounded-lg border border-blue-400/20">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                                                Available
+                                            </span>
+                                        )}
                                     </div>
-                                    <button className="btn-primary px-8 py-2.5 rounded-xl flex items-center gap-2 group/btn">
-                                        Solve
+                                    <button className={cn(
+                                        "px-8 py-2.5 rounded-xl flex items-center gap-2 group/btn font-bold transition-all duration-300",
+                                        solvedIds.includes(String(q.id))
+                                            ? "bg-secondary/10 text-muted-foreground hover:bg-secondary/20 border border-border/50"
+                                            : "btn-primary shadow-lg shadow-primary/20"
+                                    )}>
+                                        {solvedIds.includes(String(q.id)) ? 'Review' : 'Solve'}
                                         <ChevronRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
                                     </button>
                                 </div>

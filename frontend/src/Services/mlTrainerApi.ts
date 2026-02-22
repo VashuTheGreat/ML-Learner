@@ -7,18 +7,27 @@ const pythonApiInstance = axios.create({
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export interface ModelParamMeta {
+export interface DatasetParamMeta {
     type: 'int' | 'float' | 'bool' | string;
     default: number | boolean | null;
     description: string;
 }
 
+export interface ModelConfig {
+    class: string;
+    /** default_params is a flat key→value record (no type metadata) */
+    default_params: Record<string, string | number | boolean | null> | null;
+}
+
 export interface AvailableAttributes {
-    make_regression_params: Record<string, ModelParamMeta>;
-    make_classification_params: Record<string, ModelParamMeta>;
+    make_regression_params: Record<string, DatasetParamMeta>;
+    make_classification_params: Record<string, DatasetParamMeta>;
     regression_models: string[];
     classification_models: string[];
-    model_train_config: Record<string, any>;
+    model_train_config: {
+        regression_models: Record<string, ModelConfig>;
+        classification_models: Record<string, ModelConfig>;
+    };
 }
 
 export interface TrainPayload {
@@ -28,10 +37,35 @@ export interface TrainPayload {
     make_dataset: Record<string, any>;
 }
 
+/** Regression metrics from the backend */
+export interface RegressionMetrics {
+    mae: number;
+    mse: number;
+    rmse: number;
+    r2: number;
+}
+
+/** Classification metrics from the backend */
+export interface ClassificationMetrics {
+    accuracy: number;
+    precision: number;
+    recall: number;
+    f1: number;
+}
+
 export interface TrainResult {
-    model_name: string;
-    type: string;
-    metrics: Record<string, number>;
+    model_name?: string;
+    type?: string;
+    /** Regression: mae/mse/rmse/r2. Classification: accuracy/precision/recall/f1 */
+    mae?: number;
+    mse?: number;
+    rmse?: number;
+    r2?: number;
+    accuracy?: number;
+    precision?: number;
+    recall?: number;
+    f1?: number;
+    plots: string[];
     [key: string]: any;
 }
 

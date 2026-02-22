@@ -57,6 +57,37 @@ const Solve: React.FC = () => {
         fetchQuestion();
     }, [slug]);
 
+    useEffect(() => {
+        const syncCodingSchema = async () => {
+            if (!slug || !question) return;
+            try {
+                // Ensure schema exists
+                await questionApi.createCodingSchema();
+                
+                // Fetch schema
+                const res = await questionApi.getCodingSchema();
+                if (res.success && res.data) {
+                    const schema = Array.isArray(res.data) ? res.data[0] : res.data;
+                    const visited = schema.recently_visited || [];
+                    
+                    // Add current question to visited if not present
+                    if (!visited.includes(slug)) {
+                        const newVisited = [slug, ...visited].slice(0, 10); // Keep last 10
+                        await questionApi.updateCodingSchema({
+                            recently_visited: newVisited
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to sync coding schema:", err);
+            }
+        };
+
+        if (question) {
+            syncCodingSchema();
+        }
+    }, [slug, question]);
+
     const handleRun = async () => {
         if (!question) return;
         setRunning(true);
@@ -67,10 +98,83 @@ const Solve: React.FC = () => {
             const functionName = functionNameMatch ? functionNameMatch[1] : 'solution';
 
             const res = await questionApi.submitCode(code, question.test_cases, functionName);
-            if (res.data && res.data.error) {
-                setError(res.data.error);
+            console.log("Solve page: submitCode response:", res);
+
+            // More flexible test results extraction
+            let runResults = [];
+            if (res && res.data && Array.isArray(res.data)) {
+                runResults = res.data;
+            } else if (res && Array.isArray(res)) {
+                runResults = res;
+            } else if (res && res.data && res.data.data && Array.isArray(res.data.data)) {
+                runResults = res.data.data;
             } else {
-                setResults(res.data || res);
+                runResults = res ? (res.data || res) : [];
+            }
+            
+            if (!Array.isArray(runResults)) runResults = [];
+            setResults(runResults);
+
+            // SIMPLIFIED: Use loose truthiness for 'pass'
+            const allPassed = runResults.length > 0 && runResults.every((r: any) => !!r.pass);
+            
+            console.log("Solve page Debug:", {
+                runResultsLength: runResults.length,
+                allPassed,
+                firstResult: runResults[0],
+                questionId: question?.id
+            });
+
+            if (allPassed) {
+                alert("All Tests Passed! Syncing progress...");
+                // Update coding schema on success
+                try {
+                    console.log("Solve page: Starting network sync...");
+                    
+                    // 1. Ensure schema exists
+                    await questionApi.createCodingSchema();
+                    
+                    // 2. Fetch current status
+                    const schemaRes = await questionApi.getCodingSchema();
+                    console.log("Solve page: Schema response:", schemaRes);
+
+                    if (schemaRes.success && schemaRes.data) {
+                        const schema = Array.isArray(schemaRes.data) ? schemaRes.data[0] : schemaRes.data;
+                        
+                        if (!schema) throw new Error("Schema record not returned");
+
+                        const solved = schema.all_questions_solved || [];
+                        const currentId = String(question.id);
+                        
+                        console.log("Solve page: Solved check:", { currentId, isSolved: solved.includes(currentId) });
+
+                        if (!solved.includes(currentId)) {
+                            const newSolved = [currentId, ...solved];
+                            const recentSolved = [currentId, ...(schema.recently_solved || [])].slice(0, 10);
+                            
+                            const updateData: any = {
+                                all_questions_solved: newSolved,
+                                recently_solved: recentSolved,
+                            };
+                            
+                            const diff = (question.difficulty || 'easy').toLowerCase();
+                            if (diff === 'easy') updateData.easy = (schema.easy || 0) + 1;
+                            else if (diff === 'medium') updateData.medium = (schema.medium || 0) + 1;
+                            else if (diff === 'hard') updateData.hard = (schema.hard || 0) + 1;
+                            
+                            console.log("Solve page: Sending updateData:", updateData);
+                            await questionApi.updateCodingSchema(updateData);
+                            alert("Success! Achievement unlocked and count increased.");
+                        } else {
+                            alert("Correct! (Already included in your solved list)");
+                        }
+                    }
+                } catch (schemaErr: any) {
+                    console.error("Solve page Sync Error:", schemaErr);
+                    alert("Passed tests, but failed to sync progress: " + (schemaErr.message || "Unknown error"));
+                }
+            } else {
+                console.log("Solve page: Some tests failed or no results found.");
             }
         } catch (err) {
             console.error("Solve page: Failed to run code:", err);
@@ -126,7 +230,7 @@ const Solve: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
+        <div className="min-h-screen bg-background flex flex-col pt-11">
             <Navbar />
             
             {/* Sub-header / Breadcrumbs */}
@@ -169,7 +273,7 @@ const Solve: React.FC = () => {
                 </div>
             </div>
 
-            <main className="flex-1 flex overflow-hidden p-4 gap-4">
+            <main className="flex-1 flex overflow-hidden p-4 pt-6 gap-4">
                 {/* Left Panel: Description & Learn & Solution */}
                 <div className="w-1/2 flex flex-col glass-card rounded-2xl border border-border/50 overflow-hidden">
                     <div className="flex border-b border-border/50 bg-secondary/5">

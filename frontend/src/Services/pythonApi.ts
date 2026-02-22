@@ -70,7 +70,7 @@ class PythonApi {
     // ── Performance ───────────────────────────────────────────────────────
     /** Fetch AI-evaluated performance report for a given thread */
     async getPerformance(threadId: string) {
-        const response = await pythonApiInstance.get(`/api/performance/${threadId}`);
+        const response = await pythonApiInstance.get(`/api/performance/performance/${threadId}`);
         return response.data;
     }
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import pythonApi from '@/Services/pythonApi';
 import Navbar from '@/components/layout/Navbar';
-import { Briefcase, Calendar, MapPin, Loader2, Tag, Clock, Building2 } from 'lucide-react';
+import { Briefcase, Calendar, MapPin, Loader2, Tag, Clock, Building2, ShieldCheck, ChevronDown } from 'lucide-react';
 import interviewApi from '@/Services/interviewApi';
 const COMPANY_LOGOS: { [key: string]: string } = {
     "Google": "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
@@ -15,12 +15,13 @@ const COMPANY_LOGOS: { [key: string]: string } = {
 export const Apply = () => {
     const [interviews, setInterviews] = useState<any[] | null>(null);
     const [loading, setLoading] = useState(true);
-    const [userAplied,setUserAplied]=useState<any>(null)
+    const [userAplied,setUserAplied]=useState<any>(null);
+    const [isUpdated, setIsUpdated] = useState(false);
 
-    const fetchRunningApplyingInterviews = async () => {
+    const fetchRunningApplyingInterviews = async (updated: boolean = false) => {
         setLoading(true);
         try {
-            const response = await pythonApi.generateInterviewSchemas(3);
+            const response = await pythonApi.generateInterviewSchemas(3, undefined, undefined, updated);
             setInterviews(response.interviews || []);
             console.log("Fetched interviews:", response);
         } catch (error) {
@@ -44,9 +45,22 @@ export const Apply = () => {
     };
 
     useEffect(() => {
-        fetchRunningApplyingInterviews();
+        fetchRunningApplyingInterviews(isUpdated);
         fetchUserAppliedInterviews();
-    }, []);
+    }, [isUpdated]);
+
+    const handleUpdateChange = (value: boolean) => {
+        if (value === true) {
+            const password = prompt("Please enter admin password to enable updated interviews:");
+            if (password === "admin") {
+                setIsUpdated(true);
+            } else {
+                alert("Incorrect password!");
+            }
+        } else {
+            setIsUpdated(false);
+        }
+    };
 
     const handleApply = async (job: any) => {
         // Temporary function - logic will be added later
@@ -74,9 +88,32 @@ export const Apply = () => {
         <div className="min-h-screen bg-background">
             <Navbar />
             <main className="container mx-auto px-4 pt-24 pb-12">
-                <div className="mb-8">
-                    <h1 className="text-4xl font-bold mb-2">Available <span className="gradient-text">Opportunities</span></h1>
-                    <p className="text-muted-foreground text-lg">Apply for roles that match your AI-generated profile.</p>
+                <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <h1 className="text-4xl font-bold mb-2">Available <span className="gradient-text">Opportunities</span></h1>
+                        <p className="text-muted-foreground text-lg">Apply for roles that match your AI-generated profile.</p>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-secondary/10 p-1 rounded-xl border border-border/50">
+                        <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground mr-2">
+                           <ShieldCheck className="w-4 h-4 text-primary" />
+                           Admin Mode
+                        </div>
+                        <div className="flex bg-background rounded-lg shadow-sm">
+                            <button 
+                                onClick={() => handleUpdateChange(false)}
+                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${!isUpdated ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-secondary/20'}`}
+                            >
+                                Default
+                            </button>
+                            <button 
+                                onClick={() => handleUpdateChange(true)}
+                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${isUpdated ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-secondary/20'}`}
+                            >
+                                Updated
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 {loading ? (

@@ -16,13 +16,16 @@ import {
   Camera,
   Trash2,
   Upload,
-  FlaskConical
+  FlaskConical,
+  Trophy,
+  Code2
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import userApi from "@/Services/userApi";
 import templateApi from "@/Services/templateApi";
 import pythonApi from "@/Services/pythonApi";
 import interviewApi from "@/Services/interviewApi";
+import questionApi, { type CodingSchema } from "@/Services/questionApi";
 
 interface User {
   _id: string;
@@ -110,6 +113,7 @@ export const DashBoard = () => {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isExtractingResume, setIsExtractingResume] = useState(false);
   const [appliedInterviews, setAppliedInterviews] = useState<any[]>([]);
+  const [codingSchema, setCodingSchema] = useState<CodingSchema | null>(null);
 
   const fetchInterviews = async () => {
     try {
@@ -139,6 +143,17 @@ export const DashBoard = () => {
     }
   };
 
+  const fetchCodingSchema = async () => {
+    try {
+      const res = await questionApi.getCodingSchema();
+      if (res.success && res.data) {
+        setCodingSchema(Array.isArray(res.data) ? res.data[0] : res.data);
+      }
+    } catch (error) {
+      console.warn("Coding schema not found or failed to fetch");
+    }
+  };
+
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
@@ -149,6 +164,7 @@ export const DashBoard = () => {
           setAboutInput(parsedUser.aboutUser);
         }
         fetchInterviews();
+        fetchCodingSchema();
       } catch (error) {
         console.error("Failed to parse user data", error);
         navigate("/login");
@@ -578,6 +594,55 @@ const handleUpdateUser=async()=>{
                    )}
                  </div>
                )}
+            </div>
+
+            {/* Coding Stats Card */}
+            <div className="glass-card p-6 rounded-2xl relative overflow-hidden bg-gradient-to-br from-indigo-500/5 to-purple-500/5 border border-indigo-500/20">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+              
+              <div className="flex justify-between items-center mb-6 relative z-10">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-indigo-500" />
+                  Coding Achievement
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 mb-8 relative z-10">
+                <div className="bg-background/50 p-3 rounded-xl border border-border/50 text-center">
+                  <div className="text-[10px] font-bold text-green-500 uppercase tracking-widest mb-1">Easy</div>
+                  <div className="text-xl font-bold">{codingSchema?.easy || 0}</div>
+                </div>
+                <div className="bg-background/50 p-3 rounded-xl border border-border/50 text-center">
+                  <div className="text-[10px] font-bold text-yellow-500 uppercase tracking-widest mb-1">Med</div>
+                  <div className="text-xl font-bold">{codingSchema?.medium || 0}</div>
+                </div>
+                <div className="bg-background/50 p-3 rounded-xl border border-border/50 text-center">
+                  <div className="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1">Hard</div>
+                  <div className="text-xl font-bold">{codingSchema?.hard || 0}</div>
+                </div>
+              </div>
+
+              <div className="space-y-3 relative z-10">
+                <h4 className="text-xs font-black text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                  <Clock className="w-3.5 h-3.5" />
+                  Recently Solved
+                </h4>
+                {codingSchema?.recently_solved && codingSchema.recently_solved.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {codingSchema.recently_solved.slice(0, 5).map((slug, idx) => (
+                      <Link 
+                        key={idx}
+                        to={`/solve/${slug}`}
+                        className="px-3 py-1.5 rounded-lg bg-secondary/10 border border-border/50 text-[10px] font-medium hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-all truncate max-w-[120px]"
+                      >
+                        {slug.replace(/-/g, ' ')}
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">No questions solved yet.</p>
+                )}
+              </div>
             </div>
 
           </div>

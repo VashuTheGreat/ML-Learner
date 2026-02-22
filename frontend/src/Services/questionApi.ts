@@ -32,7 +32,50 @@ export interface Question {
     test_cases: { test: any; expected_output: any }[];
 }
 
+export interface CodingSchema {
+    recently_solved: string[];
+    recently_visited: string[];
+    all_questions_solved: string[];
+    easy: number;
+    medium: number;
+    hard: number;
+    user: string;
+}
+
+export interface UpdateCodingSchemaBody {
+    recently_solved?: string[];
+    recently_visited?: string[];
+    all_questions_solved?: string[];
+    easy?: number;
+    medium?: number;
+    hard?: number;
+}
+
 class QuestionApi {
+    /** Coding Schema Methods */
+    
+    async createCodingSchema() {
+        const response = await nodeApiInstance.get('/codingSchema/createCodingSchema', {
+            withCredentials: true
+        });
+        return response.data;
+    }
+
+    async getCodingSchema() {
+        const response = await nodeApiInstance.get('/codingSchema/getCodingSchema', {
+            withCredentials: true
+        });
+        return response.data;
+    }
+
+    async updateCodingSchema(data: UpdateCodingSchemaBody) {
+        const response = await nodeApiInstance.post('/codingSchema/updateCodingSchema', data, {
+            withCredentials: true
+        });
+        return response.data;
+    }
+
+    /** Question Methods */
     async fetchQuestionById(id: string) {
         console.log(`Fetching question by ID: ${id}`);
         const response = await nodeApiInstance.get(`/question/fetch_question/id/${id}`);

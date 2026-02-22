@@ -21,15 +21,20 @@ export const AIInterview = () => {
   const [threadId, setThreadId] = useState<string>("");
   const [topic, setTopic] = useState<string>("");
 
-  // Initialize threadId
+  // Initialize unique threadId for the interview session
   useEffect(() => {
-    let id = sessionStorage.getItem('interview_thread_id') || localStorage.getItem('interview_thread_id');
+    // Check if we already have a threadId for this session (e.g. on refresh)
+    let id = sessionStorage.getItem('interview_thread_id');
+    
     if (!id) {
+      // Generate a new unique ID if none exists for this session
       id = crypto.randomUUID();
       sessionStorage.setItem('interview_thread_id', id);
-      localStorage.setItem('interview_thread_id', id);
+      console.log("New Interview Thread ID generated:", id);
+    } else {
+      console.log("Resuming Interview with Thread ID:", id);
     }
-    console.log("Interview Thread ID initialized:", id);
+    
     setThreadId(id);
   }, []);
 
