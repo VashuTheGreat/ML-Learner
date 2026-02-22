@@ -9,6 +9,7 @@ import logger from "../logger/create.logger.js";
 
 
 export const verifyJWT=asyncHandler(async (req,res,next)=>{
+    logger.info("I am in verify jwt")
     const token=req.cookies?.accessToken|| req.header("Authorization")?.replace("Bearer ","");
 
     if (!token) throw new ApiError(401,"Unauthorized request")

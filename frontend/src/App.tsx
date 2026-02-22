@@ -26,6 +26,8 @@ import { AIInterview } from "./pages/AIInterview";
 import Performance from "./pages/Performance";
 import Practice from "./pages/Practice";
 import Solve from "./pages/Solve";
+import MLTrainer from "./pages/MLTrainer";
+import Playground from "./pages/Playground";
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -55,6 +57,8 @@ const App = () => (
           <Route path="/performance/:slug" element={<Performance/>} />
           <Route path="/practice" element={<Practice/>} />
           <Route path="/solve/:slug" element={<Solve/>} />
+          <Route path="/ml-trainer" element={<MLTrainer/>} />
+          <Route path="/playground" element={<Playground/>} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

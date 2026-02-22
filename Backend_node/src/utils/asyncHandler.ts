@@ -4,8 +4,7 @@ type AsyncFunction = (req: Request, res: Response, next: NextFunction) => Promis
 
 const asyncHandler = (fn: AsyncFunction) => (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch((error: any) => {
-        logger.error('Error:', error.message);
-        logger.error('Stack:', error.stack);
+        logger.error(error);
         res.status(error.statusCode || 500).json({ 
             success: false,
             message: error.message || "Something went wrong" 

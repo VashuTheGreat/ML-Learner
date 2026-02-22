@@ -1,11 +1,12 @@
 import api from './api';
 
 class UserApi {
-    async create({ fullname, email, password }: { fullname: string, email: string, password: string }) {
+    async create({ fullname, email, password, username }: { fullname: string, email: string, password: string, username: string }) {
         const response = await api.post('/user/create', {
             fullName: fullname, // Backend expects fullName
             email,
-            password
+            password,
+            username
         });
         const user = response.data.data;
         console.log("User Created", user);

@@ -7,7 +7,8 @@ import TemplateRouter from "./routes/templates.routes.js";
 import InterviewRouter from "./routes/interviews.routes.js";
 import performanceRouter from "./routes/performance.routes.js"
 import questionRouter from "./routes/question.routes.js";
-import CodingSchemaRouter from "./routes/coding.routes.js"
+import CodingSchemaRouter from "./routes/coding.routes.js";
+import StreamRouter from "./routes/stream.routes.js"
 import { Request, Response } from "express";
 import { rateLimit } from 'express-rate-limit'
 import { RedisStore } from 'rate-limit-redis'
@@ -64,7 +65,8 @@ app.use("/api/templates",TemplateRouter);
 app.use("/api/interview",InterviewRouter);
 app.use("/api/performance",performanceRouter);
 app.use("/api/question",questionRouter);
-app.use("/api/codingSchema",CodingSchemaRouter)
+app.use("/api/codingSchema",CodingSchemaRouter);
+app.use("/api/stream",StreamRouter)
 
 app.use("/",async (req:Request,res:Response)=>{
     // await new Promise(resolve=>setTimeout(resolve,2000))

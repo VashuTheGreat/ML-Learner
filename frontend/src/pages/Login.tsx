@@ -11,9 +11,12 @@ const Login = () => {
   const [password, setPassword] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-      const user=await userApi.login({email,password})
+    e.preventDefault();
+
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    const user = await userApi.login({ email: trimmedEmail, password: trimmedPassword });
   
       if (!user) alert("Error while registering");
   

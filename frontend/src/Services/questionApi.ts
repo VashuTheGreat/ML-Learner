@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const NODE_BASE_URL = 'http://localhost:3002/api';
+const NODE_BASE_URL = 'http://localhost:3000/api';
 const PYTHON_BASE_URL = 'http://localhost:8000';
 
 const nodeApiInstance = axios.create({
@@ -64,7 +64,7 @@ class QuestionApi {
         // code is expected to be base64 encoded by the caller or here
         // Using a more robust way to handle non-ASCII characters
         const base64Code = btoa(unescape(encodeURIComponent(code)));
-        const response = await pythonApiInstance.post('/submit', {
+        const response = await pythonApiInstance.post('/api/coding/submit', {
             code: base64Code,
             test_cases: testCases,
             function_name: functionName

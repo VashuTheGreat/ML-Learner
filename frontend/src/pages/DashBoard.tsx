@@ -15,7 +15,8 @@ import {
   X,
   Camera,
   Trash2,
-  Upload
+  Upload,
+  FlaskConical
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import userApi from "@/Services/userApi";
@@ -483,6 +484,19 @@ const handleUpdateUser=async()=>{
                 </div>
               </div>
             </div>
+
+            {/* ML Playground Card */}
+            <Link to="/playground" className="glass-card p-6 rounded-2xl flex items-center gap-4 group cursor-pointer border-2 border-primary/20 hover:border-primary/50 transition-all duration-300 relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-primary/20 transition-all duration-500"></div>
+               <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 relative z-10">
+                 <FlaskConical className="w-8 h-8 text-primary" />
+               </div>
+               <div className="relative z-10">
+                 <h3 className="font-bold text-lg group-hover:text-primary transition-colors">ML Playground</h3>
+                 <p className="text-xs text-muted-foreground">Experiment with AI models in our interactive lab.</p>
+               </div>
+               <ChevronRight className="w-5 h-5 ml-auto text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+            </Link>
 
             {/* About User Section */}
             <div className="glass-card p-6 rounded-2xl relative overflow-hidden">

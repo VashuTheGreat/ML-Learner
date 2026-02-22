@@ -47,36 +47,43 @@ export const createUser = expressRepre({
     body: { fullName: "Vansh Sharma", email: "vanshsharma123@gmail.com", password: "122344544" },
     response: "To create a user",
 }, asyncHandler(async(req,res)=>{
-    const {fullName, email, password} = req.body;
-    logger.info(`Creating user with email: ${email}`);
+    const {fullName, email, password, username} = req.body;
+    logger.info(`Creating user with email: ${email}, username: ${username}`);
     
-    if(!fullName || !email || !password){
-        throw new ApiError(400,"All fields are required");
+    if(!fullName || !email || !password || !username){
+        throw new ApiError(400,"All fields (fullName, email, password, username) are required");
     }
 
     await ValidateAnything({email, password});
 
-    // Check if user already exists by email
-    const existingUser = await User.findOne({email});
+    // Check if user already exists by email or username
+    const existingUser = await User.findOne({ $or: [{email}, {username}] });
     if (existingUser){
-        throw new ApiError(400,"email already taken, please choose another");
+        if (existingUser.email === email) {
+            throw new ApiError(400,"email already taken, please choose another");
+        }
+        throw new ApiError(400,"username already taken, please choose another");
     }
     
-   
+    const user = new User({
+        fullName,
+        email,
+        password,
+        username
+    });
     
-    const createdUser = await User.create({fullName, email, password});
+    const {accessToken, refreshToken} = await generateAccessRefreshToken(user);
+    
+    user.refreshToken = refreshToken;
+    await user.save();
+    
+    const createdUser = await User.findById(user._id).select("-password -refreshToken");
     
     if(!createdUser){
-        throw new ApiError(500,"Failed to create user");
+        throw new ApiError(500,"Failed to register user");
     }
     
-    const {accessToken, refreshToken} = await generateAccessRefreshToken(createdUser);
-    
-    createdUser.refreshToken = refreshToken;
-    await createdUser.save();
-    
-    // Remove password from response
-    const userResponse = await User.findById(createdUser._id).select("-password");
+    const userResponse = createdUser;
     
     logger.info(`User created successfully: ${userResponse?._id}`);
     
@@ -136,22 +143,28 @@ export const login = expressRepre({
     },
     response: "user "
 }, asyncHandler(async (req,res)=>{
-    const {password, email} = req.body;
-    logger.info(`Login attempt for email: ${email}`);
-    
-    
+    const {password, email: loginIdentifier} = req.body;
+    logger.info(`Login attempt for: ${loginIdentifier}`);
     
     if(!password){
         throw new ApiError(400,"Password is required");
     }
     
-    if(!email){
-        throw new ApiError(400,"email is required");
+    if(!loginIdentifier){
+        throw new ApiError(400,"Email or username is required");
     }
 
-    await ValidateAnything({password, email});
+    const trimmedIdentifier = loginIdentifier.trim();
+    const trimmedPassword = password.trim();
+
+    await ValidateAnything({password: trimmedPassword, email: trimmedIdentifier});
     
-    const userInstance = await User.findOne({email});
+    const userInstance = await User.findOne({
+        $or: [
+            { email: trimmedIdentifier },
+            { username: trimmedIdentifier.toLowerCase() }
+        ]
+    });
     
     
     

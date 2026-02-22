@@ -57,7 +57,7 @@ const Navbar = () => {
     { name: "About", path: "/about" },
     { name: "Courses", path: "/courses" },
     { name: "Practice", path: "/practice" },
-    // { name: "Quiz", path: "/quiz" },
+    { name: "ML Playground", path: "/playground" },
     { name: "apply", path: "/apply" },
     { name: "Contact", path: "/contact" },
   ];
