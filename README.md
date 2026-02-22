@@ -1,127 +1,132 @@
-# InterviewCraker
+# 🎯 ML-Learner (InterviewCracker)
 
-A comprehensive interview preparation and practice platform with AI-powered features, resume building, and performance tracking.
+**The Ultimate AI-Powered Technical Interview & Machine Learning Playground.**
 
-## 📋 Overview
+InterviewCracker is a robust, full-stack platform designed to bridge the gap between learning and landing your dream job. It combines a sophisticated Machine Learning playground, an interactive coding environment, and AI-driven interview simulations into one seamless experience.
 
-InterviewCraker is a full-stack application designed to help users prepare for technical interviews, practice coding problems, build professional resumes, and track their performance over time.
+---
 
-## 🏗️ Project Structure
+## � Core Features
 
-The project is organized into three main components:
+### 🧠 AI Interview Simulation
 
-### Backend (Node.js)
-- **Location**: `Backend_node/`
-- **Framework**: Express.js
-- **Features**:
-  - User authentication and management
-  - Coding problem repository
-  - Interview simulations
-  - Performance tracking
-  - Resume template management
-  - File upload with Cloudinary integration
-  - Redis caching
-  - MongoDB database
+- **Dynamic Interaction**: Engage in realistic technical interviews with AI agents that adapt to your responses.
+- **Skill Mapping**: Get a detailed breakdown of your strengths and weaknesses across different technical domains.
+- **Performance Analytics**: Track your progress with visual metrics and historical performance data.
 
-### Frontend (React + TypeScript)
-- **Location**: `pixel-perfect-ui/`
-- **Framework**: React with Vite
-- **Features**:
-  - Interview practice interface
-  - Dashboard with analytics
-  - Resume builder
-  - LinkedIn integration
-  - Responsive UI with Tailwind CSS
-  - Unit testing with Vitest
+### 💻 Interactive Coding Practice
 
-### Python Backend
-- **Location**: `python_backend/`
-- **Features**:
-  - AI-powered features
-  - Advanced data processing
-  - MCP (Model Context Protocol) integration
+- **Multi-Category Challenges**: Practice Linear Algebra, Statistics, Data Structures, and ML-specific coding problems.
+- **TinyGrad Integration**: Solve problems specifically designed for optimized tensor computation.
+- **Real-time Execution**: Immediate feedback on code performance and test case validation.
+- **Progress Tracking**: Keep tabs on your achievements with a gamified dashboard.
 
-## 🚀 Getting Started
+### 📊 ML Playground & Trainer
 
-### Prerequisites
-- Node.js (v14 or higher)
-- Python 3.8+
-- MongoDB
-- Redis (optional, for caching)
+- **End-to-End ML Pipeline**: From data transformation to model training and evaluation.
+- **Interactive Visualizations**: Real-time plots for classification decision regions, regression residuals, and more.
+- **Model Configuration**: Experiment with different architectures and hyperparameters directly from the UI.
 
-### Installation
+### 📝 Resume & Career Tools
 
-1. **Backend Node Setup**
-   ```bash
-   cd Backend_node
-   npm install
-   npm start
-   ```
+- **Template-Based Builder**: Create professional, EJS-templated resumes.
+- **LinkedIn Sync**: Integrate your professional profile for a unified career presence.
 
-2. **Frontend Setup**
-   ```bash
-   cd pixel-perfect-ui
-   npm install
-   npm run dev
-   ```
+---
 
-3. **Python Backend Setup**
-   ```bash
-   cd python_backend
-   pip install -r requirements.txt
-   python main.py
-   ```
+## 🏗️ Architecture & Tech Stack
 
-## 📁 Key Files
+The project follows a distributed architecture with dual backends to handle high-performance ML workloads and scalable user management.
 
-### Backend Node
-- `src/app.js` - Express application setup
-- `src/routes/` - API route definitions
-- `src/controllers/` - Business logic
-- `src/models/` - Database schemas
-- `src/utils/` - Helper utilities
+### 🎨 Frontend (React + Vite)
 
-### Frontend
-- `src/pages/` - Page components
-- `src/components/` - Reusable components
-- `src/Services/` - API service calls
-- `src/hooks/` - Custom React hooks
+- **Framework**: React 18 with TypeScript
+- **Styling**: Tailwind CSS & Lucide Icons
+- **Components**: Shadcn/UI for premium, responsive design
+- **Editor**: Monaco Editor for a VS-Code like coding experience
+- **State/Data**: TanStack Query (React Query) & Axios
 
-## 🔧 Environment Variables
+### ⚡ Node.js Backend (Core Engine)
 
-Create `.env` files in respective directories:
+- **Framework**: Express.js with `@vashuthegreat/vexpress`
+- **Database**: MongoDB (Mongoose)
+- **Caching**: Redis for session and rate-limiting
+- **Storage**: Cloudinary for file and avatar management
+- **Logging**: Winston for comprehensive observability
 
-**Backend_node/.env**
-```
-MONGODB_URI=your_mongodb_uri
-REDIS_URL=your_redis_url
-CLOUDINARY_NAME=your_cloudinary_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-PORT=8000
-```
+### 🐍 Python Backend (ML & AI)
 
-**pixel-perfect-ui/.env**
-```
-VITE_API_BASE_URL=http://localhost:8000
-```
+- **Framework**: FastAPI
+- **AI/LLM**: LangChain & LangGraph for intelligent interview flows
+- **ML Libraries**: PyTorch, Scikit-Learn, TinyGrad
+- **Visualization**: Seaborn & Matplotlib
 
-## 📚 Features
+---
 
-- **Interview Practice**: Simulate real interview scenarios with AI feedback
-- **Coding Problems**: Extensive library of coding interview questions
-- **Resume Builder**: Multiple professional resume templates
-- **Performance Analytics**: Track progress and identify weak areas
-- **LinkedIn Integration**: Easy profile sharing
-- **Code Storage**: Save and manage coding solutions
+## 📁 Project Structure
 
-## 🧪 Testing
-
-### Frontend
 ```bash
-cd pixel-perfect-ui
-npm run test
+ML-Learner/
+├── frontend/               # React + Vite application
+│   ├── src/pages/          # Main application views (Solve, DashBoard, MLTrainer, etc.)
+│   ├── src/Services/       # API integration layers
+│   └── src/components/     # Shared UI components
+├── Backend_node/           # Main application server (Node.js)
+│   ├── src/routes/         # Auth, Questions, Coding, Interviews
+│   ├── src/controllers/    # Business logic implementation
+│   └── src/models/         # MongoDB schemas
+└── python_backend/         # AI & ML computation server (Python)
+    ├── src/routes/         # ML Training, AI Interviews, Coding Execution
+    ├── src/components/     # Coderunner, Model Trainer, AI Agents
+    └── main.py             # FastAPI entry point
 ```
+
+---
+
+## 🚥 API Reference
+
+### Node.js API (`:3000`)
+
+- `GET  /api/user/me` - Fetch authenticated user profile
+- `GET  /api/question/fetch_question/all` - List practice challenges
+- `POST /api/codingSchema/updateCodingSchema` - Sync user progress
+- `GET  /api/interview/getUserAppliedInterviews` - Fetch interview history
+
+### Python API (`:8000`)
+
+- `POST /api/coding/submit` - Execute and validate coding solutions
+- `POST /api/modelTrain/initiate_training` - Trigger custom ML training
+- `POST /api/interviewSchema/aboutUserByResume` - AI-powered resume extraction
+
+---
+
+## 🛠️ Getting Started
+
+### 1. Setup Backend (Node)
+
+```bash
+cd Backend_node
+npm install
+npm run dev
+```
+
+### 2. Setup ML Engine (Python)
+
+```bash
+cd python_backend
+# Recommended: use uv
+uv run main.py
+```
+
+### 3. Setup Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
 
 ## 📄 License
 
@@ -129,16 +134,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Author
 
-Vansh
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to fork the repository and submit pull requests.
-
-## 📧 Contact
-
-For inquiries and support, please reach out through the Contact page in the application.
+**Vansh** - [GitHub](https://github.com/VashuTheGreat)
 
 ---
 
-**Happy Interviewing! 🎯**
+_Powered by Deep Learning and Passion. 🚀_
