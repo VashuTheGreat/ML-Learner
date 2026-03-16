@@ -391,7 +391,7 @@ const handleUpdateUser=async()=>{
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen w-full flex items-center justify-center relative">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
@@ -400,7 +400,7 @@ const handleUpdateUser=async()=>{
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 p-4 md:p-8 animate-in fade-in max-w-[1600px] mx-auto">
+    <div className="min-h-screen w-full text-foreground selection:bg-primary/20 p-4 md:p-8 animate-in fade-in max-w-[1600px] mx-auto relative z-10">
       
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -439,8 +439,8 @@ const handleUpdateUser=async()=>{
         </div>
         
         <div className="bg-card border border-border p-4 rounded-2xl flex items-center gap-4 relative overflow-hidden group">
-          <div className="absolute -right-2 top-0 w-16 h-16 bg-cyan-500/5 rounded-full blur-xl group-hover:bg-cyan-500/10 transition-colors"></div>
-          <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-500">
+          <div className="absolute -right-2 top-0 w-16 h-16 bg-accent/5 rounded-full blur-xl group-hover:bg-accent/10 transition-colors"></div>
+          <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
             <FileText className="w-5 h-5" />
           </div>
           <div>
@@ -450,8 +450,8 @@ const handleUpdateUser=async()=>{
         </div>
         
         <div className="bg-card border border-border p-4 rounded-2xl flex items-center gap-4 relative overflow-hidden group">
-          <div className="absolute -right-2 top-0 w-16 h-16 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-colors"></div>
-          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+          <div className="absolute -right-2 top-0 w-16 h-16 bg-secondary/10 rounded-full blur-xl group-hover:bg-secondary/20 transition-colors"></div>
+          <div className="w-12 h-12 rounded-xl bg-secondary/20 flex items-center justify-center text-secondary-foreground">
             <Calendar className="w-5 h-5" />
           </div>
           <div>
@@ -679,10 +679,10 @@ const handleUpdateUser=async()=>{
                       <div className="absolute top-3 right-3">
                         <span className={`text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest backdrop-blur-sm ${
                           interview.status === 'live'
-                            ? 'bg-green-500 text-white shadow-lg shadow-green-500/40 animate-pulse'
+                            ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/40 animate-pulse'
                             : interview.status === 'done'
                             ? 'bg-white/20 text-white border border-white/30'
-                            : 'bg-amber-400/90 text-amber-900'
+                            : 'bg-secondary text-secondary-foreground'
                         }`}>
                           {interview.status === 'live' ? '● Live' : interview.status === 'done' ? '✓ Done' : '⏰ Scheduled'}
                         </span>

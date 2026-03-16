@@ -99,7 +99,7 @@ const Practice: React.FC = () => {
     );
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen">
             <Navbar />
             
             {/* Header Section */}
@@ -225,8 +225,8 @@ const Practice: React.FC = () => {
                                                 Solved
                                             </span>
                                         ) : (
-                                            <span className="text-sm font-medium text-blue-400 flex items-center gap-1.5 bg-blue-400/10 px-3 py-1 rounded-lg border border-blue-400/20">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                                            <span className="text-sm font-medium text-primary flex items-center gap-1.5 bg-primary/10 px-3 py-1 rounded-lg border border-primary/20">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
                                                 Available
                                             </span>
                                         )}

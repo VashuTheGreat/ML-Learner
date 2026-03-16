@@ -9,22 +9,22 @@ const About = () => {
       icon: Target,
       title: "Our Mission",
       description: "To make quality ML & coding education accessible to everyone, everywhere — from beginners to senior engineers.",
-      gradient: "from-violet-500 to-purple-600",
-      iconBg: "bg-violet-500/10 text-violet-500",
+      gradient: "from-primary to-accent",
+      iconBg: "bg-primary/10 text-primary",
     },
     {
       icon: Eye,
       title: "Our Vision",
       description: "To become the world's leading platform for interactive machine learning education and interview preparation.",
-      gradient: "from-pink-500 to-rose-600",
-      iconBg: "bg-pink-500/10 text-pink-500",
+      gradient: "from-accent to-secondary",
+      iconBg: "bg-accent/10 text-accent",
     },
     {
       icon: Heart,
       title: "Our Values",
       description: "Innovation, accessibility, and student success drive every feature we ship and every decision we make.",
-      gradient: "from-amber-500 to-orange-500",
-      iconBg: "bg-amber-500/10 text-amber-500",
+      gradient: "from-secondary to-primary",
+      iconBg: "bg-secondary/20 text-secondary-foreground",
     },
   ];
 
@@ -41,21 +41,21 @@ const About = () => {
       role: "Founder & CEO",
       specialization: "Full Stack Development",
       initials: "RS",
-      color: "from-violet-500 to-purple-600",
+      color: "from-primary to-accent",
     },
     {
       name: "Priya Patel",
       role: "Head of Education",
       specialization: "Data Science & ML",
       initials: "PP",
-      color: "from-pink-500 to-rose-600",
+      color: "from-accent to-secondary",
     },
     {
       name: "Amit Kumar",
       role: "Lead Instructor",
       specialization: "Frontend Development",
       initials: "AK",
-      color: "from-amber-500 to-orange-500",
+      color: "from-secondary to-primary",
     },
   ];
 
@@ -66,7 +66,7 @@ const About = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen w-full relative">
       <Navbar />
 
       {/* ── Hero ─────────────────────────────────────────── */}
@@ -124,7 +124,7 @@ const About = () => {
       </section>
 
       {/* ── Stats Bar ─────────────────────────────────────── */}
-      <section className="py-16 bg-foreground/[0.03] border-y border-border">
+      <section className="py-16 border-y border-border/50 relative z-10">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {stats.map((stat, i) => (
@@ -173,7 +173,7 @@ const About = () => {
       </section>
 
       {/* ── Team ─────────────────────────────────────────── */}
-      <section className="py-24 bg-foreground/[0.02]">
+      <section className="py-24 relative z-10">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-semibold mb-5">

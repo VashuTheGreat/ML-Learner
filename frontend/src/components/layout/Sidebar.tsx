@@ -59,12 +59,17 @@ export const Sidebar = () => {
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex flex-col",
-          "bg-sidebar-background border-r border-sidebar-border shadow-lg",
+          "border-r border-sidebar-border shadow-2xl",
           "transition-all duration-300 ease-in-out",
           // Mobile responsive classes
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
-        style={{ width: isCollapsed ? "72px" : "260px" }}
+        style={{
+          width: isCollapsed ? "72px" : "260px",
+          background: "hsl(var(--sidebar-background) / 0.75)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+        }}
       >
         {/* Collapse toggle (Desktop only) */}
         <button

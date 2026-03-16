@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-export type ThemeId = "teal" | "violet" | "emerald" | "amber" | "rose";
+export type ThemeId = "teal" | "violet" | "emerald" | "amber" | "rose" | "cyber" | "aurora" | "nebula" | "solaris" | "prism";
 
 export interface ThemeMeta {
   id: ThemeId;
@@ -15,7 +15,13 @@ export const THEMES: ThemeMeta[] = [
   { id: "emerald", name: "Emerald Peak",    light: "#065F46", dark: "#34d399" },
   { id: "amber",   name: "Amber Forge",     light: "#92400E", dark: "#fbbf24" },
   { id: "rose",    name: "Rose Storm",      light: "#9F1239", dark: "#fb7185" },
+  { id: "cyber",   name: "Cyber Neon",      light: "#7C3AED", dark: "#F472B6" },
+  { id: "aurora",  name: "Aurora Nova",     light: "#10b981", dark: "#059669" },
+  { id: "nebula",  name: "Nebula Drift",    light: "#8b5cf6", dark: "#ec4899" },
+  { id: "solaris", name: "Solaris Gold",    light: "#f59e0b", dark: "#fbbf24" },
+  { id: "prism",   name: "Prism Multi",     light: "#6366f1", dark: "#10b981" },
 ];
+
 
 interface ThemeCtx {
   themeId: ThemeId;

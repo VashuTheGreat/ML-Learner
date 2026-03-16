@@ -28,24 +28,24 @@ const Contact = () => {
       label: "Email Us",
       value: "hello@mllearner.com",
       description: "Drop us a line anytime",
-      color: "from-violet-500 to-purple-600",
-      iconBg: "bg-violet-500/10 text-violet-500",
+      color: "from-primary to-accent",
+      iconBg: "bg-primary/10 text-primary",
     },
     {
       icon: Phone,
       label: "Call Us",
       value: "+91 123 456 7890",
       description: "Mon–Fri, 9am–6pm IST",
-      color: "from-pink-500 to-rose-600",
-      iconBg: "bg-pink-500/10 text-pink-500",
+      color: "from-accent to-secondary",
+      iconBg: "bg-accent/10 text-accent",
     },
     {
       icon: MapPin,
       label: "Find Us",
       value: "Mumbai, India",
       description: "Come say hello",
-      color: "from-amber-500 to-orange-500",
-      iconBg: "bg-amber-500/10 text-amber-500",
+      color: "from-secondary to-primary",
+      iconBg: "bg-secondary/20 text-secondary-foreground",
     },
   ];
 
@@ -57,7 +57,7 @@ const Contact = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen">
       <Navbar />
 
       {/* ── Hero ─────────────────────────────────────────── */}

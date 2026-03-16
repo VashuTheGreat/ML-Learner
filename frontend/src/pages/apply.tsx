@@ -85,7 +85,7 @@ export const Apply = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen">
             <Navbar />
             <main className="container mx-auto px-4 pt-24 pb-12">
                 <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">

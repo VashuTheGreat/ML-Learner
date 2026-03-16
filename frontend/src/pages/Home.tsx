@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Play, Star, Users, BookOpen, Bot, FileText, Code2 } from "lucide-react";
 import Footer from "@/components/layout/Footer";
+import { FloatingStudyHero } from "@/components/layout/FloatingStudyHero";
 
 const Home = () => {
   return (
@@ -10,38 +11,38 @@ const Home = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[minmax(180px,auto)]">
 
         {/* BIG HERO – spans 3 cols, 2 rows */}
-        <div className="md:col-span-3 md:row-span-2 relative rounded-3xl overflow-hidden p-8 md:p-12 shadow-2xl flex flex-col justify-between group gradient-bg"
-        >
+          <div className="md:col-span-3 md:row-span-2 relative rounded-3xl overflow-hidden p-8 md:p-12 shadow-2xl flex flex-col md:flex-row items-center gap-6 justify-between group gradient-bg">
           {/* ambient glow orbs */}
           <div className="absolute top-0 right-0 w-[480px] h-[480px] rounded-full blur-[110px] -translate-y-1/3 translate-x-1/4 transition-all duration-700 bg-primary/10" />
           <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full blur-[90px] translate-y-1/3 -translate-x-1/4 bg-primary/20" />
 
-          <div className="relative z-10 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-medium mb-8 text-white">
-              <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-              <span>Top Rated Tech Platform 2025</span>
+          {/* Text side */}
+          <div className="relative z-10 max-w-xl flex flex-col justify-between h-full py-2">
+            <div>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-medium mb-8 text-white">
+                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                <span>Top Rated Tech Platform 2025</span>
+              </div>
+
+              <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.1] tracking-tight mb-6 text-white">
+                Master The <br />
+                <span className="gradient-text brightness-125">Future of AI.</span>
+              </h1>
+
+              <p className="text-lg md:text-xl max-w-lg mb-10 leading-relaxed text-white/80">
+                Accelerate your tech career with personalized coding
+                challenges and real-time AI-driven mock interviews.
+              </p>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.1] tracking-tight mb-6 text-white">
-              Master The <br />
-              <span className="gradient-text brightness-125">
-                Future of AI.
-              </span>
-            </h1>
-
-            <p className="text-lg md:text-xl max-w-lg mb-10 leading-relaxed text-white/80">
-              Accelerate your tech career with personalized coding
-              challenges and real-time AI-driven mock interviews.
-            </p>
+            <div className="flex items-center gap-4">
+              <Link to="/courses" className="btn-primary">Start Learning Now</Link>
+            </div>
           </div>
 
-          <div className="relative z-10 flex items-center gap-4">
-            <Link
-              to="/courses"
-              className="btn-primary"
-            >
-              Start Learning Now
-            </Link>
+          {/* 3D Knowledge Graph */}
+          <div className="hidden md:block relative z-10 flex-shrink-0 w-[44%] h-[320px] rounded-2xl overflow-hidden">
+            <FloatingStudyHero />
           </div>
         </div>
 

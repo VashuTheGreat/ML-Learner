@@ -172,7 +172,7 @@ export default function Playground() {
   const metricKeys = taskType === "regression" ? REGRESSION_METRICS : CLASSIFICATION_METRICS;
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen">
       <Navbar />
 
       {/* ── Hero ──────────────────────────────────────────────── */}
@@ -200,8 +200,8 @@ export default function Playground() {
 
             <div className="flex items-center gap-3 bg-card p-2 rounded-2xl border border-border shadow-lg animate-in fade-in slide-in-from-right duration-700">
               <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-muted border border-border hover:bg-muted/80 transition-colors group">
-                <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 group-hover:scale-110 transition-transform">
-                  <Cpu className="w-5 h-5 text-cyan-500" />
+                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center border border-accent/20 group-hover:scale-110 transition-transform">
+                  <Cpu className="w-5 h-5 text-accent" />
                 </div>
                 <div className="text-left">
                   <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Engine</p>
@@ -209,13 +209,13 @@ export default function Playground() {
                 </div>
               </div>
               <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-muted border border-border hover:bg-muted/80 transition-colors group">
-                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">
-                  <Zap className="w-5 h-5 text-emerald-500" />
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:scale-110 transition-transform">
+                  <Zap className="w-5 h-5 text-primary" />
                 </div>
                 <div className="text-left">
                   <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Status</p>
-                  <p className="text-sm font-bold text-emerald-500 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <p className="text-sm font-bold text-primary flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                     Connected
                   </p>
                 </div>
@@ -246,7 +246,7 @@ export default function Playground() {
                 <p className="text-sm text-muted-foreground mt-1">{attrsError}</p>
                 <div className="mt-3 flex items-center gap-2 text-[10px] font-mono p-2 bg-muted rounded border border-border">
                   <span className="text-muted-foreground">$</span>
-                  <span className="text-cyan-500">uvicorn src.app:app --reload --port 8000</span>
+                  <span className="text-accent">uvicorn src.app:app --reload --port 8000</span>
                 </div>
               </div>
             </CardContent>
@@ -397,9 +397,9 @@ export default function Playground() {
               <Card className="border-border bg-card shadow-md transition-all duration-300 hover:border-primary/40 hover:shadow-lg">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-sm uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2 font-black">
-                    <BarChart3 className="w-4 h-4 text-cyan-500" />
+                    <BarChart3 className="w-4 h-4 text-accent" />
                     Dataset Parameters
-                    <Badge variant="secondary" className="ml-auto text-[9px] bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 uppercase tracking-wide font-bold">
+                    <Badge variant="secondary" className="ml-auto text-[9px] bg-accent/10 text-accent border border-accent/20 uppercase tracking-wide font-bold">
                       {taskType}
                     </Badge>
                   </CardTitle>
@@ -413,7 +413,7 @@ export default function Playground() {
                     {Object.entries(datasetParamsMeta as Record<string, DatasetParamMeta>).map(([key, meta]) => (
                       <div key={key} className="space-y-1.5 group/data">
                         <Label
-                          className="text-[10px] text-muted-foreground font-black uppercase tracking-widest truncate block group-hover/data:text-cyan-500 transition-colors cursor-help"
+                          className="text-[10px] text-muted-foreground font-black uppercase tracking-widest truncate block group-hover/data:text-accent transition-colors cursor-help"
                           title={meta.description}
                         >
                           {key}
@@ -485,7 +485,7 @@ export default function Playground() {
                   {result.plots && result.plots.length > 0 && (
                     <>
                       <div className="flex items-center gap-3">
-                        <BarChart3 className="w-5 h-5 text-cyan-500" />
+                        <BarChart3 className="w-5 h-5 text-accent" />
                         <h2 className="text-lg font-black text-foreground tracking-tight">Visualizations</h2>
                         <span className="text-xs text-muted-foreground ml-auto">
                           {result.plots.length} plot{result.plots.length > 1 ? "s" : ""}

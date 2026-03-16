@@ -3,6 +3,7 @@ import { Sidebar } from "./Sidebar";
 import { createContext, useContext, useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CanvasBackground } from "./CanvasBackground";
 
 export const SidebarContext = createContext<{
   isCollapsed: boolean;
@@ -39,10 +40,17 @@ export const AppLayout = () => {
 
   return (
     <SidebarContext.Provider value={{ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen }}>
-      <div className="flex min-h-screen bg-background text-foreground w-full overflow-x-hidden">
+      <div className="flex min-h-screen text-foreground w-full overflow-x-hidden">
         
         {/* Mobile Header */}
-        <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-sidebar-background border-b border-sidebar-border z-40 flex items-center justify-between px-4">
+        <header
+          className="lg:hidden fixed top-0 left-0 right-0 h-16 border-b border-sidebar-border z-40 flex items-center justify-between px-4"
+          style={{
+            background: "hsl(var(--sidebar-background) / 0.75)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+          }}
+        >
           <button 
             onClick={() => setIsMobileOpen(true)}
             className="p-2 hover:bg-sidebar-accent rounded-lg transition-colors"
@@ -58,23 +66,23 @@ export const AppLayout = () => {
         {/* Sidebar Overlay for Mobile */}
         {isMobileOpen && (
           <div 
-            className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity"
+            className="lg:hidden fixed inset-0 bg-black/70 z-40 transition-opacity"
             onClick={() => setIsMobileOpen(false)}
           />
         )}
 
         <Sidebar />
 
+        {/* 3D WebGL Background Layer */}
+        <CanvasBackground />
+
         {/* Main content shifts using margin so it never overlaps or leaves a gap */}
         <main
           className={cn(
-            "flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full",
-            "pt-16 lg:pt-0" // Account for mobile header
+            "flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full relative z-10",
+            "pt-16 lg:pt-0", // Account for mobile header
+            isCollapsed ? "lg:ml-[72px] lg:w-[calc(100%-72px)]" : "lg:ml-[260px] lg:w-[calc(100%-260px)]"
           )}
-          style={{
-            marginLeft: (window.innerWidth >= 1024) ? (isCollapsed ? "72px" : "260px") : "0",
-            width: (window.innerWidth >= 1024) ? `calc(100% - ${isCollapsed ? "72px" : "260px"})` : "100%",
-          }}
         >
           <div className="flex-1 w-full animate-fade-in relative">
             <Outlet />

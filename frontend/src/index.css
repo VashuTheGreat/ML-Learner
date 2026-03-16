@@ -367,9 +367,349 @@
   --sidebar-ring: 346 85% 62%;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   SHARED BASE STYLES
-   ═══════════════════════════════════════════════════════════════════ */
+/* ──────────────────────────────────────────────────────────────────
+   THEME 6 · CYBER NEON
+   Light: bright cool cyan background · neon purple primary
+   Dark:  very dark night · vivid hot pink/purple
+   ────────────────────────────────────────────────────────────────── */
+[data-theme="cyber"] {
+  --background: 240 10% 98%;
+  --foreground: 240 20% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 20% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 20% 10%;
+  --primary: 320 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 190 100% 50%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 240 10% 90%;
+  --muted-foreground: 240 10% 40%;
+  --accent: 280 100% 60%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 240 10% 88%;
+  --input: 240 10% 88%;
+  --ring: 320 100% 50%;
+  --mesh-primary: 320 100% 60%;
+  --mesh-secondary: 190 100% 60%;
+  --mesh-accent: 280 100% 60%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 240 20% 10%;
+  --sidebar-primary: 320 100% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 240 10% 92%;
+  --sidebar-accent-foreground: 240 20% 10%;
+  --sidebar-border: 240 10% 88%;
+  --sidebar-ring: 320 100% 50%;
+}
+
+[data-theme="cyber"].dark {
+  --background: 240 30% 3%;
+  --foreground: 320 10% 95%;
+  --card: 240 25% 6%;
+  --card-foreground: 240 10% 95%;
+  --popover: 240 25% 6%;
+  --popover-foreground: 240 10% 95%;
+  --primary: 320 100% 60%;
+  --primary-foreground: 240 30% 3%;
+  --secondary: 190 100% 50%;
+  --secondary-foreground: 240 10% 95%;
+  --muted: 240 20% 10%;
+  --muted-foreground: 240 15% 65%;
+  --accent: 280 100% 65%;
+  --accent-foreground: 240 30% 3%;
+  --destructive: 0 70% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 240 20% 12%;
+  --input: 240 20% 12%;
+  --ring: 320 100% 60%;
+  --mesh-primary: 320 100% 25%;
+  --mesh-secondary: 190 100% 15%;
+  --mesh-accent: 280 100% 20%;
+  --sidebar-background: 240 28% 4%;
+  --sidebar-foreground: 240 15% 85%;
+  --sidebar-primary: 320 100% 60%;
+  --sidebar-primary-foreground: 240 30% 3%;
+  --sidebar-accent: 240 25% 8%;
+  --sidebar-accent-foreground: 240 10% 95%;
+  --sidebar-border: 240 20% 10%;
+  --sidebar-ring: 320 100% 60%;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   THEME 7 · AURORA NOVA (All in One Animated Minimalist)
+   ────────────────────────────────────────────────────────────────── */
+[data-theme="aurora"] {
+  --background: 160 30% 98%;
+  --foreground: 160 50% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 160 50% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 160 50% 10%;
+  --primary: 165 100% 40%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 190 100% 45%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 160 20% 92%;
+  --muted-foreground: 160 30% 40%;
+  --accent: 210 100% 50%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 160 20% 88%;
+  --input: 160 20% 88%;
+  --ring: 165 100% 40%;
+  --mesh-primary: 165 100% 60%;
+  --mesh-secondary: 190 100% 60%;
+  --mesh-accent: 210 100% 60%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 160 50% 10%;
+  --sidebar-primary: 165 100% 40%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 160 20% 95%;
+  --sidebar-accent-foreground: 160 50% 10%;
+  --sidebar-border: 160 20% 90%;
+  --sidebar-ring: 165 100% 40%;
+}
+
+[data-theme="aurora"].dark {
+  --background: 170 40% 4%;
+  --foreground: 160 100% 95%;
+  --card: 170 30% 8%;
+  --card-foreground: 160 100% 95%;
+  --popover: 170 30% 8%;
+  --popover-foreground: 160 100% 95%;
+  --primary: 165 100% 55%;
+  --primary-foreground: 170 40% 4%;
+  --secondary: 190 100% 50%;
+  --secondary-foreground: 160 100% 95%;
+  --muted: 170 25% 15%;
+  --muted-foreground: 165 20% 65%;
+  --accent: 210 100% 60%;
+  --accent-foreground: 170 40% 4%;
+  --destructive: 0 80% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 170 25% 18%;
+  --input: 170 25% 18%;
+  --ring: 165 100% 55%;
+  --mesh-primary: 165 100% 20%;
+  --mesh-secondary: 190 100% 15%;
+  --mesh-accent: 210 100% 20%;
+  --sidebar-background: 170 32% 6%;
+  --sidebar-foreground: 160 40% 90%;
+  --sidebar-primary: 165 100% 55%;
+  --sidebar-primary-foreground: 170 40% 4%;
+  --sidebar-accent: 170 25% 12%;
+  --sidebar-accent-foreground: 160 100% 95%;
+  --sidebar-border: 170 25% 15%;
+  --sidebar-ring: 165 100% 55%;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   THEME 8 · NEBULA DRIFT (Ultra Smooth & Cinematic)
+   ────────────────────────────────────────────────────────────────── */
+[data-theme="nebula"] {
+  --background: 230 25% 97%;
+  --foreground: 240 25% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 25% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 25% 12%;
+  --primary: 250 85% 65%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 195 85% 60%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 230 15% 92%;
+  --muted-foreground: 240 20% 45%;
+  --accent: 285 85% 65%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 230 15% 88%;
+  --input: 230 15% 88%;
+  --ring: 250 85% 65%;
+  --mesh-primary: 250 85% 65%;
+  --mesh-secondary: 195 85% 60%;
+  --mesh-accent: 285 85% 65%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 240 25% 12%;
+  --sidebar-primary: 250 85% 65%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 230 15% 92%;
+  --sidebar-accent-foreground: 240 25% 12%;
+  --sidebar-border: 230 15% 88%;
+  --sidebar-ring: 250 85% 65%;
+}
+
+[data-theme="nebula"].dark {
+  --background: 260 35% 5%;
+  --foreground: 260 10% 95%;
+  --card: 260 30% 8%;
+  --card-foreground: 260 10% 95%;
+  --popover: 260 30% 8%;
+  --popover-foreground: 260 10% 95%;
+  --primary: 260 100% 70%;
+  --primary-foreground: 260 35% 5%;
+  --secondary: 340 95% 65%;
+  --secondary-foreground: 260 10% 95%;
+  --muted: 260 25% 15%;
+  --muted-foreground: 260 15% 65%;
+  --accent: 200 100% 60%;
+  --accent-foreground: 260 35% 5%;
+  --destructive: 0 70% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 260 20% 18%;
+  --input: 260 20% 18%;
+  --ring: 260 100% 70%;
+  --mesh-primary: 260 90% 20%;
+  --mesh-secondary: 340 85% 15%;
+  --mesh-accent: 200 85% 15%;
+  --sidebar-background: 260 32% 6%;
+  --sidebar-foreground: 260 15% 85%;
+  --sidebar-primary: 260 100% 70%;
+  --sidebar-primary-foreground: 260 35% 5%;
+  --sidebar-accent: 260 25% 12%;
+  --sidebar-accent-foreground: 260 10% 95%;
+  --sidebar-border: 260 20% 15%;
+  --sidebar-ring: 260 100% 70%;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   THEME 9 · SOLARIS (Golden Sun / High Energy)
+   ────────────────────────────────────────────────────────────────── */
+[data-theme="solaris"] {
+  --background: 45 40% 98%;
+  --foreground: 25 50% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 25 50% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 25 50% 10%;
+  --primary: 38 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 15 100% 55%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 45 20% 90%;
+  --muted-foreground: 30 30% 40%;
+  --accent: 55 100% 50%;
+  --accent-foreground: 0 0% 0%;
+  --border: 45 20% 85%;
+  --input: 45 20% 85%;
+  --ring: 38 100% 50%;
+  --mesh-primary: 38 100% 70%;
+  --mesh-secondary: 15 100% 65%;
+  --mesh-accent: 55 100% 65%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 25 50% 10%;
+  --sidebar-primary: 38 100% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 45 25% 95%;
+  --sidebar-accent-foreground: 25 50% 10%;
+  --sidebar-border: 45 20% 88%;
+  --sidebar-ring: 38 100% 50%;
+}
+
+[data-theme="solaris"].dark {
+  --background: 20 50% 4%;
+  --foreground: 45 100% 92%;
+  --card: 20 40% 8%;
+  --card-foreground: 45 100% 92%;
+  --popover: 20 40% 8%;
+  --popover-foreground: 45 100% 92%;
+  --primary: 38 100% 55%;
+  --primary-foreground: 20 50% 4%;
+  --secondary: 15 100% 50%;
+  --secondary-foreground: 45 100% 92%;
+  --muted: 20 30% 15%;
+  --muted-foreground: 38 30% 65%;
+  --accent: 55 100% 55%;
+  --accent-foreground: 20 50% 4%;
+  --destructive: 0 80% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 20 30% 18%;
+  --input: 20 30% 18%;
+  --ring: 38 100% 55%;
+  --mesh-primary: 38 100% 20%;
+  --mesh-secondary: 15 100% 15%;
+  --mesh-accent: 55 100% 20%;
+  --sidebar-background: 20 35% 6%;
+  --sidebar-foreground: 45 40% 85%;
+  --sidebar-primary: 38 100% 55%;
+  --sidebar-primary-foreground: 20 50% 4%;
+  --sidebar-accent: 20 30% 12%;
+  --sidebar-accent-foreground: 45 100% 92%;
+  --sidebar-border: 20 30% 15%;
+  --sidebar-ring: 38 100% 55%;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   THEME 10 · PRISM MULTI (Ultra Mixed / High Energy)
+   Primary: Indigo · Secondary: Emerald · Accent: Rose
+   ────────────────────────────────────────────────────────────────── */
+[data-theme="prism"] {
+  --background: 230 40% 98%;
+  --foreground: 230 40% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 230 40% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 230 40% 10%;
+  --primary: 245 100% 60%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 155 100% 40%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 230 20% 92%;
+  --muted-foreground: 230 20% 45%;
+  --accent: 345 100% 60%;
+  --accent-foreground: 0 0% 100%;
+  --border: 230 20% 88%;
+  --input: 230 20% 88%;
+  --ring: 245 100% 60%;
+  --mesh-primary: 245 100% 70%;
+  --mesh-secondary: 155 100% 70%;
+  --mesh-accent: 345 100% 70%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 230 40% 10%;
+  --sidebar-primary: 245 100% 60%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 230 20% 95%;
+  --sidebar-accent-foreground: 230 40% 10%;
+  --sidebar-border: 230 20% 90%;
+  --sidebar-ring: 245 100% 60%;
+}
+
+[data-theme="prism"].dark {
+  --background: 245 50% 3%;
+  --foreground: 230 50% 98%;
+  --card: 245 40% 6%;
+  --card-foreground: 230 50% 98%;
+  --popover: 245 40% 6%;
+  --popover-foreground: 230 50% 98%;
+  --primary: 245 100% 70%;
+  --primary-foreground: 245 50% 3%;
+  --secondary: 155 100% 60%;
+  --secondary-foreground: 230 50% 98%;
+  --muted: 245 30% 12%;
+  --muted-foreground: 245 20% 70%;
+  --accent: 345 100% 70%;
+  --accent-foreground: 245 50% 3%;
+  --destructive: 0 80% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 245 25% 15%;
+  --input: 245 25% 15%;
+  --ring: 245 100% 70%;
+  --mesh-primary: 245 100% 25%;
+  --mesh-secondary: 155 100% 20%;
+  --mesh-accent: 345 100% 25%;
+  --sidebar-background: 245 35% 4%;
+  --sidebar-foreground: 245 20% 90%;
+  --sidebar-primary: 245 100% 70%;
+  --sidebar-primary-foreground: 245 50% 3%;
+  --sidebar-accent: 245 25% 10%;
+  --sidebar-accent-foreground: 230 50% 98%;
+  --sidebar-border: 245 20% 12%;
+  --sidebar-ring: 245 100% 70%;
+}
 @layer base {
   * { @apply border-border; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -388,23 +728,29 @@
   /* Gradient text */
   .gradient-text {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--secondary)), hsl(var(--primary)));
+    background-size: 300% 300%;
+    animation: pulseGradient 8s ease-in-out infinite;
   }
 
   /* Gradient backgrounds */
   .gradient-bg {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--secondary)), hsl(var(--primary)));
+    background-size: 300% 300%;
+    animation: pulseGradient 8s ease-in-out infinite;
   }
 
   /* Mesh */
   .mesh-gradient {
     background:
-      radial-gradient(at 30% 15%,  hsl(var(--mesh-primary)   / 0.40) 0px, transparent 55%),
-      radial-gradient(at 78% 10%,  hsl(var(--mesh-secondary) / 0.30) 0px, transparent 50%),
-      radial-gradient(at 5%  55%,  hsl(var(--mesh-primary)   / 0.25) 0px, transparent 50%),
-      radial-gradient(at 82% 55%,  hsl(var(--mesh-accent)    / 0.25) 0px, transparent 50%),
-      radial-gradient(at 5%  95%,  hsl(var(--mesh-secondary) / 0.25) 0px, transparent 50%),
-      hsl(var(--background));
+      radial-gradient(at 0% 0%,  hsl(var(--mesh-primary)   / 0.40) 0px, transparent 70%),
+      radial-gradient(at 100% 0%,  hsl(var(--mesh-secondary) / 0.35) 0px, transparent 70%),
+      radial-gradient(at 0% 100%,  hsl(var(--mesh-primary)   / 0.30) 0px, transparent 70%),
+      radial-gradient(at 100% 100%,  hsl(var(--mesh-accent)    / 0.30) 0px, transparent 70%),
+      radial-gradient(at 50% 50%,  hsl(var(--mesh-secondary) / 0.30) 0px, transparent 70%),
+      transparent;
+    background-size: 200% 200%;
+    animation: moveMesh 30s ease-in-out infinite alternate;
   }
 
   /* Gradient border */
@@ -419,8 +765,9 @@
 
   /* Glass */
   .glass-card {
-    @apply backdrop-blur-xl border border-white/10 shadow-2xl;
+    @apply backdrop-blur-xl border shadow-2xl;
     background: hsl(var(--card) / 0.6);
+    border-color: hsl(var(--border) / 0.4);
   }
 
   /* Buttons */
@@ -468,6 +815,20 @@
   .animate-fade-in    { animation: fadeIn 0.5s ease-out forwards; }
   .animate-slide-up   { animation: slideUp 0.55s ease-out forwards; }
   .animate-scale-in  { animation: scaleIn 0.3s ease-out forwards; }
+
+  @keyframes pulseGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes moveMesh {
+    0%   { background-position: 0% 0%; }
+    25%  { background-position: 100% 0%; }
+    50%  { background-position: 100% 100%; }
+    75%  { background-position: 0% 100%; }
+    100% { background-position: 0% 0%; }
+  }
 
   @keyframes float   { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-18px); } }
   @keyframes fadeIn  { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
