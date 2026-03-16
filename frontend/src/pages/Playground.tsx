@@ -44,7 +44,6 @@ function defaultStr(val: any): string {
   return String(val);
 }
 
-/** Infer type from a default value for smart casting */
 function inferType(val: any): "bool" | "int" | "float" | "str" {
   if (typeof val === "boolean") return "bool";
   if (typeof val === "number") {
@@ -53,28 +52,26 @@ function inferType(val: any): "bool" | "int" | "float" | "str" {
   return "str";
 }
 
-/** Cast the string input back to the right JS type before sending to API */
 function castParam(raw: string, defaultVal: any): any {
   const t = inferType(defaultVal);
   if (t === "bool") return raw === "true";
   if (t === "int") return raw === "" || raw === "null" ? null : parseInt(raw, 10);
   if (t === "float") return raw === "" || raw === "null" ? null : parseFloat(raw);
-  // str: send null for empty/none
   if (raw === "" || raw.toLowerCase() === "none" || raw.toLowerCase() === "null") return null;
   return raw;
 }
 
-// ─── Metric metadata for nice display ─────────────────────────────────────────
+// ─── Metric metadata ───────────────────────────────────────────────────────────
 
 const METRIC_META: Record<string, { label: string; icon: React.ElementType; color: string; description: string }> = {
-  mae:       { label: "MAE",       icon: Activity,   color: "text-orange-600", description: "Mean Absolute Error" },
-  mse:       { label: "MSE",       icon: Sigma,      color: "text-red-600",    description: "Mean Squared Error" },
-  rmse:      { label: "RMSE",      icon: TrendingUp, color: "text-purple-600", description: "Root Mean Squared Error" },
-  r2:        { label: "R² Score",  icon: Target,     color: "text-emerald-600",description: "Coefficient of Determination" },
-  accuracy:  { label: "Accuracy",  icon: Target,     color: "text-emerald-600",description: "Overall Accuracy" },
-  precision: { label: "Precision", icon: Activity,   color: "text-blue-600",   description: "Weighted Precision" },
-  recall:    { label: "Recall",    icon: TrendingUp, color: "text-violet-600", description: "Weighted Recall" },
-  f1:        { label: "F1 Score",  icon: Sigma,      color: "text-rose-600",   description: "Weighted F1 Score" },
+  mae:       { label: "MAE",       icon: Activity,   color: "text-orange-500", description: "Mean Absolute Error" },
+  mse:       { label: "MSE",       icon: Sigma,      color: "text-red-500",    description: "Mean Squared Error" },
+  rmse:      { label: "RMSE",      icon: TrendingUp, color: "text-purple-500", description: "Root Mean Squared Error" },
+  r2:        { label: "R² Score",  icon: Target,     color: "text-emerald-500",description: "Coefficient of Determination" },
+  accuracy:  { label: "Accuracy",  icon: Target,     color: "text-emerald-500",description: "Overall Accuracy" },
+  precision: { label: "Precision", icon: Activity,   color: "text-blue-500",   description: "Weighted Precision" },
+  recall:    { label: "Recall",    icon: TrendingUp, color: "text-violet-500", description: "Weighted Recall" },
+  f1:        { label: "F1 Score",  icon: Sigma,      color: "text-rose-500",   description: "Weighted F1 Score" },
 };
 
 const REGRESSION_METRICS = ["mae", "mse", "rmse", "r2"];
@@ -87,14 +84,11 @@ export default function Playground() {
   const [loadingAttrs, setLoadingAttrs] = useState(true);
   const [attrsError, setAttrsError] = useState<string | null>(null);
 
-  // form state
   const [taskType, setTaskType] = useState<"regression" | "classification">("regression");
   const [modelName, setModelName] = useState<string>("");
-  /** Stores user-edited overrides for model params (string form) */
   const [modelParams, setModelParams] = useState<Record<string, string>>({});
   const [datasetParams, setDatasetParams] = useState<Record<string, string>>({});
 
-  // training state
   const [training, setTraining] = useState(false);
   const [result, setResult] = useState<TrainResult | null>(null);
   const [trainError, setTrainError] = useState<string | null>(null);
@@ -114,7 +108,6 @@ export default function Playground() {
       });
   }, []);
 
-  // Reset model & params when task type changes
   useEffect(() => {
     if (!attrs) return;
     const list = taskType === "regression" ? attrs.regression_models : attrs.classification_models;
@@ -123,7 +116,6 @@ export default function Playground() {
     setResult(null);
   }, [taskType, attrs]);
 
-  // Reset params when model changes
   useEffect(() => {
     setModelParams({});
   }, [modelName]);
@@ -131,7 +123,6 @@ export default function Playground() {
   const datasetParamsMeta =
     attrs?.[taskType === "regression" ? "make_regression_params" : "make_classification_params"] ?? {};
 
-  /** The default_params for the selected model (flat key→value) */
   const modelDefaultParams: Record<string, any> =
     attrs?.model_train_config?.[
       taskType === "regression" ? "regression_models" : "classification_models"
@@ -143,18 +134,15 @@ export default function Playground() {
     setResult(null);
     setTrainError(null);
 
-    // Build model params — only send actual values, not descriptions
     const resolvedModelParams: Record<string, any> = {};
     Object.entries(modelDefaultParams).forEach(([k, defaultVal]) => {
       const raw = modelParams[k] ?? defaultStr(defaultVal);
       resolvedModelParams[k] = castParam(raw, defaultVal);
     });
 
-    // Build dataset params — only send actual values, not descriptions
     const resolvedDatasetParams: Record<string, any> = {};
     Object.entries(datasetParamsMeta).forEach(([k, meta]) => {
       const raw = datasetParams[k] ?? defaultStr((meta as DatasetParamMeta).default);
-      // Cast based on type from meta
       const t = (meta as DatasetParamMeta).type;
       if (t === "bool") resolvedDatasetParams[k] = raw === "true";
       else if (t === "int") resolvedDatasetParams[k] = raw === "" || raw === "null" ? null : parseInt(raw, 10);
@@ -184,11 +172,11 @@ export default function Playground() {
   const metricKeys = taskType === "regression" ? REGRESSION_METRICS : CLASSIFICATION_METRICS;
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
+    <div className="min-h-screen bg-background text-foreground">
       <Navbar />
 
-      {/* Hero Section */}
-      <div className="relative pt-32 pb-16 px-6 overflow-hidden bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
+      {/* ── Hero ──────────────────────────────────────────────── */}
+      <div className="relative pt-32 pb-16 px-6 overflow-hidden mesh-gradient">
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10" />
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[100px] -z-10" />
 
@@ -200,33 +188,33 @@ export default function Playground() {
                 AI Lab Environment 2.0
               </Badge>
               <div className="space-y-2">
-                <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-slate-900">
+                <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-foreground">
                   ML <span className="gradient-text">Playground</span>
                 </h1>
-                <p className="text-slate-500 max-w-2xl text-lg md:text-xl font-medium leading-relaxed">
+                <p className="text-muted-foreground max-w-2xl text-lg md:text-xl font-medium leading-relaxed">
                   Design, train, and evaluate machine learning models in real-time.
                   Tune hyperparameters and instantly see metrics + visualizations.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-slate-200 shadow-lg animate-in fade-in slide-in-from-right duration-700">
-              <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors group">
-                <div className="w-10 h-10 rounded-lg bg-cyan-50 flex items-center justify-center border border-cyan-200 group-hover:scale-110 transition-transform">
-                  <Cpu className="w-5 h-5 text-cyan-600" />
+            <div className="flex items-center gap-3 bg-card p-2 rounded-2xl border border-border shadow-lg animate-in fade-in slide-in-from-right duration-700">
+              <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-muted border border-border hover:bg-muted/80 transition-colors group">
+                <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 group-hover:scale-110 transition-transform">
+                  <Cpu className="w-5 h-5 text-cyan-500" />
                 </div>
                 <div className="text-left">
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Engine</p>
-                  <p className="text-sm font-bold text-slate-800">Python 3.11</p>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Engine</p>
+                  <p className="text-sm font-bold text-foreground">Python 3.11</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors group">
-                <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center border border-emerald-200 group-hover:scale-110 transition-transform">
-                  <Zap className="w-5 h-5 text-emerald-600" />
+              <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-muted border border-border hover:bg-muted/80 transition-colors group">
+                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">
+                  <Zap className="w-5 h-5 text-emerald-500" />
                 </div>
                 <div className="text-left">
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Status</p>
-                  <p className="text-sm font-bold text-emerald-600 flex items-center gap-1.5">
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Status</p>
+                  <p className="text-sm font-bold text-emerald-500 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     Connected
                   </p>
@@ -238,25 +226,27 @@ export default function Playground() {
       </div>
 
       <div className="mx-auto max-w-7xl px-6 pb-20 pt-8">
+        {/* Loading */}
         {loadingAttrs && (
           <div className="flex flex-col items-center justify-center py-32 space-y-4">
             <Dna className="h-12 w-12 text-primary animate-spin" />
-            <p className="text-slate-500 font-medium">Initializing Neural Pathways...</p>
+            <p className="text-muted-foreground font-medium">Initializing Neural Pathways...</p>
           </div>
         )}
 
+        {/* Backend error */}
         {attrsError && (
-          <Card className="border-red-200 bg-red-50 animate-in fade-in slide-in-from-bottom-4">
+          <Card className="border-red-500/30 bg-red-500/10 animate-in fade-in slide-in-from-bottom-4">
             <CardContent className="flex items-center gap-4 pt-6">
-              <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center border border-red-200">
+              <div className="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
                 <AlertCircle className="h-6 w-6 text-red-500" />
               </div>
               <div className="flex-1">
-                <p className="font-bold text-red-700">Backend Connection Error</p>
-                <p className="text-sm text-slate-600 mt-1">{attrsError}</p>
-                <div className="mt-3 flex items-center gap-2 text-[10px] font-mono p-2 bg-slate-100 rounded border border-slate-200">
-                  <span className="text-slate-400">$</span>
-                  <span className="text-cyan-700">uvicorn src.app:app --reload --port 8000</span>
+                <p className="font-bold text-red-500">Backend Connection Error</p>
+                <p className="text-sm text-muted-foreground mt-1">{attrsError}</p>
+                <div className="mt-3 flex items-center gap-2 text-[10px] font-mono p-2 bg-muted rounded border border-border">
+                  <span className="text-muted-foreground">$</span>
+                  <span className="text-cyan-500">uvicorn src.app:app --reload --port 8000</span>
                 </div>
               </div>
             </CardContent>
@@ -265,15 +255,16 @@ export default function Playground() {
 
         {attrs && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* ── Configuration Sidebar ── */}
+
+            {/* ── Config Sidebar ── */}
             <div className="lg:col-span-4 space-y-6">
               <div className="sticky top-24 space-y-6">
 
                 {/* Mode Selector */}
-                <Card className="border-slate-200 bg-white shadow-md overflow-hidden transition-all duration-300 hover:border-primary/40 hover:shadow-lg">
-                  <div className="absolute top-0 left-0 w-1.5 h-full bg-primary" />
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-sm uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2 font-black">
+                <Card className="border-border bg-card shadow-md overflow-hidden transition-all duration-300 hover:border-primary/40 hover:shadow-lg relative">
+                  <div className="absolute top-0 left-0 w-1.5 h-full bg-primary rounded-l-lg" />
+                  <CardHeader className="pb-4 pl-6">
+                    <CardTitle className="text-sm uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2 font-black">
                       <Layers className="w-4 h-4 text-primary" />
                       Learning Mode
                     </CardTitle>
@@ -287,7 +278,7 @@ export default function Playground() {
                           "flex-1 rounded-xl border py-4 px-2 text-xs font-black uppercase tracking-widest transition-all duration-300",
                           taskType === t
                             ? "border-primary bg-primary/10 text-primary"
-                            : "border-slate-200 bg-slate-50 text-slate-500 hover:border-slate-300 hover:text-slate-700"
+                            : "border-border bg-muted text-muted-foreground hover:border-primary/30 hover:text-foreground"
                         )}
                       >
                         {t}
@@ -296,13 +287,13 @@ export default function Playground() {
                   </CardContent>
                 </Card>
 
-                {/* Model Configuration */}
-                <Card className="border-slate-200 bg-white shadow-md transition-all duration-300 hover:border-primary/40 hover:shadow-lg">
+                {/* Model Config */}
+                <Card className="border-border bg-card shadow-md transition-all duration-300 hover:border-primary/40 hover:shadow-lg">
                   <CardHeader>
-                    <CardTitle className="text-sm uppercase tracking-[0.2em] text-slate-600 font-black">
+                    <CardTitle className="text-sm uppercase tracking-[0.2em] text-muted-foreground font-black">
                       Model Configuration
                     </CardTitle>
-                    <CardDescription className="text-xs text-slate-400 font-medium">
+                    <CardDescription className="text-xs text-muted-foreground/70 font-medium">
                       Select algorithm and tune hyperparameters
                     </CardDescription>
                   </CardHeader>
@@ -311,10 +302,10 @@ export default function Playground() {
                     <div className="space-y-2">
                       <Label className="text-[10px] uppercase tracking-[0.25em] text-primary font-black">Algorithm</Label>
                       <Select value={modelName} onValueChange={setModelName}>
-                        <SelectTrigger className="bg-white border-slate-300 text-slate-800 rounded-xl h-12 focus:ring-primary/20 hover:border-slate-400 transition-colors">
+                        <SelectTrigger className="bg-background border-border text-foreground rounded-xl h-12 focus:ring-primary/20 hover:border-primary/40 transition-colors">
                           <SelectValue placeholder="Choose a model…" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-slate-200 text-slate-800 max-h-72">
+                        <SelectContent className="bg-card border-border text-foreground max-h-72">
                           {(taskType === "regression"
                             ? attrs.regression_models
                             : attrs.classification_models
@@ -327,13 +318,13 @@ export default function Playground() {
                       </Select>
                     </div>
 
-                    {/* Hyperparameters from default_params */}
+                    {/* Hyperparameters */}
                     {Object.keys(modelDefaultParams).length > 0 && (
-                      <div className="space-y-4 pt-4 border-t border-slate-100">
-                        <p className="text-[10px] uppercase tracking-[0.25em] text-slate-400 font-black">
+                      <div className="space-y-4 pt-4 border-t border-border">
+                        <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground font-black">
                           Hyperparameters
                         </p>
-                        <div className="grid grid-cols-1 gap-3 max-h-80 overflow-y-auto pr-1">
+                        <div className="grid grid-cols-1 gap-3 max-h-80 overflow-y-auto pr-1 scrollbar-thin">
                           {Object.entries(modelDefaultParams).map(([key, defaultVal]) => {
                             const isBool = typeof defaultVal === "boolean" ||
                               (typeof defaultVal === "string" && (defaultVal === "True" || defaultVal === "False"));
@@ -341,10 +332,8 @@ export default function Playground() {
                             return (
                               <div key={key} className="space-y-1.5">
                                 <div className="flex justify-between items-center">
-                                  <Label className="text-xs text-slate-700 font-bold">
-                                    {key}
-                                  </Label>
-                                  <Badge variant="secondary" className="text-[9px] font-bold bg-slate-100 text-slate-500 uppercase tracking-wide">
+                                  <Label className="text-xs text-foreground font-bold">{key}</Label>
+                                  <Badge variant="secondary" className="text-[9px] font-bold bg-muted text-muted-foreground uppercase tracking-wide">
                                     {inferType(defaultVal)}
                                   </Badge>
                                 </div>
@@ -353,17 +342,17 @@ export default function Playground() {
                                     value={currentVal}
                                     onValueChange={(v) => setModelParams((p) => ({ ...p, [key]: v }))}
                                   >
-                                    <SelectTrigger className="bg-white border-slate-300 text-slate-800 h-10 text-xs rounded-xl hover:border-slate-400 transition-colors">
+                                    <SelectTrigger className="bg-background border-border text-foreground h-10 text-xs rounded-xl hover:border-primary/40 transition-colors">
                                       <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-white border-slate-200">
+                                    <SelectContent className="bg-card border-border text-foreground">
                                       <SelectItem value="true">True</SelectItem>
                                       <SelectItem value="false">False</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 ) : (
                                   <Input
-                                    className="bg-white border-slate-300 text-slate-800 h-10 text-xs rounded-xl focus:ring-primary/20 hover:border-slate-400 transition-colors"
+                                    className="bg-background border-border text-foreground h-10 text-xs rounded-xl focus:ring-primary/20 hover:border-primary/40 transition-colors"
                                     placeholder={defaultStr(defaultVal) || "None"}
                                     value={currentVal}
                                     onChange={(e) => setModelParams((p) => ({ ...p, [key]: e.target.value }))}
@@ -401,21 +390,22 @@ export default function Playground() {
               </div>
             </div>
 
-            {/* ── Results Main Area ── */}
+            {/* ── Results ── */}
             <div className="lg:col-span-8 space-y-8">
 
-              {/* Dataset Params Card */}
-              <Card className="border-slate-200 bg-white shadow-md transition-all duration-300 hover:border-primary/40 hover:shadow-lg">
+              {/* Dataset Params */}
+              <Card className="border-border bg-card shadow-md transition-all duration-300 hover:border-primary/40 hover:shadow-lg">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-sm uppercase tracking-[0.2em] text-slate-600 flex items-center gap-2 font-black">
-                    <BarChart3 className="w-4 h-4 text-cyan-600" />
+                  <CardTitle className="text-sm uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2 font-black">
+                    <BarChart3 className="w-4 h-4 text-cyan-500" />
                     Dataset Parameters
-                    <Badge variant="secondary" className="ml-auto text-[9px] bg-cyan-50 text-cyan-700 border border-cyan-200 uppercase tracking-wide font-bold">
+                    <Badge variant="secondary" className="ml-auto text-[9px] bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 uppercase tracking-wide font-bold">
                       {taskType}
                     </Badge>
                   </CardTitle>
-                  <CardDescription className="text-xs text-slate-400">
-                    Configure synthetic dataset generation via sklearn's <code className="bg-slate-100 px-1 rounded">make_{taskType}</code>
+                  <CardDescription className="text-xs text-muted-foreground/70">
+                    Configure synthetic dataset generation via sklearn's{" "}
+                    <code className="bg-muted px-1 rounded text-foreground">make_{taskType}</code>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -423,13 +413,13 @@ export default function Playground() {
                     {Object.entries(datasetParamsMeta as Record<string, DatasetParamMeta>).map(([key, meta]) => (
                       <div key={key} className="space-y-1.5 group/data">
                         <Label
-                          className="text-[10px] text-slate-500 font-black uppercase tracking-widest truncate block group-hover/data:text-cyan-600 transition-colors cursor-help"
+                          className="text-[10px] text-muted-foreground font-black uppercase tracking-widest truncate block group-hover/data:text-cyan-500 transition-colors cursor-help"
                           title={meta.description}
                         >
                           {key}
                         </Label>
                         <Input
-                          className="bg-white border-slate-300 text-slate-800 h-10 text-xs rounded-xl text-center focus:ring-primary/20 hover:border-slate-400 transition-all font-bold"
+                          className="bg-background border-border text-foreground h-10 text-xs rounded-xl text-center focus:ring-primary/20 hover:border-primary/40 transition-all font-bold"
                           value={datasetParams[key] ?? defaultStr(meta.default)}
                           onChange={(e) => setDatasetParams((p) => ({ ...p, [key]: e.target.value }))}
                         />
@@ -439,30 +429,28 @@ export default function Playground() {
                 </CardContent>
               </Card>
 
-              {/* Error Message */}
+              {/* Train Error */}
               {trainError && (
-                <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex gap-3 items-start animate-in zoom-in-95">
+                <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex gap-3 items-start animate-in zoom-in-95">
                   <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                  <p className="text-sm text-red-700 font-medium">{trainError}</p>
+                  <p className="text-sm text-red-500 font-medium">{trainError}</p>
                 </div>
               )}
 
               {/* Results */}
               {result ? (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
-
-                  {/* Metrics header */}
                   <div className="flex items-center gap-3">
                     <Brain className="w-5 h-5 text-primary" />
-                    <h2 className="text-lg font-black text-slate-800 tracking-tight">
+                    <h2 className="text-lg font-black text-foreground tracking-tight">
                       {modelName} — Performance Metrics
                     </h2>
-                    <Badge className="ml-auto bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold uppercase tracking-wide">
+                    <Badge className="ml-auto bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-bold uppercase tracking-wide">
                       {taskType}
                     </Badge>
                   </div>
 
-                  {/* Metric cards */}
+                  {/* Metric Cards */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {metricKeys.map((k) => {
                       const val = result[k];
@@ -470,22 +458,22 @@ export default function Playground() {
                       const meta = METRIC_META[k];
                       const Icon = meta?.icon ?? Activity;
                       return (
-                        <Card key={k} className="bg-white border-slate-200 shadow-sm relative overflow-hidden group hover:border-primary/40 hover:shadow-md transition-all duration-300">
+                        <Card key={k} className="bg-card border-border shadow-sm relative overflow-hidden group hover:border-primary/40 hover:shadow-md transition-all duration-300">
                           <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-full blur-2xl -mr-8 -mt-8" />
                           <CardHeader className="p-4 pb-2">
                             <div className="flex items-center gap-1.5">
-                              <Icon className={cn("w-3.5 h-3.5", meta?.color ?? "text-slate-400")} />
-                              <CardTitle className="text-[10px] uppercase font-black tracking-widest text-slate-400">
+                              <Icon className={cn("w-3.5 h-3.5", meta?.color ?? "text-muted-foreground")} />
+                              <CardTitle className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">
                                 {meta?.label ?? k}
                               </CardTitle>
                             </div>
                           </CardHeader>
                           <CardContent className="p-4 pt-0">
-                            <p className={cn("text-2xl font-black tracking-tighter", meta?.color ?? "text-slate-900")}>
+                            <p className={cn("text-2xl font-black tracking-tighter", meta?.color ?? "text-foreground")}>
                               {typeof val === "number" ? val.toFixed(4) : String(val)}
                             </p>
                             {meta?.description && (
-                              <p className="text-[10px] text-slate-400 mt-0.5">{meta.description}</p>
+                              <p className="text-[10px] text-muted-foreground mt-0.5">{meta.description}</p>
                             )}
                           </CardContent>
                         </Card>
@@ -497,20 +485,22 @@ export default function Playground() {
                   {result.plots && result.plots.length > 0 && (
                     <>
                       <div className="flex items-center gap-3">
-                        <BarChart3 className="w-5 h-5 text-cyan-600" />
-                        <h2 className="text-lg font-black text-slate-800 tracking-tight">Visualizations</h2>
-                        <span className="text-xs text-slate-400 ml-auto">{result.plots.length} plot{result.plots.length > 1 ? "s" : ""}</span>
+                        <BarChart3 className="w-5 h-5 text-cyan-500" />
+                        <h2 className="text-lg font-black text-foreground tracking-tight">Visualizations</h2>
+                        <span className="text-xs text-muted-foreground ml-auto">
+                          {result.plots.length} plot{result.plots.length > 1 ? "s" : ""}
+                        </span>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {result.plots.map((plot, idx) => (
-                          <Card key={idx} className="border-slate-200 bg-white overflow-hidden group shadow-md hover:border-primary/40 hover:shadow-lg transition-all duration-500">
-                            <CardHeader className="bg-slate-50 border-b border-slate-100 p-4">
-                              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center justify-between">
+                          <Card key={idx} className="border-border bg-card overflow-hidden group shadow-md hover:border-primary/40 hover:shadow-lg transition-all duration-500">
+                            <CardHeader className="bg-muted border-b border-border p-4">
+                              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center justify-between">
                                 <span>Plot {idx + 1}</span>
                                 <div className="w-2 h-2 rounded-full bg-primary" />
                               </CardTitle>
                             </CardHeader>
-                            <div className="relative flex items-center justify-center p-4 bg-white group-hover:bg-slate-50 transition-colors duration-500">
+                            <div className="relative flex items-center justify-center p-4 bg-card group-hover:bg-muted/30 transition-colors duration-500">
                               <img
                                 src={`data:image/png;base64,${plot}`}
                                 alt={`Visualization ${idx + 1}`}
@@ -525,24 +515,23 @@ export default function Playground() {
                 </div>
               ) : (
                 /* Empty state */
-                <div className="h-[500px] border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center space-y-6 bg-slate-50 animate-in fade-in zoom-in-95 duration-700">
-                  <div className="h-24 w-24 rounded-3xl bg-white border border-slate-200 flex items-center justify-center shadow-md">
+                <div className="h-[500px] border-2 border-dashed border-border rounded-3xl flex flex-col items-center justify-center space-y-6 bg-muted/20 animate-in fade-in zoom-in-95 duration-700">
+                  <div className="h-24 w-24 rounded-3xl bg-card border border-border flex items-center justify-center shadow-md">
                     <FlaskConical className="h-10 w-10 text-primary" />
                   </div>
                   <div className="text-center space-y-2">
-                    <h3 className="text-xl font-black text-slate-800 tracking-tight">Playground Ready</h3>
-                    <p className="max-w-xs text-slate-500 font-medium leading-relaxed">
+                    <h3 className="text-xl font-black text-foreground tracking-tight">Playground Ready</h3>
+                    <p className="max-w-xs text-muted-foreground font-medium leading-relaxed">
                       Select a model, tune parameters, and click
                       <span className="text-primary font-extrabold"> "Train Model" </span>
                       to see results.
                     </p>
                   </div>
-                  {/* Hint chips */}
                   <div className="flex gap-2 flex-wrap justify-center">
                     {metricKeys.map((k) => {
                       const meta = METRIC_META[k];
                       return (
-                        <span key={k} className="text-[10px] bg-white border border-slate-200 text-slate-500 font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+                        <span key={k} className="text-[10px] bg-card border border-border text-muted-foreground font-bold uppercase tracking-wider px-3 py-1 rounded-full">
                           {meta?.label ?? k}
                         </span>
                       );

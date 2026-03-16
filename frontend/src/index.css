@@ -1,175 +1,483 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+/* ═══════════════════════════════════════════════════════════════════
+   THEME SYSTEM
+   Each theme is defined as [data-theme="X"] for light and
+   [data-theme="X"].dark for dark. They all override the same
+   set of CSS custom properties.
+   ═══════════════════════════════════════════════════════════════════ */
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 10%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 10%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 10%;
-
-    --primary: 262 83% 58%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 330 81% 60%;
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 5% 45%;
-
-    --accent: 45 93% 58%;
-    --accent-foreground: 240 10% 10%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 262 83% 58%;
-
-    --radius: 0.75rem;
-
-    /* Custom colors for the design */
-    --gradient-start: 262 83% 58%;
-    --gradient-mid: 330 81% 60%;
-    --gradient-end: 45 93% 58%;
-    
-    --code-bg: 240 10% 10%;
-    --code-foreground: 0 0% 95%;
-    
-    --mesh-purple: 262 83% 85%;
-    --mesh-pink: 330 81% 90%;
-    --mesh-yellow: 45 93% 85%;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 262 83% 58%;
-  }
-
-  .dark {
-    --background: 240 10% 6%;
-    --foreground: 0 0% 95%;
-
-    --card: 240 10% 10%;
-    --card-foreground: 0 0% 95%;
-
-    --popover: 240 10% 10%;
-    --popover-foreground: 0 0% 95%;
-
-    --primary: 262 83% 58%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 330 81% 60%;
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 240 5% 18%;
-    --muted-foreground: 240 5% 65%;
-
-    --accent: 45 93% 58%;
-    --accent-foreground: 240 10% 10%;
-
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 0 0% 95%;
-
-    --border: 240 5% 20%;
-    --input: 240 5% 20%;
-    --ring: 262 83% 58%;
-  }
+/* ──────────────────────────────────────────────────────────────────
+   THEME 1 · TEAL ABYSS  (default alias)
+   Light: soft gray-green bg · teal primary (#124E66)
+   Dark:  near-black navy  · electric cyan
+   ────────────────────────────────────────────────────────────────── */
+:root,
+[data-theme="teal"] {
+  --background: 132 9% 93%;
+  --foreground: 207 20% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 207 20% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 207 20% 14%;
+  --primary: 197 70% 28%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 190 12% 48%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 132 8% 87%;
+  --muted-foreground: 210 15% 38%;
+  --accent: 190 35% 38%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 190 10% 78%;
+  --input: 190 10% 78%;
+  --ring: 197 70% 28%;
+  --radius: 0.75rem;
+  --mesh-primary: 197 70% 60%;
+  --mesh-secondary: 190 30% 70%;
+  --mesh-accent: 132 20% 75%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 207 20% 22%;
+  --sidebar-primary: 197 70% 28%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 132 9% 92%;
+  --sidebar-accent-foreground: 207 20% 14%;
+  --sidebar-border: 190 10% 82%;
+  --sidebar-ring: 197 70% 28%;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
+[data-theme="teal"].dark {
+  --background: 216 28% 7%;
+  --foreground: 210 40% 96%;
+  --card: 216 24% 11%;
+  --card-foreground: 210 40% 96%;
+  --popover: 216 24% 11%;
+  --popover-foreground: 210 40% 96%;
+  --primary: 188 90% 48%;
+  --primary-foreground: 216 28% 6%;
+  --secondary: 190 25% 38%;
+  --secondary-foreground: 210 40% 96%;
+  --muted: 216 20% 16%;
+  --muted-foreground: 200 25% 68%;
+  --accent: 172 70% 42%;
+  --accent-foreground: 216 28% 6%;
+  --destructive: 0 70% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 216 18% 20%;
+  --input: 216 18% 20%;
+  --ring: 188 90% 48%;
+  --mesh-primary: 188 90% 22%;
+  --mesh-secondary: 172 60% 16%;
+  --mesh-accent: 210 40% 12%;
+  --sidebar-background: 216 26% 9%;
+  --sidebar-foreground: 200 30% 78%;
+  --sidebar-primary: 188 90% 48%;
+  --sidebar-primary-foreground: 216 28% 6%;
+  --sidebar-accent: 216 22% 14%;
+  --sidebar-accent-foreground: 210 40% 96%;
+  --sidebar-border: 216 18% 18%;
+  --sidebar-ring: 188 90% 48%;
+}
 
+/* ──────────────────────────────────────────────────────────────────
+   THEME 2 · MIDNIGHT VIOLET
+   Light: soft lavender bg · rich purple primary
+   Dark:  very dark purple-black · vivid violet
+   ────────────────────────────────────────────────────────────────── */
+[data-theme="violet"] {
+  --background: 270 30% 96%;
+  --foreground: 270 40% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 270 40% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 270 40% 12%;
+  --primary: 267 75% 40%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 270 25% 55%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 270 20% 90%;
+  --muted-foreground: 270 20% 40%;
+  --accent: 290 60% 45%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 270 18% 84%;
+  --input: 270 18% 84%;
+  --ring: 267 75% 40%;
+  --mesh-primary: 267 70% 70%;
+  --mesh-secondary: 290 50% 75%;
+  --mesh-accent: 250 40% 80%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 270 35% 20%;
+  --sidebar-primary: 267 75% 40%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 270 25% 94%;
+  --sidebar-accent-foreground: 270 40% 12%;
+  --sidebar-border: 270 18% 88%;
+  --sidebar-ring: 267 75% 40%;
+}
+
+[data-theme="violet"].dark {
+  --background: 265 30% 6%;
+  --foreground: 270 40% 95%;
+  --card: 265 26% 10%;
+  --card-foreground: 270 40% 95%;
+  --popover: 265 26% 10%;
+  --popover-foreground: 270 40% 95%;
+  --primary: 267 80% 65%;
+  --primary-foreground: 265 30% 6%;
+  --secondary: 270 30% 32%;
+  --secondary-foreground: 270 40% 95%;
+  --muted: 265 22% 15%;
+  --muted-foreground: 270 25% 65%;
+  --accent: 290 65% 60%;
+  --accent-foreground: 265 30% 6%;
+  --destructive: 0 70% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 265 20% 20%;
+  --input: 265 20% 20%;
+  --ring: 267 80% 65%;
+  --mesh-primary: 267 70% 18%;
+  --mesh-secondary: 290 50% 14%;
+  --mesh-accent: 250 30% 12%;
+  --sidebar-background: 265 28% 8%;
+  --sidebar-foreground: 270 30% 78%;
+  --sidebar-primary: 267 80% 65%;
+  --sidebar-primary-foreground: 265 30% 6%;
+  --sidebar-accent: 265 24% 13%;
+  --sidebar-accent-foreground: 270 40% 95%;
+  --sidebar-border: 265 20% 18%;
+  --sidebar-ring: 267 80% 65%;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   THEME 3 · EMERALD PEAK
+   Light: pale sage bg · deep forest green primary
+   Dark:  dark forest · vibrant emerald
+   ────────────────────────────────────────────────────────────────── */
+[data-theme="emerald"] {
+  --background: 150 20% 95%;
+  --foreground: 160 40% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 160 40% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 160 40% 10%;
+  --primary: 160 65% 25%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 155 25% 45%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 150 15% 88%;
+  --muted-foreground: 160 20% 38%;
+  --accent: 140 55% 35%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 150 15% 80%;
+  --input: 150 15% 80%;
+  --ring: 160 65% 25%;
+  --mesh-primary: 160 60% 65%;
+  --mesh-secondary: 140 50% 70%;
+  --mesh-accent: 150 30% 78%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 160 35% 18%;
+  --sidebar-primary: 160 65% 25%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 150 15% 92%;
+  --sidebar-accent-foreground: 160 40% 10%;
+  --sidebar-border: 150 15% 84%;
+  --sidebar-ring: 160 65% 25%;
+}
+
+[data-theme="emerald"].dark {
+  --background: 160 30% 6%;
+  --foreground: 150 30% 94%;
+  --card: 160 25% 10%;
+  --card-foreground: 150 30% 94%;
+  --popover: 160 25% 10%;
+  --popover-foreground: 150 30% 94%;
+  --primary: 152 70% 45%;
+  --primary-foreground: 160 30% 5%;
+  --secondary: 155 28% 30%;
+  --secondary-foreground: 150 30% 94%;
+  --muted: 160 20% 15%;
+  --muted-foreground: 155 22% 62%;
+  --accent: 140 60% 45%;
+  --accent-foreground: 160 30% 5%;
+  --destructive: 0 70% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 160 18% 18%;
+  --input: 160 18% 18%;
+  --ring: 152 70% 45%;
+  --mesh-primary: 160 65% 14%;
+  --mesh-secondary: 140 50% 12%;
+  --mesh-accent: 150 30% 10%;
+  --sidebar-background: 160 28% 8%;
+  --sidebar-foreground: 150 25% 75%;
+  --sidebar-primary: 152 70% 45%;
+  --sidebar-primary-foreground: 160 30% 5%;
+  --sidebar-accent: 160 22% 13%;
+  --sidebar-accent-foreground: 150 30% 94%;
+  --sidebar-border: 160 18% 16%;
+  --sidebar-ring: 152 70% 45%;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   THEME 4 · AMBER FORGE
+   Light: warm cream bg · deep amber primary
+   Dark:  dark warm charcoal · bright gold
+   ────────────────────────────────────────────────────────────────── */
+[data-theme="amber"] {
+  --background: 42 35% 94%;
+  --foreground: 30 40% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 30 40% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 30 40% 12%;
+  --primary: 32 80% 32%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 38 40% 50%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 42 20% 87%;
+  --muted-foreground: 35 20% 40%;
+  --accent: 20 70% 40%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 38 20% 78%;
+  --input: 38 20% 78%;
+  --ring: 32 80% 32%;
+  --mesh-primary: 38 80% 65%;
+  --mesh-secondary: 20 60% 70%;
+  --mesh-accent: 42 40% 78%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 30 35% 18%;
+  --sidebar-primary: 32 80% 32%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 42 25% 92%;
+  --sidebar-accent-foreground: 30 40% 12%;
+  --sidebar-border: 38 20% 82%;
+  --sidebar-ring: 32 80% 32%;
+}
+
+[data-theme="amber"].dark {
+  --background: 28 22% 7%;
+  --foreground: 42 35% 95%;
+  --card: 28 18% 11%;
+  --card-foreground: 42 35% 95%;
+  --popover: 28 18% 11%;
+  --popover-foreground: 42 35% 95%;
+  --primary: 42 95% 52%;
+  --primary-foreground: 28 22% 7%;
+  --secondary: 38 30% 32%;
+  --secondary-foreground: 42 35% 95%;
+  --muted: 28 16% 16%;
+  --muted-foreground: 38 25% 62%;
+  --accent: 20 75% 55%;
+  --accent-foreground: 28 22% 7%;
+  --destructive: 0 70% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 28 16% 20%;
+  --input: 28 16% 20%;
+  --ring: 42 95% 52%;
+  --mesh-primary: 38 80% 16%;
+  --mesh-secondary: 20 60% 14%;
+  --mesh-accent: 42 30% 12%;
+  --sidebar-background: 28 20% 9%;
+  --sidebar-foreground: 42 25% 76%;
+  --sidebar-primary: 42 95% 52%;
+  --sidebar-primary-foreground: 28 22% 7%;
+  --sidebar-accent: 28 18% 14%;
+  --sidebar-accent-foreground: 42 35% 95%;
+  --sidebar-border: 28 16% 18%;
+  --sidebar-ring: 42 95% 52%;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   THEME 5 · ROSE STORM
+   Light: cool blush bg · deep rose/crimson primary
+   Dark:  very dark cool · vivid rose pink
+   ────────────────────────────────────────────────────────────────── */
+[data-theme="rose"] {
+  --background: 350 25% 95%;
+  --foreground: 340 40% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 340 40% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 340 40% 12%;
+  --primary: 346 75% 35%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 350 28% 52%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 350 15% 88%;
+  --muted-foreground: 345 18% 40%;
+  --accent: 320 60% 42%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 348 18% 80%;
+  --input: 348 18% 80%;
+  --ring: 346 75% 35%;
+  --mesh-primary: 346 70% 65%;
+  --mesh-secondary: 320 55% 70%;
+  --mesh-accent: 350 30% 78%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 340 35% 18%;
+  --sidebar-primary: 346 75% 35%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 350 18% 92%;
+  --sidebar-accent-foreground: 340 40% 12%;
+  --sidebar-border: 348 18% 84%;
+  --sidebar-ring: 346 75% 35%;
+}
+
+[data-theme="rose"].dark {
+  --background: 340 25% 7%;
+  --foreground: 350 35% 95%;
+  --card: 340 22% 11%;
+  --card-foreground: 350 35% 95%;
+  --popover: 340 22% 11%;
+  --popover-foreground: 350 35% 95%;
+  --primary: 346 85% 62%;
+  --primary-foreground: 340 25% 7%;
+  --secondary: 348 28% 30%;
+  --secondary-foreground: 350 35% 95%;
+  --muted: 340 18% 15%;
+  --muted-foreground: 348 22% 63%;
+  --accent: 320 65% 58%;
+  --accent-foreground: 340 25% 7%;
+  --destructive: 0 70% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 340 18% 20%;
+  --input: 340 18% 20%;
+  --ring: 346 85% 62%;
+  --mesh-primary: 346 70% 15%;
+  --mesh-secondary: 320 50% 12%;
+  --mesh-accent: 350 25% 10%;
+  --sidebar-background: 340 24% 9%;
+  --sidebar-foreground: 350 28% 76%;
+  --sidebar-primary: 346 85% 62%;
+  --sidebar-primary-foreground: 340 25% 7%;
+  --sidebar-accent: 340 20% 13%;
+  --sidebar-accent-foreground: 350 35% 95%;
+  --sidebar-border: 340 18% 17%;
+  --sidebar-ring: 346 85% 62%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SHARED BASE STYLES
+   ═══════════════════════════════════════════════════════════════════ */
+@layer base {
+  * { @apply border-border; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
     font-family: 'Plus Jakarta Sans', sans-serif;
+    font-feature-settings: "cv11","ss01";
+    -webkit-font-smoothing: antialiased;
   }
+  h1,h2,h3,h4,h5,h6 { color: hsl(var(--foreground)); font-weight: 700; letter-spacing: -0.025em; }
+  p { color: hsl(var(--foreground) / 0.85); }
+  .text-muted-foreground { color: hsl(var(--muted-foreground)) !important; }
 }
 
 @layer components {
+  /* Gradient text */
   .gradient-text {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+    background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
   }
 
+  /* Gradient backgrounds */
   .gradient-bg {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
   }
 
-  .gradient-border {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
-    padding: 2px;
-  }
-
+  /* Mesh */
   .mesh-gradient {
-    background: 
-      radial-gradient(at 40% 20%, hsl(var(--mesh-purple) / 0.4) 0px, transparent 50%),
-      radial-gradient(at 80% 0%, hsl(var(--mesh-pink) / 0.3) 0px, transparent 50%),
-      radial-gradient(at 0% 50%, hsl(var(--mesh-purple) / 0.3) 0px, transparent 50%),
-      radial-gradient(at 80% 50%, hsl(var(--mesh-yellow) / 0.3) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsl(var(--mesh-pink) / 0.3) 0px, transparent 50%),
-      radial-gradient(at 80% 100%, hsl(var(--mesh-purple) / 0.2) 0px, transparent 50%),
+    background:
+      radial-gradient(at 30% 15%,  hsl(var(--mesh-primary)   / 0.40) 0px, transparent 55%),
+      radial-gradient(at 78% 10%,  hsl(var(--mesh-secondary) / 0.30) 0px, transparent 50%),
+      radial-gradient(at 5%  55%,  hsl(var(--mesh-primary)   / 0.25) 0px, transparent 50%),
+      radial-gradient(at 82% 55%,  hsl(var(--mesh-accent)    / 0.25) 0px, transparent 50%),
+      radial-gradient(at 5%  95%,  hsl(var(--mesh-secondary) / 0.25) 0px, transparent 50%),
       hsl(var(--background));
   }
 
-  .code-theme {
-    @apply bg-code text-code-foreground;
+  /* Gradient border */
+  .gradient-border { position: relative; }
+  .gradient-border::before {
+    content: ''; position: absolute; inset: 0; padding: 1.5px; border-radius: inherit;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
   }
 
+  /* Glass */
   .glass-card {
-    @apply bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl;
+    @apply backdrop-blur-xl border border-white/10 shadow-2xl;
+    background: hsl(var(--card) / 0.6);
   }
 
+  /* Buttons */
   .btn-primary {
-    @apply gradient-bg text-white font-semibold px-6 py-3 rounded-xl hover:opacity-90 transition-opacity;
+    @apply gradient-bg text-white font-semibold px-6 py-3 rounded-xl shadow-lg
+           hover:opacity-90 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200;
   }
-
   .btn-outline {
-    @apply border-2 border-primary text-primary font-semibold px-6 py-3 rounded-xl hover:bg-primary hover:text-white transition-all;
+    @apply border-2 border-primary text-primary font-semibold px-6 py-3 rounded-xl
+           hover:bg-primary hover:text-white hover:-translate-y-0.5 transition-all duration-200;
+  }
+  .btn-ghost {
+    @apply text-muted-foreground hover:text-foreground hover:bg-muted font-medium
+           px-4 py-2 rounded-xl transition-all duration-200;
   }
 
+  /* Input */
   .input-field {
-    @apply w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all;
+    @apply w-full px-4 py-3 rounded-xl border border-border bg-background
+           text-foreground placeholder:text-muted-foreground
+           focus:outline-none focus:ring-2 focus:ring-primary/40
+           focus:border-primary transition-all duration-200;
   }
 
-  .nav-link {
-    @apply text-muted-foreground hover:text-foreground transition-colors font-medium;
-  }
-
-  .nav-link-active {
-    @apply text-foreground font-semibold;
-  }
-
+  /* Card hover */
   .card-hover {
-    @apply transition-all duration-300 hover:shadow-2xl hover:-translate-y-1;
+    @apply transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:border-primary/40;
+  }
+
+  /* Glow */
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.30), 0 0 60px hsl(var(--primary) / 0.10);
+  }
+
+  /* Divider */
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(var(--border)), hsl(var(--primary) / 0.5), hsl(var(--border)), transparent);
   }
 }
 
 @layer utilities {
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
+  .animate-float      { animation: float 6s ease-in-out infinite; }
+  .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4,0,0.6,1) infinite; }
+  .animate-fade-in    { animation: fadeIn 0.5s ease-out forwards; }
+  .animate-slide-up   { animation: slideUp 0.55s ease-out forwards; }
+  .animate-scale-in  { animation: scaleIn 0.3s ease-out forwards; }
 
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-  }
+  @keyframes float   { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-18px); } }
+  @keyframes fadeIn  { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes slideUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes scaleIn { from { opacity:0; transform:scale(0.94); } to { opacity:1; transform:scale(1); } }
 
-  .animate-pulse-slow {
-    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
+  .scrollbar-thin { scrollbar-width: thin; scrollbar-color: hsl(var(--border)) transparent; }
+  .scrollbar-thin::-webkit-scrollbar        { width: 5px; height: 5px; }
+  .scrollbar-thin::-webkit-scrollbar-track  { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb  { background: hsl(var(--border)); border-radius: 9999px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: hsl(var(--primary) / 0.6); }
+  .text-balance { text-wrap: balance; }
 }

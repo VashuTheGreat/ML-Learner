@@ -18,7 +18,8 @@ import {
   Upload,
   FlaskConical,
   Trophy,
-  Code2
+  Code2,
+  Bot
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import userApi from "@/Services/userApi";
@@ -399,378 +400,397 @@ const handleUpdateUser=async()=>{
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background selection:bg-primary/20">
-      <Navbar />
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 p-4 md:p-8 animate-in fade-in max-w-[1600px] mx-auto">
       
-      <main className="container mx-auto px-4 pt-24 pb-12">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">
-              Welcome back, <span className="gradient-text">{user.fullName}</span>
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Manage your resumes and track your interview progress.
-            </p>
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-bold mb-1 tracking-tight flex items-center gap-3">
+            Command Center
+            <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs uppercase tracking-widest font-bold">Online</span>
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Welcome back, <span className="font-semibold text-foreground">{user.fullName}</span>. Here's your mission control.
+          </p>
+        </div>
+        
+        <button 
+          onClick={handleLogout}
+          className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/50 border border-border text-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-all duration-300 shadow-sm"
+        >
+          <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <span className="text-sm font-semibold">System Exit</span>
+        </button>
+      </div>
+
+      {/* Horizontal Stats Strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="bg-card border border-border p-4 rounded-2xl flex items-center gap-4 relative overflow-hidden group">
+          <div className="absolute -right-2 top-0 w-16 h-16 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors"></div>
+          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+            <UserIcon className="w-5 h-5" />
           </div>
-          
-          <button 
-            onClick={handleLogout}
-            className="group flex items-center gap-2 px-5 py-2.5 rounded-xl border border-destructive/20 text-destructive hover:bg-destructive/10 transition-all duration-300"
-          >
-            <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            <span>Sign Out</span>
-          </button>
+          <div>
+            <div className="text-xs font-bold text-muted-foreground uppercase">Profile</div>
+            <div className="text-xl font-bold flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div> Active
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-card border border-border p-4 rounded-2xl flex items-center gap-4 relative overflow-hidden group">
+          <div className="absolute -right-2 top-0 w-16 h-16 bg-cyan-500/5 rounded-full blur-xl group-hover:bg-cyan-500/10 transition-colors"></div>
+          <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-500">
+            <FileText className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-muted-foreground uppercase">Resumes</div>
+            <div className="text-xl font-bold">{user.resumes.length} Doc{user.resumes.length !== 1 && 's'}</div>
+          </div>
+        </div>
+        
+        <div className="bg-card border border-border p-4 rounded-2xl flex items-center gap-4 relative overflow-hidden group">
+          <div className="absolute -right-2 top-0 w-16 h-16 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-colors"></div>
+          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+            <Calendar className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-muted-foreground uppercase">Interviews</div>
+            <div className="text-xl font-bold">{appliedInterviews.length} Scheduled</div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column: User Profile & Stats */}
-          <div className="space-y-8">
-            {/* Profile Card */}
-            <div className="glass-card p-6 rounded-2xl relative overflow-hidden group">
+        <Link to="/playground" className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 hover:border-primary/50 p-4 rounded-2xl flex items-center gap-4 relative overflow-hidden group transition-all">
+          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/30 group-hover:scale-110 transition-transform">
+            <FlaskConical className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-primary/80 uppercase">Lab</div>
+            <div className="text-lg font-bold text-primary">ML Playground</div>
+          </div>
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+        
+        {/* Left Column: Full-Bleed Profile Visual */}
+        <div className="xl:col-span-1 space-y-6">
+          <div className="bg-card border border-border rounded-3xl overflow-hidden relative shadow-sm">
+            {/* Cover Image/Gradient area */}
+            <div className="h-32 relative overflow-hidden gradient-bg"
+            >
               <button 
                 onClick={handleUpdateUser}
-                className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-secondary/5 border border-border/50 text-[10px] uppercase tracking-wider font-bold text-muted-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all duration-300 group/edit z-20"
+                className="absolute top-4 right-4 p-2 rounded-xl bg-black/20 hover:bg-black/40 text-white backdrop-blur-md transition-all z-10"
+                title="Edit Profile Settings"
               >
-                <Settings className="w-3.5 h-3.5 group-hover/edit:rotate-90 transition-transform duration-500" />
-                <span>Edit Profile</span>
+                <Settings className="w-4 h-4" />
               </button>
-              
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -mr-16 -mt-16 transition-all duration-500 group-hover:bg-primary/20"></div>
-              
-              <div className="relative z-10">
-                <div className="relative w-20 h-20 mb-6 group/avatar">
-                  <div className="w-20 h-20 rounded-2xl gradient-bg flex items-center justify-center text-3xl font-bold text-white shadow-lg shadow-primary/20 overflow-hidden">
-                    {user.avatar ? (
-                      <img 
-                        src={user.avatar} 
-                        alt={user.fullName} 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      user.fullName.charAt(0).toUpperCase()
-                    )}
-                    
-                    {isUploadingAvatar && (
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-white"></div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-xl shadow-lg border border-border flex items-center justify-center cursor-pointer hover:bg-secondary/10 transition-colors group-hover/avatar:scale-110 duration-300">
-                    <Camera className="w-4 h-4 text-primary" />
-                    <input 
-                      type="file" 
-                      className="hidden" 
-                      accept="image/*"
-                      onChange={handleUploadAvatar}
-                      disabled={isUploadingAvatar}
+            </div>
+            
+            <div className="px-6 pb-6 relative">
+              {/* Avatar out of bounds effect */}
+              <div className="relative w-24 h-24 -mt-12 mb-4 group/avatar border-4 border-card rounded-2xl bg-card">
+                <div className="w-full h-full rounded-xl bg-muted flex items-center justify-center text-3xl font-bold text-foreground overflow-hidden">
+                  {user.avatar ? (
+                    <img 
+                      src={user.avatar} 
+                      alt={user.fullName} 
+                      className="w-full h-full object-cover"
                     />
-                  </label>
+                  ) : (
+                    user.fullName.charAt(0).toUpperCase()
+                  )}
+                  
+                  {isUploadingAvatar && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20">
+                      <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-primary"></div>
+                    </div>
+                  )}
                 </div>
                 
-                <h2 className="text-2xl font-bold mb-1">{user.fullName}</h2>
-                <p className="text-muted-foreground mb-6">{user.email}</p>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground p-3 rounded-xl bg-secondary/5 border border-border/50">
-                    <Calendar className="w-4 h-4 text-primary" />
-                    <span>Joined {formatDate(user.createdAt)}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground p-3 rounded-xl bg-secondary/5 border border-border/50">
-                    <Clock className="w-4 h-4 text-primary" />
-                    <span>Last updated {formatDate(user.updatedAt)}</span>
-                  </div>
+                <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary rounded-xl shadow-lg border border-primary-foreground flex items-center justify-center text-white cursor-pointer hover:bg-primary/90 transition-colors group-hover/avatar:scale-110 z-10">
+                  <Camera className="w-4 h-4" />
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={handleUploadAvatar}
+                    disabled={isUploadingAvatar}
+                  />
+                </label>
+              </div>
+              
+              <h2 className="text-xl font-bold leading-none mb-1">{user.fullName}</h2>
+              <p className="text-sm text-muted-foreground mb-6 truncate">{user.email}</p>
+              
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-muted-foreground flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5"/> Joined</span>
+                  <span className="font-medium">{formatDate(user.createdAt)}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-muted-foreground flex items-center gap-1.5"><Clock className="w-3.5 h-3.5"/> Updated</span>
+                  <span className="font-medium">{formatDate(user.updatedAt)}</span>
                 </div>
               </div>
-            </div>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="glass-card p-5 rounded-2xl border-l-4 border-l-primary">
-                <div className="text-muted-foreground text-sm font-medium mb-1">Total Resumes</div>
-                <div className="text-3xl font-bold">{user.resumes.length}</div>
-              </div>
-              <div className="glass-card p-5 rounded-2xl border-l-4 border-l-secondary">
-                <div className="text-muted-foreground text-sm font-medium mb-1">Account Status</div>
-                <div className="text-lg font-bold text-green-500 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                  Active
-                </div>
-              </div>
-            </div>
-
-            {/* ML Playground Card */}
-            <Link to="/playground" className="glass-card p-6 rounded-2xl flex items-center gap-4 group cursor-pointer border-2 border-primary/20 hover:border-primary/50 transition-all duration-300 relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-primary/20 transition-all duration-500"></div>
-               <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 relative z-10">
-                 <FlaskConical className="w-8 h-8 text-primary" />
-               </div>
-               <div className="relative z-10">
-                 <h3 className="font-bold text-lg group-hover:text-primary transition-colors">ML Playground</h3>
-                 <p className="text-xs text-muted-foreground">Experiment with AI models in our interactive lab.</p>
-               </div>
-               <ChevronRight className="w-5 h-5 ml-auto text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-            </Link>
-
-            {/* About User Section */}
-            <div className="glass-card p-6 rounded-2xl relative overflow-hidden">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-bold flex items-center gap-2">
-                    <UserIcon className="w-5 h-5 text-primary" />
-                    About You
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    <label className="p-2 hover:bg-secondary/10 rounded-lg transition-colors text-muted-foreground hover:text-primary cursor-pointer" title="Upload Resume (PDF)">
-                      {isExtractingResume ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-primary"></div>
-                      ) : (
-                        <Upload className="w-4 h-4" />
+              {/* About User Inside Profile */}
+              <div className="border-t border-border pt-6">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">About You</h3>
+                  <div className="flex justify-end gap-1">
+                      <label className="p-1.5 bg-secondary/30 hover:bg-secondary/60 rounded-md transition-colors text-muted-foreground hover:text-primary cursor-pointer" title="Auto-fill from Resume PDF">
+                        {isExtractingResume ? (
+                          <div className="animate-spin rounded-full h-3 w-3 border-t-2 border-primary"></div>
+                        ) : (
+                          <Upload className="w-3 h-3" />
+                        )}
+                        <input 
+                          type="file" 
+                          className="hidden" 
+                          accept=".pdf"
+                          onChange={handleResumeUpload}
+                          disabled={isExtractingResume || isSavingAbout}
+                        />
+                      </label>
+                      {!isEditingAbout && (
+                        <button 
+                          onClick={() => setIsEditingAbout(true)}
+                          className="p-1.5 bg-secondary/30 hover:bg-secondary/60 rounded-md transition-colors text-muted-foreground hover:text-primary"
+                          title="Edit Manually"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </button>
                       )}
-                      <input 
-                        type="file" 
-                        className="hidden" 
-                        accept=".pdf"
-                        onChange={handleResumeUpload}
-                        disabled={isExtractingResume || isSavingAbout}
-                      />
-                    </label>
-                    {!isEditingAbout && (
-                      <button 
-                        onClick={() => setIsEditingAbout(true)}
-                        className="p-2 hover:bg-secondary/10 rounded-lg transition-colors text-muted-foreground hover:text-primary"
-                        title="Edit Manually"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                    )}
                   </div>
                 </div>
-               
-               {isEditingAbout ? (
+
+                {isEditingAbout ? (
                  <div className="space-y-3">
                    <textarea
                      value={aboutInput}
                      onChange={(e) => setAboutInput(e.target.value)}
-                     className="w-full min-h-[100px] p-3 rounded-xl bg-secondary/5 border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none text-sm"
+                     className="w-full min-h-[120px] p-3 text-sm rounded-xl bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none"
                      placeholder="Tell us about your professional background..."
                    />
                    <div className="flex justify-end gap-2">
                      <button 
                        onClick={() => setIsEditingAbout(false)}
                        disabled={isSavingAbout}
-                       className="px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                       className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
                      >
                        Cancel
                      </button>
                      <button 
                        onClick={handleSaveAbout}
                        disabled={isSavingAbout}
-                       className="px-3 py-1.5 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                       className="px-4 py-1.5 text-xs font-semibold bg-primary text-white rounded-lg hover:bg-primary/90 flex items-center gap-2"
                      >
                        {isSavingAbout ? (
-                         <>
-                           <div className="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-white"></div>
-                           <span>Saving...</span>
-                         </>
-                       ) : (
-                         <>
-                           <Save className="w-3 h-3" />
-                           <span>Save</span>
-                         </>
-                       )}
+                         <div className="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-white"></div>
+                       ) : <Save className="w-3 h-3" />}
+                       Save
                      </button>
                    </div>
                  </div>
                ) : (
-                 <div className="text-sm text-muted-foreground leading-relaxed">
+                 <div className="text-sm text-foreground/80 leading-relaxed p-3 bg-secondary/10 rounded-xl">
                    {user.aboutUser ? (
-                     user.aboutUser
+                     <span className="line-clamp-6">{user.aboutUser}</span>
                    ) : (
-                     <p className="italic opacity-70">
-                       No information added yet. Click edit or upload a resume to add your professional summary.
-                     </p>
+                     <span className="italic opacity-60">
+                       No summary added. Upload a resume PDF to auto-generate.
+                     </span>
                    )}
                  </div>
                )}
-            </div>
-
-            {/* Coding Stats Card */}
-            <div className="glass-card p-6 rounded-2xl relative overflow-hidden bg-gradient-to-br from-indigo-500/5 to-purple-500/5 border border-indigo-500/20">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-              
-              <div className="flex justify-between items-center mb-6 relative z-10">
-                <h3 className="text-lg font-bold flex items-center gap-2">
-                  <Trophy className="w-5 h-5 text-indigo-500" />
-                  Coding Achievement
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3 mb-8 relative z-10">
-                <div className="bg-background/50 p-3 rounded-xl border border-border/50 text-center">
-                  <div className="text-[10px] font-bold text-green-500 uppercase tracking-widest mb-1">Easy</div>
-                  <div className="text-xl font-bold">{codingSchema?.easy || 0}</div>
-                </div>
-                <div className="bg-background/50 p-3 rounded-xl border border-border/50 text-center">
-                  <div className="text-[10px] font-bold text-yellow-500 uppercase tracking-widest mb-1">Med</div>
-                  <div className="text-xl font-bold">{codingSchema?.medium || 0}</div>
-                </div>
-                <div className="bg-background/50 p-3 rounded-xl border border-border/50 text-center">
-                  <div className="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1">Hard</div>
-                  <div className="text-xl font-bold">{codingSchema?.hard || 0}</div>
-                </div>
-              </div>
-
-              <div className="space-y-3 relative z-10">
-                <h4 className="text-xs font-black text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                  <Clock className="w-3.5 h-3.5" />
-                  Recently Solved
-                </h4>
-                {codingSchema?.recently_solved && codingSchema.recently_solved.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {codingSchema.recently_solved.slice(0, 5).map((slug, idx) => (
-                      <Link 
-                        key={idx}
-                        to={`/solve/${slug}`}
-                        className="px-3 py-1.5 rounded-lg bg-secondary/10 border border-border/50 text-[10px] font-medium hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-all truncate max-w-[120px]"
-                      >
-                        {slug.replace(/-/g, ' ')}
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground italic">No questions solved yet.</p>
-                )}
               </div>
             </div>
-
           </div>
 
-          {/* Right Column: Resumes & Actions */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Applied Interviews Section */}
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold flex items-center gap-3">
-                <Calendar className="w-6 h-6 text-primary" />
-                Applied Interviews
-              </h2>
-              
-              {appliedInterviews.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {appliedInterviews.map((interview, index) => (
-                    <div 
-                      key={index} 
-                      onClick={() => {
-                        if (interview.status === 'live') {
-                          navigate(`/interview/${interview._id}`);
-                        } else if (interview.status === 'done') {
-                          navigate(`/performance/${interview._id}`);
-                        } else {
-                          alert(`Please come on ${formatDate(interview.time)} for this interview.`);
-                        }
-                      }}
-                      className="glass-card p-6 rounded-2xl card-hover group cursor-pointer relative overflow-hidden border border-border/50"
+          {/* Coding Stats Small Card */}
+          <div className="bg-card border border-border rounded-3xl p-6 shadow-sm">
+            <h3 className="text-sm font-bold flex items-center gap-2 mb-4 uppercase tracking-wider text-muted-foreground">
+              <Code2 className="w-4 h-4 text-primary" />
+              Code Solved
+            </h3>
+            <div className="grid grid-cols-3 gap-2 mb-6">
+                <div className="bg-green-500/10 p-2 text-center rounded-xl border border-green-500/20">
+                  <div className="text-lg font-black text-green-600 dark:text-green-400">{codingSchema?.easy || 0}</div>
+                  <div className="text-[9px] font-bold text-green-600/70 uppercase">Easy</div>
+                </div>
+                <div className="bg-yellow-500/10 p-2 text-center rounded-xl border border-yellow-500/20">
+                  <div className="text-lg font-black text-yellow-600 dark:text-yellow-400">{codingSchema?.medium || 0}</div>
+                  <div className="text-[9px] font-bold text-yellow-600/70 uppercase">Med</div>
+                </div>
+                <div className="bg-red-500/10 p-2 text-center rounded-xl border border-red-500/20">
+                  <div className="text-lg font-black text-red-600 dark:text-red-400">{codingSchema?.hard || 0}</div>
+                  <div className="text-[9px] font-bold text-red-600/70 uppercase">Hard</div>
+                </div>
+            </div>
+            
+            <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Recently Active</h4>
+            {codingSchema?.recently_solved && codingSchema.recently_solved.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {codingSchema.recently_solved.slice(0, 4).map((slug, idx) => (
+                  <Link 
+                    key={idx}
+                    to={`/solve/${slug}`}
+                    className="px-2.5 py-1 rounded-md bg-secondary border border-border text-[10px] font-semibold hover:border-primary/50 transition-colors truncate max-w-[100px]"
+                  >
+                    {slug.replace(/-/g, ' ')}
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-muted-foreground italic bg-secondary/30 p-2 rounded-lg text-center">No questions solved.</div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: Carousel & Stack */}
+        <div className="xl:col-span-3 space-y-8">
+          
+          {/* Interview Carousel (Horizontal Scrolling Row) */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-primary" />
+              Upcoming Interviews
+            </h2>
+            
+            {appliedInterviews.length > 0 ? (
+              <div className="flex overflow-x-auto gap-5 pb-4 snap-x scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+                {appliedInterviews.map((interview, index) => (
+                  <div
+                    key={index}
+                    onClick={() => {
+                      if (interview.status === 'live') navigate(`/interview/${interview._id}`);
+                      else if (interview.status === 'done') navigate(`/performance/${interview._id}`);
+                      else alert(`Scheduled for ${formatDate(interview.time)}.`);
+                    }}
+                    className="min-w-[320px] sm:min-w-[360px] snap-center cursor-pointer group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300"
+                  >
+                    {/* Gradient header band */}
+                    <div className="h-24 relative overflow-hidden flex-shrink-0 gradient-bg"
                     >
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 group-hover:border-primary/50 transition-colors">
-                          <Clock className="w-6 h-6 text-primary" />
-                        </div>
-                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
-                          interview.status === 'live' ? 'bg-green-500/10 text-green-500 animate-pulse' : 
-                          interview.status === 'done' ? 'bg-gray-500/10 text-gray-500' : 
-                          'bg-yellow-500/10 text-yellow-600'
+                      <div className="absolute inset-0 opacity-30 bg-white/10" />
+                      {/* Status badge top-right */}
+                      <div className="absolute top-3 right-3">
+                        <span className={`text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest backdrop-blur-sm ${
+                          interview.status === 'live'
+                            ? 'bg-green-500 text-white shadow-lg shadow-green-500/40 animate-pulse'
+                            : interview.status === 'done'
+                            ? 'bg-white/20 text-white border border-white/30'
+                            : 'bg-amber-400/90 text-amber-900'
                         }`}>
-                          {interview.status}
+                          {interview.status === 'live' ? '● Live' : interview.status === 'done' ? '✓ Done' : '⏰ Scheduled'}
                         </span>
                       </div>
-                      <h3 className="text-lg font-bold mb-1 group-hover:text-primary transition-colors">{interview.job_Role}</h3>
-                      <p className="text-muted-foreground font-medium mb-4">{interview.companyName}</p>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="w-4 h-4 text-primary/60" />
-                        <span>{formatDate(interview.time)}</span>
+                      {/* Floating Bot icon */}
+                      <div className="absolute bottom-0 left-6 translate-y-1/2">
+                        <div className="w-14 h-14 rounded-2xl bg-card border-2 border-border shadow-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                          <Bot className="w-7 h-7 text-primary" />
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="glass-card rounded-3xl p-8 text-center border-dashed border-2 border-border">
-                  <p className="text-muted-foreground">No interviews scheduled yet.</p>
-                </div>
-              )}
-            </div>
 
-            {/* Action Bar */}
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold flex items-center gap-3">
-                <FileText className="w-6 h-6 text-primary" />
-                My Resumes
-              </h2>
-              <Link 
-                to="/templates" 
-                className="btn-primary flex items-center gap-2 shadow-lg shadow-primary/25 hover:shadow-primary/40"
-              >
-                <Plus className="w-5 h-5" />
-                Create New
-              </Link>
-            </div>
-
-            {/* Resumes Grid */}
-            {user.resumes.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {user.resumes.map((resume, index) => (
-                  <div onClick={()=>viewResume(resume)} key={index} className="glass-card p-6 rounded-2xl card-hover group cursor-pointer relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <div className="relative z-10">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="p-3 rounded-xl bg-background border border-border group-hover:border-primary/50 transition-colors">
-                          <FileText className="w-6 h-6 text-primary" />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary">
-                            PDF
-                          </span>
-                          <button
-                            onClick={(e) => handleDeleteResume(index, e)}
-                            className="p-1.5 rounded-lg bg-destructive/10 text-destructive opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-destructive hover:text-white"
-                            title="Delete Resume"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
+                    {/* Body */}
+                    <div className="pt-10 pb-5 px-6 flex flex-col flex-1">
                       <div className="mb-4">
-                        <ResumePreview resumeId={resume.id || resume} />
+                        <h3 className="text-lg font-bold leading-snug group-hover:gradient-text transition-all">
+                          {interview.job_Role}
+                        </h3>
+                        <p className="text-sm text-muted-foreground font-semibold mt-0.5">
+                          {interview.companyName}
+                        </p>
                       </div>
-                      <h3 className="text-lg font-bold mb-2 group-hover:text-primary transition-colors">Resume {index + 1}</h3>
-                      <p className="text-sm text-muted-foreground mb-4">Created on {formatDate(user.updatedAt)}</p>
-                      
-                      <div className="flex items-center gap-2 text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                        View Details <ChevronRight className="w-4 h-4" />
+
+                      <div className="mt-auto pt-4 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span className="font-semibold">{formatDate(interview.time)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-primary opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                          <span className="text-xs font-bold">Open</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </div>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              /* Empty State */
-              <div className="glass-card rounded-3xl p-12 text-center border-dashed border-2 border-border hover:border-primary/50 transition-colors group">
-                <div className="w-20 h-20 mx-auto rounded-full bg-secondary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <FileText className="w-10 h-10 text-secondary" />
-                </div>
-                <h3 className="text-2xl font-bold mb-3">No resumes yet</h3>
-                <p className="text-muted-foreground max-w-md mx-auto mb-8">
-                  Create your first professional resume today. Choose from our premium templates and get started in minutes.
-                </p>
-                <Link to="/templates" className="btn-primary inline-flex items-center gap-2">
-                  <Plus className="w-5 h-5" />
-                  Create Your First Resume
-                </Link>
+              <div className="bg-secondary/20 border border-dashed border-border rounded-3xl p-8 text-center text-muted-foreground">
+                No active interviews. Apply for jobs to start practicing.
               </div>
             )}
           </div>
+
+          {/* Vertical Resume Stack */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <FileText className="w-5 h-5 text-primary" />
+                Resume Stack
+              </h2>
+              <Link to="/templates" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-md hover:bg-primary/90 transition-colors">
+                <Plus className="w-4 h-4" /> New Document
+              </Link>
+            </div>
+
+            {user.resumes.length > 0 ? (
+              <div className="flex flex-col gap-3">
+                {user.resumes.map((resume, index) => (
+                  <div 
+                    key={index} 
+                    onClick={()=>viewResume(resume)} 
+                    className="bg-card border border-border hover:border-primary/40 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 cursor-pointer group transition-all"
+                  >
+                    {/* Tiny visual preview replacing the huge iframe block on dashboard */}
+                    <div className="w-16 h-20 bg-secondary rounded-lg overflow-hidden border border-border relative flex-shrink-0 group-hover:border-primary/50 transition-colors hidden sm:block">
+                       <ResumePreview resumeId={resume.id || resume} />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-base font-bold truncate group-hover:text-primary transition-colors">Software Engineer Details</h3>
+                        <span className="px-2 py-0.5 rounded-full bg-secondary text-[10px] font-bold uppercase text-muted-foreground">V{index + 1}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate flex items-center gap-2">
+                         <Clock className="w-3 h-3" /> Modified {formatDate(user.updatedAt)}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-4 sm:mt-0 w-full sm:w-auto justify-end sm:justify-start">
+                      <button className="px-3 py-1.5 rounded-lg bg-secondary text-foreground text-xs font-semibold hover:bg-primary/10 hover:text-primary transition-colors flex items-center gap-1">
+                         View
+                      </button>
+                      <button
+                        onClick={(e) => handleDeleteResume(index, e)}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                        title="Delete Request"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-secondary/20 border border-dashed border-border rounded-3xl p-10 text-center flex flex-col items-center justify-center">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 text-primary">
+                  <FileText className="w-8 h-8" />
+                </div>
+                <h3 className="text-lg font-bold mb-2">No Active Resumes</h3>
+                <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6">Build a powerful, ATS-friendly resume to start applying for interviews.</p>
+                <Link to="/templates" className="btn-primary py-2 px-6 rounded-xl text-sm">Deploy Template</Link>
+              </div>
+            )}
+          </div>
+          
         </div>
-      </main>
+      </div>
     </div>
   );
 };
