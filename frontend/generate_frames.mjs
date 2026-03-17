@@ -125,10 +125,10 @@ const server = http.createServer((req, res) => {
     req.on('end', () => {
       try {
         const { frame, image } = JSON.parse(body);
-        const base64Data = image.replace(/^data:image\\/jpeg;base64,/, "");
-        const fileName = \`frame_\${frame.toString().padStart(4, '0')}.jpg\`;
+        const base64Data = image.replace(/^data:image\/jpeg;base64,/, "");
+        const fileName = `frame_${frame.toString().padStart(4, '0')}.jpg`;
         fs.writeFileSync(path.join(targetDir, fileName), base64Data, 'base64');
-        process.stdout.write(\`\rSaved \${fileName} (\${frame}/150)...\`);
+        process.stdout.write(`\rSaved ${fileName} (${frame}/150)...`);
         res.writeHead(200);
         res.end();
       } catch (err) {
@@ -156,5 +156,5 @@ server.listen(9999, async () => {
   
   // Open the browser automatically to trigger generation
   const startCmd = process.platform === 'win32' ? 'start' : process.platform === 'darwin' ? 'open' : 'xdg-open';
-  exec(\`\${startCmd} http://localhost:9999\`);
+  exec(`${startCmd} http://localhost:9999`);
 });
