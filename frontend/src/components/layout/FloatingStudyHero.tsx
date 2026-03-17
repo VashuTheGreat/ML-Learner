@@ -143,6 +143,42 @@ export const FloatingStudyHero = () => {
       ctx.setLineDash([]);
     };
 
+    // Interaction state
+    const mouse = { x: -1000, y: -1000, active: false };
+    let draggedNode: Node | null = null;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+      mouse.active = true;
+    };
+
+    const handleMouseDown = () => {
+      // Find node under mouse
+      for (const node of nodes) {
+        const dx = node.x - mouse.x;
+        const dy = node.y - mouse.y;
+        if (Math.sqrt(dx * dx + dy * dy) < node.radius * 1.5) {
+          draggedNode = node;
+          break;
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      draggedNode = null;
+    };
+
+    const handleMouseLeave = () => {
+      mouse.active = false;
+    };
+
+    canvas.addEventListener("mousemove", handleMouseMove);
+    canvas.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
+    canvas.addEventListener("mouseleave", handleMouseLeave);
+
     const tick = () => {
       t += 0.016;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -154,10 +190,36 @@ export const FloatingStudyHero = () => {
 
       // Physics: move nodes
       nodes.forEach((n) => {
-        n.x += n.vx;
-        n.y += n.vy;
-        if (n.x < n.radius || n.x > canvas.width - n.radius) n.vx *= -1;
-        if (n.y < n.radius || n.y > canvas.height - n.radius) n.vy *= -1;
+        if (n === draggedNode) {
+          n.x = mouse.x;
+          n.y = mouse.y;
+          n.vx = 0;
+          n.vy = 0;
+        } else {
+          // Magnetic attraction to mouse
+          if (mouse.active) {
+            const dx = mouse.x - n.x;
+            const dy = mouse.y - n.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 400) {
+              const force = (1 - dist / 400) * 0.02;
+              n.vx += dx * force;
+              n.vy += dy * force;
+            }
+          }
+
+          n.x += n.vx;
+          n.y += n.vy;
+          
+          // Damping to keep things stable
+          n.vx *= 0.98;
+          n.vy *= 0.98;
+
+          if (n.x < n.radius) { n.x = n.radius; n.vx *= -1; }
+          if (n.x > canvas.width - n.radius) { n.x = canvas.width - n.radius; n.vx *= -1; }
+          if (n.y < n.radius) { n.y = n.radius; n.vy *= -1; }
+          if (n.y > canvas.height - n.radius) { n.y = canvas.height - n.radius; n.vy *= -1; }
+        }
       });
 
       // Draw edges
@@ -178,6 +240,10 @@ export const FloatingStudyHero = () => {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
+      canvas.removeEventListener("mousemove", handleMouseMove);
+      canvas.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
+      canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
   }, [isDark]);
 

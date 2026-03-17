@@ -2,13 +2,15 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Play, Star, Users, BookOpen, Bot, FileText, Code2 } from "lucide-react";
 import Footer from "@/components/layout/Footer";
 import { FloatingStudyHero } from "@/components/layout/FloatingStudyHero";
+import Magnetic from "@/components/ui/Magnetic";
+import TiltCard from "@/components/ui/TiltCard";
 
 const Home = () => {
   return (
     <div className="min-h-screen flex flex-col pt-6 px-4 md:px-8 max-w-7xl mx-auto space-y-6 md:space-y-8 animate-in fade-in pb-20">
 
       {/* ── BENTO GRID ───────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[minmax(180px,auto)]">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[minmax(180px,auto)]" style={{ perspective: "1000px" }}>
 
         {/* BIG HERO – spans 3 cols, 2 rows */}
           <div className="md:col-span-3 md:row-span-2 relative rounded-3xl overflow-hidden p-8 md:p-12 shadow-2xl flex flex-col md:flex-row items-center gap-6 justify-between group gradient-bg">
@@ -36,7 +38,9 @@ const Home = () => {
             </div>
 
             <div className="flex items-center gap-4">
-              <Link to="/courses" className="btn-primary">Start Learning Now</Link>
+              <Magnetic>
+                <Link to="/courses" className="btn-primary">Start Learning Now</Link>
+              </Magnetic>
             </div>
           </div>
 
@@ -65,44 +69,50 @@ const Home = () => {
         </div>
 
         {/* FEATURE CARDS – middle row, 3 cards */}
-        <Link
-          to="/courses"
-          className="rounded-3xl p-6 md:p-8 flex flex-col justify-between group hover:-translate-y-1 transition-transform relative overflow-hidden border border-border bg-card"
-        >
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-primary/5" />
-          <BookOpen className="w-8 h-8 text-primary mb-8 relative z-10" />
-          <div className="relative z-10">
-            <div className="text-3xl font-bold mb-1 text-foreground group-hover:text-primary transition-colors">50+</div>
-            <div className="text-lg font-medium text-muted-foreground">Premium Courses</div>
-          </div>
-        </Link>
-
-        <Link
-          to="/ai-interview"
-          className="rounded-3xl text-white p-6 md:p-8 flex flex-col justify-between group hover:-translate-y-1 transition-transform relative overflow-hidden shadow-lg gradient-bg glow-primary"
-        >
-          <div className="absolute top-6 right-6 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold animate-pulse">
-            Live Now
-          </div>
-          <Bot className="w-8 h-8 text-white mb-8" />
-          <div>
-            <div className="text-2xl font-bold mb-1">AI Interviewer</div>
-            <div className="font-medium leading-tight text-white/80">
-              Practice with FAANG-level AI
+        <TiltCard className="md:col-span-1">
+          <Link
+            to="/courses"
+            className="rounded-3xl p-6 md:p-8 flex flex-col justify-between group h-full relative overflow-hidden border border-border bg-card"
+          >
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-primary/5" />
+            <BookOpen className="w-8 h-8 text-primary mb-8 relative z-10" />
+            <div className="relative z-10">
+              <div className="text-3xl font-bold mb-1 text-foreground group-hover:text-primary transition-colors">50+</div>
+              <div className="text-lg font-medium text-muted-foreground">Premium Courses</div>
             </div>
-          </div>
-        </Link>
+          </Link>
+        </TiltCard>
 
-        <Link
-          to="/dashboard"
-          className="rounded-3xl bg-card border border-border p-6 md:p-8 flex flex-col justify-between group hover:-translate-y-1 hover:border-primary/50 transition-all"
-        >
-          <FileText className="w-8 h-8 text-primary mb-8" />
-          <div>
-            <div className="text-2xl font-bold text-foreground mb-1">Resume Builder</div>
-            <div className="text-muted-foreground font-medium leading-tight">ATS-friendly templates</div>
-          </div>
-        </Link>
+        <TiltCard className="md:col-span-1">
+          <Link
+            to="/ai-interview"
+            className="rounded-3xl text-white p-6 md:p-8 flex flex-col justify-between group h-full relative overflow-hidden shadow-lg gradient-bg glow-primary"
+          >
+            <div className="absolute top-6 right-6 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold animate-pulse">
+              Live Now
+            </div>
+            <Bot className="w-8 h-8 text-white mb-8" />
+            <div>
+              <div className="text-2xl font-bold mb-1">AI Interviewer</div>
+              <div className="font-medium leading-tight text-white/80">
+                Practice with FAANG-level AI
+              </div>
+            </div>
+          </Link>
+        </TiltCard>
+
+        <TiltCard className="md:col-span-1">
+          <Link
+            to="/dashboard"
+            className="rounded-3xl bg-card border border-border p-6 md:p-8 flex flex-col justify-between group h-full transition-all"
+          >
+            <FileText className="w-8 h-8 text-primary mb-8" />
+            <div>
+              <div className="text-2xl font-bold text-foreground mb-1">Resume Builder</div>
+              <div className="text-muted-foreground font-medium leading-tight">ATS-friendly templates</div>
+            </div>
+          </Link>
+        </TiltCard>
 
         {/* BOTTOM ROW */}
         <div className="md:col-span-2 rounded-3xl border border-border p-8 flex items-center justify-between group cursor-pointer hover:bg-primary/5 transition-colors overflow-hidden relative">
