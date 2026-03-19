@@ -143,10 +143,10 @@ export const CanvasBackground = () => {
       <canvas 
         ref={canvasRef} 
         style={{ filter: getHueShift() }}
-        className="w-full h-full opacity-70 dark:opacity-90 transition-opacity duration-1000 object-cover" 
+        className="w-full h-full opacity-60 dark:opacity-80 transition-opacity duration-1000 object-cover" 
       />
-      {/* Minimal tint just to keep text readable */}
-      <div className="absolute inset-0 bg-background/10"></div>
+      {/* Increased tint to keep text readable against busy video frames */}
+      <div className="absolute inset-0 bg-background/40 dark:bg-background/20"></div>
     </div>
   );
 };

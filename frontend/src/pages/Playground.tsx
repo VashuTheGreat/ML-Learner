@@ -4,7 +4,7 @@ import mlTrainerApi, {
   TrainPayload,
   TrainResult,
   DatasetParamMeta,
-} from "@/Services/mlTrainerApi";
+} from "@/services/mlTrainerApi";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +34,7 @@ import {
   Activity,
   Sigma,
 } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
+
 import { cn } from "@/lib/utils";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -173,7 +173,7 @@ export default function Playground() {
 
   return (
     <div className="min-h-screen">
-      <Navbar />
+
 
       {/* ── Hero ──────────────────────────────────────────────── */}
       <div className="relative pt-32 pb-16 px-6 overflow-hidden mesh-gradient">

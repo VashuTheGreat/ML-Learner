@@ -25,6 +25,11 @@ class InterviewApi {
         const response = await api.get(`/interview/getInterviewById`, { params: { id } });
         return response.data.data;
     }
+
+    async deleteInterview(id: string) {
+        const response = await api.delete(`/interview/deleteInterview/${id}`);
+        return response.data.data;
+    }
 }
 
 export default new InterviewApi();

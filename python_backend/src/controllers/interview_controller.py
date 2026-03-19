@@ -2,6 +2,7 @@ import sys
 import logging
 from typing import List
 from fastapi import Query
+from datetime import datetime
 from src.components.dummyInterviews import generate_interview_schema
 from src.components.interview import chat_interviewer as chat_node
 from src.exception import MyException
@@ -11,7 +12,8 @@ async def interview(
     no_of_interviews: int = 3,
     updated: bool = False,
     fields: List[str] = Query(default=DEFAULT_INTERVIEW_FIELDS),
-    companiesName: List[str] = Query(default=DEFAULT_COMPANIES)
+    companiesName: List[str] = Query(default=DEFAULT_COMPANIES),
+    start_date: datetime = None
 ):
     logging.info("Entering interview controller")
     try:
@@ -19,7 +21,8 @@ async def interview(
             no_of_interviews=no_of_interviews,
             fields=fields,
             updated=updated,
-            companiesName=companiesName
+            companiesName=companiesName,
+            start_date=start_date
         )
         logging.info("Interview schema generated successfully")
         print("the schema generated is ",res)

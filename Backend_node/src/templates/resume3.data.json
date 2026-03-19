@@ -1,34 +1,46 @@
 {
-    "personal": {
-        "name": "Alice Williams",
-        "title": "Graphic Designer",
-        "email": "alice.williams@example.com",
-        "portfolio": "www.alicewilliams.design"
-    },
-    "skills": ["Adobe Photoshop", "Adobe Illustrator", "Figma", "UI/UX Design", "Typography"],
-    "awards": [
-        "Best Graphic Designer 2023 - Design Hub",
-        "Top 10 Portfolio of the Year - Creative Network"
-    ],
-    "projects": [
-        {
-            "name": "Brand Identity for EcoLife",
-            "desc": "Developed a complete brand identity including logo, color palette, and brand guidelines for an eco-friendly startup.",
-            "type": "Branding"
-        },
-        {
-            "name": "Mobile App UI for Foodie",
-            "desc": "Designed the user interface for a food delivery application focusing on user experience and accessibility.",
-            "type": "UI/UX"
-        }
-    ],
-    "references": [
-        {
-            "name": "Michael Scott",
-            "position": "Creative Director",
-            "company": "Design Studio",
-            "email": "michael.scott@designstudio.com",
-            "phone": "+1 555 987 6543"
-        }
-    ]
+  "avatar": "http://res.cloudinary.com/dkluatpz0/image/upload/v1768889203/jc4palybrshhbmsjtzpz.jpg",
+  "name": "Alice Williams",
+  "title": "Creative Graphic Designer",
+  "email": "alice.design@example.com",
+  "phone": "+1-555-020-8888",
+  "location": "New York, NY",
+  "summary": "Creative and detail-oriented Graphic Designer with 5 years of experience in branding, UI/UX, and visual storytelling. Dedicated to creating impactful designs that resonate with audiences.",
+  "skills": ["Adobe Photoshop", "Adobe Illustrator", "Figma", "UI/UX Design", "Typography", "Branding", "After Effects"],
+  "soft_skills": ["Creativity", "Collaboration", "Time Management", "Attention to Detail"],
+  "languages": ["English", "French"],
+  "education": [
+    {
+      "degree": "BFA in Graphic Design",
+      "institute": "Rhode Island School of Design",
+      "year": "2016 - 2020"
+    }
+  ],
+  "experience": [
+    {
+      "role": "Senior Graphic Designer",
+      "company": "Creative Studio X",
+      "duration": "2021 - Present",
+      "description": " Spearheaded the rebranding of three major international brands, resulting in a cohesive visual identity across all platforms."
+    }
+  ],
+  "projects": [
+    {
+      "title": "EcoLife Brand Identity",
+      "description": "Developed a complete brand identity including logo, color palette, and brand guidelines for an eco-friendly startup.",
+      "tech_stack": ["Illustrator", "Photoshop", "InDesign"]
+    }
+  ],
+  "certifications": [
+    "Google UX Design Professional Certificate",
+    "Adobe Certified Professional"
+  ],
+  "achievements": [
+    "Best Portfolio 2023 - Design Network",
+    "A' Design Award Gold Winner"
+  ],
+  "someImportantUrls": {
+    "Behance": "https://behance.net/alicewilliams",
+    "Dribbble": "https://dribbble.com/alicewilliams"
+  }
 }

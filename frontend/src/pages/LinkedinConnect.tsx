@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Linkedin, ExternalLink } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
+
 
 const LinkedinConnect = () => {
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ const LinkedinConnect = () => {
 
   return (
     <div className="min-h-screen mesh-gradient">
-      <Navbar />
+
       
       <div className="pt-32 pb-16">
         <div className="container mx-auto px-4">

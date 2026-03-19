@@ -15,12 +15,7 @@ router.post("/uploadAvatar",upload.fields([
     }
 ]),verifyJWT,uploadAvatar)
 router.delete("/deleteAvatar",verifyJWT,deleteAvatar)
-router.post("/addResume",upload.fields([
-    {
-        name:"resume",
-        maxCount:1
-    }
-]),verifyJWT,addResume)
+router.post("/addResume",verifyJWT,addResume)
 router.post("/addAboutUser",verifyJWT,addAboutUser)
 router.put("/deleteResume/:idx",verifyJWT,deleteResume)
 router.get("/getUserById/:id",getUserById)

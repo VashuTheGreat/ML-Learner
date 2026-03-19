@@ -1,43 +1,46 @@
 {
-    "personal": {
-        "name": "David Miller"
-    },
-    "about": "Motivated high school student with a strong interest in technology and community service. Seeking to leverage my skills in a part-time role.",
-    "experience": [
-        {
-            "role": "Volunteer Tutor",
-            "duration": "2022 - Present",
-            "company": "Local Library"
-        },
-        {
-            "role": "Camp Counselor",
-            "duration": "Summer 2022",
-            "company": "City Summer Camp"
-        }
-    ],
-    "skills": ["Python", "Java", "Public Speaking", "Teamwork"],
-    "training": [
-        {
-            "name": "First Aid & CPR Certified",
-            "provider": "Red Cross"
-        }
-    ],
-    "license": "Driver's License (Class C)",
-    "education": {
-        "year": "2021 - 2025 (Expected)",
-        "school": "Central High School"
-    },
-    "awards": [
-        {
-            "name": "Honor Roll",
-            "school": "Central High School"
-        }
-    ],
-    "volunteering": [
-        {
-            "name": "Food Bank Volunteer",
-            "desc": "Assisted in sorting and distributing food to families in need."
-        }
-    ],
-    "interests": "Coding, Basketball, Playing Guitar"
+  "avatar": "http://res.cloudinary.com/dkluatpz0/image/upload/v1768889203/jc4palybrshhbmsjtzpz.jpg",
+  "name": "Robert Black",
+  "title": "Full Stack Developer",
+  "email": "robert.dev@example.com",
+  "phone": "+1-555-030-7777",
+  "location": "Austin, TX",
+  "summary": "Full Stack Developer with a knack for building scalable web applications. Expert in React, Node.js, and cloud architecture. Passionate about clean code and modern developer tools.",
+  "skills": ["React", "Node.js", "TypeScript", "PostgreSQL", "Docker", "AWS", "Go", "Kubernetes"],
+  "soft_skills": ["Mentorship", "Agile Leadership", "Problem Solving", "Technical Writing"],
+  "languages": ["English", "German"],
+  "education": [
+    {
+      "degree": "BS in Computer Science",
+      "institute": "University of Texas at Austin",
+      "year": "2014 - 2018"
+    }
+  ],
+  "experience": [
+    {
+      "role": "Senior Software Engineer",
+      "company": "SaaS Innovations",
+      "duration": "2019 - Present",
+      "description": "Architected and implemented a microservices-based platform, handling over 1 million daily active users with high availability."
+    }
+  ],
+  "projects": [
+    {
+      "title": "Open Source CLI Tool",
+      "description": "Created a developer utility for managing cloud resources efficiently, gaining over 2k stars on GitHub.",
+      "tech_stack": ["Go", "Cobra", "gRPC"]
+    }
+  ],
+  "certifications": [
+    "AWS Solutions Architect - Associate",
+    "CKAD: Certified Kubernetes Application Developer"
+  ],
+  "achievements": [
+    "Open Source Contributor of the Year 2022",
+    "Hackathon Winner - JS Conf"
+  ],
+  "someImportantUrls": {
+    "GitHub": "https://github.com/robertdev",
+    "LinkedIn": "https://linkedin.com/in/robertdev"
+  }
 }

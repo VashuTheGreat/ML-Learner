@@ -1,6 +1,8 @@
 import base64
+import ast
 import importlib.util
 import os
+import logging
 from src.exception import MyException
 import sys
 import uuid
@@ -19,12 +21,21 @@ except ImportError:
 
 def _to_numpy_if_nested(val):
     """
-    Only converts 2-D nested lists (list-of-lists / matrices) to numpy arrays.
-    Flat 1-D lists stay as plain Python lists so they still work as shape args
-    (reshape), index tuples, etc.
-    Numpy handles  ndarray @ list  and  ndarray.reshape(list)  natively.
+    Converts lists of numbers (1-D or 2-D) to numpy arrays so that functions
+    using .shape, .dot(), etc. work correctly with test case inputs.
+    Non-numeric lists (e.g. lists of strings) are left as-is.
     """
-    if isinstance(val, list) and val and isinstance(val[0], list):
+    if not isinstance(val, (list, tuple)):
+        return val
+    if not val:
+        return val
+    # Check if elements are numeric or nested lists (matrix)
+    first = val[0]
+    if isinstance(first, (int, float)):
+        # 1-D numeric list → numpy array (so .shape works)
+        return np.array(val)
+    if isinstance(first, list):
+        # 2-D list-of-lists → numpy array (matrix)
         return np.array(val)
     return val
 
@@ -84,34 +95,70 @@ async def run_code(sub):
 
         await write_file(file_path, code_to_write)
 
-        # Dynamically load the solution module
-        spec = importlib.util.spec_from_file_location("Solution", file_path)
-        solution_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(solution_module)
-
-        solution = solution_module.Solution()
-        res = []
         try:
-            for test in sub.test_cases:
-                func = getattr(solution, sub.function_name)
+            # Dynamically load the solution module
+            spec = importlib.util.spec_from_file_location("Solution", file_path)
+            solution_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(solution_module)
 
-                # Convert nested-list inputs (matrices) to numpy arrays
-                call_args = _smart_args(test["test"])
+            # Flexibility: Check if Solution class exists, otherwise use module level
+            if hasattr(solution_module, 'Solution'):
+                target = solution_module.Solution()
+            else:
+                target = solution_module
+
+            res = []
+            for test in sub.test_cases:
+                func = getattr(target, sub.function_name, None)
+                if not func:
+                    raise AttributeError(f"Function '{sub.function_name}' not found in submitted code.")
+
+                # Handle different test case formats:
+                # 1. test["test"] is a list of args (standard)
+                # 2. test["test"] is a single value (wrap it)
+                # 3. test["test"] is a string (eval - handle with caution)
+                
+                raw_test_input = test.get("test")
+                
+                # Robust argument parsing
+                try:
+                    if isinstance(raw_test_input, str):
+                        try:
+                            # Try to parse as a literal (handles "1, 2", "[1, 2]", etc.)
+                            parsed = ast.literal_eval(f"[{raw_test_input}]")
+                            call_args = _smart_args(parsed) if isinstance(parsed, list) else _smart_args([parsed])
+                        except (ValueError, SyntaxError):
+                            # Fallback for bare strings like "hello"
+                            call_args = _smart_args([raw_test_input])
+                    elif isinstance(raw_test_input, (list, tuple)):
+                        call_args = _smart_args(list(raw_test_input))
+                    else:
+                        call_args = _smart_args([raw_test_input])
+                except Exception as e:
+                    logging.warning(f"Failed to parse test input {raw_test_input}: {e}")
+                    call_args = _smart_args([raw_test_input])
+
                 output = func(*call_args)
 
-                expected = _to_numpy_if_nested(test["expected_output"])
+                expected_raw = test.get("expected_output") or test.get("expected_res")
+                expected = _to_numpy_if_nested(expected_raw)
                 is_true = _equal(output, expected)
 
                 res.append({
-                    "test_input": test["test"],
-                    # Serialise output so FastAPI can JSON-encode it
+                    "test_input": raw_test_input,
                     "test_res": _serialize(output),
-                    "expected_res": test["expected_output"],
+                    "expected_res": expected_raw,
                     "pass": bool(is_true),
                 })
+            
+            return res
         finally:
-            await delete_file(file_path)
+            # Always attempt to delete the temp file
+            if os.path.exists(file_path):
+                await delete_file(file_path)
 
-        return res
     except Exception as e:
+        import traceback
+        error_msg = f"{str(e)}\n{traceback.format_exc()}"
+        logging.error(f"Error in run_code: {error_msg}")
         raise MyException(e, sys)

@@ -1,27 +1,46 @@
 {
-    "personal": {
-        "name": "Emily Davis",
-        "title": "Business Analyst",
-        "email": "emily.davis@example.com",
-        "phone": "+1 555 246 8101"
-    },
-    "experience": {
-        "total": "10 Years",
-        "companies": ["Global Solutions", "Data Insights", "Strategic Partners"]
-    },
-    "summary": "Dedicated Business Analyst with a decade of experience in optimizing business processes and driving strategic growth through data-driven insights.",
-    "skills": ["Data Analysis", "Strategic Planning", "Process Improvement", "SQL", "Tableau", "Stakeholder Management"],
-    "certifications": [
-        "Certified Business Analysis Professional (CBAP)",
-        "Project Management Professional (PMP)"
-    ],
-    "references": [
-        {
-            "name": "Sarah Johnson",
-            "position": "Director of Operations",
-            "company": "Global Solutions",
-            "email": "sarah.johnson@globalsolutions.com",
-            "phone": "+1 555 369 2580"
-        }
-    ]
+  "avatar": "http://res.cloudinary.com/dkluatpz0/image/upload/v1768889203/jc4palybrshhbmsjtzpz.jpg",
+  "name": "Michael Green",
+  "title": "Data Scientist | ML Engineer",
+  "email": "michael.ds@example.com",
+  "phone": "+1-555-040-6666",
+  "location": "Seattle, WA",
+  "summary": "Data Scientist with strong foundations in machine learning, statistical modeling, and data engineering. Experienced in deploying production-grade ML models and deriving actionable insights from complex datasets.",
+  "skills": ["Python", "TensorFlow", "Scikit-Learn", "PySpark", "SQL", "Pandas", "Computer Vision", "NLP"],
+  "soft_skills": ["Analytical Thinking", "Collaboration", "Decision Making", "Data Storytelling"],
+  "languages": ["English", "Mandarin"],
+  "education": [
+    {
+      "degree": "MS in Data Science",
+      "institute": "University of Washington",
+      "year": "2018 - 2020"
+    }
+  ],
+  "experience": [
+    {
+      "role": "Lead Data Scientist",
+      "company": "Insights AI",
+      "duration": "2020 - Present",
+      "description": "Developed an ensemble ML model for customer churn prediction, reducing churn by 20% and saving approximately $2M annually."
+    }
+  ],
+  "projects": [
+    {
+      "title": "Predictive Maintenance System",
+      "description": "Built a real-time IoT monitoring and predictive maintenance pipeline using Azure ML and Kafka.",
+      "tech_stack": ["Python", "Azure", "Kafka", "PyTorch"]
+    }
+  ],
+  "certifications": [
+    "Google Professional Data Engineer",
+    "DeepLearning.AI TensorFlow Developer"
+  ],
+  "achievements": [
+    "Kaggle Grandmaster",
+    "Top Data Scientist of the Quarter - Q3 2023"
+  ],
+  "someImportantUrls": {
+    "Kaggle": "https://kaggle.com/mgreen",
+    "GitHub": "https://github.com/mgreen-ds"
+  }
 }

@@ -53,7 +53,11 @@ export const get_coding_schema = expressRepre(
     const coding = await Coding.find({ user: user._id });
 
     if (!coding || coding.length === 0) {
-      throw new ApiError(404, "Coding schema not found");
+      // Auto-create to silently fix the issue for users without a schema
+      const newCoding = await Coding.create({ user: user._id });
+      return res.status(200).json(
+        new ApiResponse(200, [newCoding], "coding schema created automatically")
+      );
     }
 
     return res.status(200).json(

@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { createContext, useContext, useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CanvasBackground } from "./CanvasBackground";
 
@@ -57,8 +57,12 @@ export const AppLayout = () => {
           >
             <Menu className="w-6 h-6 text-sidebar-foreground" />
           </button>
+          {/* Logo — icon + text */}
           <div className="flex items-center gap-2">
-            <span className="font-bold text-lg"><span className="text-primary">ML</span> Learner</span>
+            <div className="w-8 h-8 rounded-xl gradient-bg flex items-center justify-center shadow-md">
+              <Code2 className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-bold text-base"><span className="text-primary">ML</span> Learner</span>
           </div>
           <div className="w-10"></div> {/* Spacer for symmetry */}
         </header>
@@ -79,12 +83,12 @@ export const AppLayout = () => {
         {/* Main content shifts using margin so it never overlaps or leaves a gap */}
         <main
           className={cn(
-            "flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full relative z-10",
+            "flex flex-col min-h-screen transition-all duration-300 ease-in-out relative z-10",
             "pt-16 lg:pt-0", // Account for mobile header
-            isCollapsed ? "lg:ml-[72px] lg:w-[calc(100%-72px)]" : "lg:ml-[260px] lg:w-[calc(100%-260px)]"
+            isCollapsed ? "lg:ml-[72px] w-full lg:w-[calc(100vw-72px)]" : "lg:ml-[260px] w-full lg:w-[calc(100vw-260px)]"
           )}
         >
-          <div className="flex-1 w-full animate-fade-in relative">
+          <div className="flex-1 w-full max-w-full animate-fade-in relative">
             <Outlet />
           </div>
         </main>

@@ -1,22 +1,22 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from src.constants import (
+from .constants import (
     APP_TITLE, APP_DESCRIPTION, APP_VERSION,
     USER_API_PREFIX, CODING_API_PREFIX, INTERVIEW_API_PREFIX,
     PERFORMANCE_API_PREFIX, THREAD_API_PREFIX, HEALTH_API_PREFIX,
     MODEL_TRAIN_API_PREFIX
 )
 
-from src.routes.user_router import router as UserRouter
-from src.routes.coding_router import router as CodingRouter
-from src.routes.interviewSchema_router import router as InterviewRouter
-from src.routes.performance_router import router as PerformanceRouter
-from src.routes.deleteThread_router import router as DeleteThreadRouter
-from src.routes.health_router import router as HealthRouter
-from src.components.interview import close_checkpointer
-from src.routes.modelTraining_router import router as ModelTrainRouter
-from src.routes.ModelTrainConfig_router import router as ModelTrainConfigRouter
+from .routes.user_router import router as UserRouter
+from .routes.coding_router import router as CodingRouter
+from .routes.interviewSchema_router import router as InterviewRouter
+from .routes.performance_router import router as PerformanceRouter
+from .routes.deleteThread_router import router as DeleteThreadRouter
+from .routes.health_router import router as HealthRouter
+from .components.interview import close_checkpointer
+from .routes.modelTraining_router import router as ModelTrainRouter
+from .routes.ModelTrainConfig_router import router as ModelTrainConfigRouter
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -34,7 +34,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=["http://localhost:8080", "http://localhost:3000", "http://localhost:5173"], 
     allow_credentials=True,
     allow_methods=["*"], 
     allow_headers=["*"],

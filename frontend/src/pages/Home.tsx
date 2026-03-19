@@ -85,7 +85,7 @@ const Home = () => {
 
         <TiltCard className="md:col-span-1">
           <Link
-            to="/ai-interview"
+            to="/schedule-interview"
             className="rounded-3xl text-white p-6 md:p-8 flex flex-col justify-between group h-full relative overflow-hidden shadow-lg gradient-bg glow-primary"
           >
             <div className="absolute top-6 right-6 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold animate-pulse">

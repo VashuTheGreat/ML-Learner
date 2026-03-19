@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Filter, Clock, Users, Star, ArrowRight, BookOpen } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
+
 import Footer from "@/components/layout/Footer";
 import { cn } from "@/lib/utils";
 
@@ -85,7 +85,7 @@ const Courses = () => {
 
   return (
     <div className="min-h-screen">
-      <Navbar />
+
       
       {/* Header Section */}
       <section className="pt-32 pb-16 mesh-gradient">

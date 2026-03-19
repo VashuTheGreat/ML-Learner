@@ -17,8 +17,7 @@ import Contact from "./pages/Contact";
 import ScheduleInterview from "./pages/ScheduleInterview";
 import NotFound from "./pages/NotFound";
 import { DashBoard } from "./pages/DashBoard";
-import { Templates } from "./pages/templates";
-const queryClient = new QueryClient();
+import { Templates } from "./pages/Templates";
 import { CreateResume } from "./pages/create-resume";
 import { View_resume } from "./pages/view_resume";
 import { Apply } from "./pages/apply";
@@ -29,6 +28,11 @@ import Solve from "./pages/Solve";
 import MLTrainer from "./pages/MLTrainer";
 import Playground from "./pages/Playground";
 import { AppLayout } from "./components/layout/AppLayout";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { GuestRoute } from "./components/auth/GuestRoute";
+
+// QueryClient must be created AFTER all imports
+const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -38,30 +42,39 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route element={<AppLayout />}>
+            {/* Public Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/courses" element={<Courses />} />
-            <Route path="/welcome-quiz" element={<WelcomeQuiz />} />
-            <Route path="/thanks-for-you" element={<ThanksForYou />} />
-            <Route path="/linkedin-connect" element={<LinkedinConnect />} />
-            <Route path="/quiz" element={<Quiz />} />
-            <Route path="/thanks-participating" element={<ThanksParticipating />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/ai-interview" element={<AIInterview />} />
-            <Route path="/schedule-interview" element={<ScheduleInterview />} />
-            <Route path="/dashboard" element={<DashBoard />} />
-            <Route path="/templates" element={<Templates />} />
-            <Route path="/create-resume/:slug" element={<CreateResume />} />
-            <Route path="/viewresume/:slug" element={<View_resume/>} />
-            <Route path="/apply" element={<Apply/>} />
-            <Route path="/interview/:slug" element={<AIInterview/>} />
-            <Route path="/performance/:slug" element={<Performance/>} />
-            <Route path="/practice" element={<Practice/>} />
-            <Route path="/solve/:slug" element={<Solve/>} />
-            <Route path="/ml-trainer" element={<MLTrainer/>} />
-            <Route path="/playground" element={<Playground/>} />
+
+            {/* Guest-only Routes */}
+            <Route element={<GuestRoute />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+            </Route>
+
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/welcome-quiz" element={<WelcomeQuiz />} />
+              <Route path="/thanks-for-you" element={<ThanksForYou />} />
+              <Route path="/linkedin-connect" element={<LinkedinConnect />} />
+              <Route path="/quiz" element={<Quiz />} />
+              <Route path="/thanks-participating" element={<ThanksParticipating />} />
+              <Route path="/schedule-interview" element={<ScheduleInterview />} />
+              <Route path="/dashboard" element={<DashBoard />} />
+              <Route path="/templates" element={<Templates />} />
+              <Route path="/create-resume/:slug" element={<CreateResume />} />
+              <Route path="/viewresume/:slug" element={<View_resume/>} />
+              <Route path="/apply" element={<Apply/>} />
+              {/* /ai-interview removed: all interviews use /interview/:slug */}
+              <Route path="/interview/:slug" element={<AIInterview/>} />
+              <Route path="/performance/:slug" element={<Performance/>} />
+              <Route path="/practice" element={<Practice/>} />
+              <Route path="/solve/:slug" element={<Solve/>} />
+              <Route path="/ml-trainer" element={<MLTrainer/>} />
+              <Route path="/playground" element={<Playground/>} />
+            </Route>
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

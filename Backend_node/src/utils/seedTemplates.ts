@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
+import { DB_NAME } from '../constants/constants';
 import Template from "../models/templates.models.js";
 
 dotenv.config({
@@ -14,8 +15,11 @@ const seedTemplates = async function seedTemplates() {
         return;
     }
     try {
-        await mongoose.connect(`${process.env.MONGODB_URI}/interviewcracker`);
-        console.log("Connected to MongoDB");
+        const connectionString = process.env.MONGODB_URI 
+          ? `${process.env.MONGODB_URI}/${DB_NAME}`
+          : `mongodb://localhost:27017/${DB_NAME}`;
+      await mongoose.connect(connectionString);
+      console.log(`Connected to MongoDB: ${DB_NAME}`);
 
         const templatesDir = path.join(process.cwd(), "src", "templates");
         const files = fs.readdirSync(templatesDir);
@@ -26,30 +30,27 @@ const seedTemplates = async function seedTemplates() {
                 if (!match) continue;
                 const id = match[1];
                 const templatePath = path.join(templatesDir, file);
-                const dataPath = path.join(templatesDir, `resume${id}.data.js`);
+                const dataPath = path.join(templatesDir, `resume${id}.data.json`);
 
                 const templateContent = fs.readFileSync(templatePath, "utf-8");
                 
-                // Dynamic import for the data file
-                const dataModule = await import(`file://${dataPath}`);
-                const tempData = dataModule[`resume${id}Data`];
+                // Read the JSON data file synchronously
+                const tempDataRaw = fs.readFileSync(dataPath, "utf-8");
+                const tempData = JSON.parse(tempDataRaw);
 
                 const title = `Resume Template ${id}`;
 
-                // Check if template already exists
-                const existingTemplate = await Template.findOne({ title });
-                if (existingTemplate) {
-                    console.log(`Template ${title} already exists, skipping...`);
-                    continue;
-                }
+                // Update or create template
+                await Template.findOneAndUpdate(
+                    { title },
+                    {
+                        template: templateContent,
+                        temp_data: tempData
+                    },
+                    { upsert: true, new: true }
+                );
 
-                await Template.create({
-                    title,
-                    template: templateContent,
-                    temp_data: tempData
-                });
-
-                console.log(`Seeded template: ${title}`);
+                console.log(`Seeded/Updated template: ${title}`);
             }
         }
 

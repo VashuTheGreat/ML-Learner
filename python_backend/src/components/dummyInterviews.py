@@ -16,7 +16,7 @@ llm = llm
 
 llm_structured = llm.with_structured_output(InterviewResponse)
 
-async def generate_interview_schema(no_of_interviews: int = 3, fields: List[str] = None,updated:bool=False,companiesName:List[str]=['Google',"Amazon","Microsoft","Apple","Meta","Netflix"]):
+async def generate_interview_schema(no_of_interviews: int = 3, fields: List[str] = None, updated: bool = False, companiesName: List[str] = ['Google', "Amazon", "Microsoft", "Apple", "Meta", "Netflix"], start_date: datetime = None):
     logging.info("Entering generate_interview_schema")
     try:
         if fields is None:
@@ -31,9 +31,9 @@ async def generate_interview_schema(no_of_interviews: int = 3, fields: List[str]
         logging.info(f"Cache missing or update requested. Proceeding to generation.")
 
         logging.info("Generating new interview schema using LLM")
-        current_time = datetime.now(timezone.utc)
-        min_date = (current_time + timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%SZ")
-        max_date = (current_time + timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        base_date = start_date if start_date else datetime.now(timezone.utc)
+        min_date = (base_date + timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        max_date = (base_date + timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
         prompt = interview_generater_Prompt.format(
             no_of_interviews=no_of_interviews,
@@ -67,7 +67,7 @@ async def generate_interview_schema(no_of_interviews: int = 3, fields: List[str]
                         "companyName": item.get("companyName", "Unknown"),
                         "topic": item.get("topic", "Unknown"),
                         "job_Role": item.get("job_Role", "Unknown"),
-                        "time": item.get("time", current_time.isoformat()),
+                        "time": item.get("time", base_date.isoformat()),
                         "status": "pending"
                     })
                 else:
@@ -75,7 +75,7 @@ async def generate_interview_schema(no_of_interviews: int = 3, fields: List[str]
                         "companyName": getattr(item, "companyName", "Unknown"),
                         "topic": getattr(item, "topic", "Unknown"),
                         "job_Role": getattr(item, "job_Role", "Unknown"),
-                        "time": getattr(item, "time", current_time.isoformat()),
+                        "time": getattr(item, "time", base_date.isoformat()),
                         "status": "pending"
                     })
         

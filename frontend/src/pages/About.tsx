@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Target, Eye, Heart, Users, BookOpen, Rocket, Sparkles, Code2, Brain } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
+
 import Footer from "@/components/layout/Footer";
 
 const About = () => {
@@ -67,7 +67,7 @@ const About = () => {
 
   return (
     <div className="min-h-screen w-full relative">
-      <Navbar />
+
 
       {/* ── Hero ─────────────────────────────────────────── */}
       <section className="relative pt-32 pb-24 mesh-gradient overflow-hidden">

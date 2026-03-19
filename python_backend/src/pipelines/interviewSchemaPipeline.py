@@ -11,17 +11,18 @@ from src.controllers.interview_controller import interview,chat_interviewer,List
 import logging
 import sys
 class InterviewSchemaPipeline(Pipeline):
-    def __init__(self,no_of_interviews,updated,fields,companiesName):
+    def __init__(self,no_of_interviews,updated,fields,companiesName,start_date=None):
         self.no_of_interviews=no_of_interviews
         self.updated=updated
         self.fields=fields
         self.companiesName=companiesName
+        self.start_date=start_date
         
         
     async def initiate(self):
         try:
             logging.info("Entered in the initiate SchemaInterviewPipeline method")
-            schema=await interview(no_of_interviews=self.no_of_interviews,updated=self.updated,fields=self.fields,companiesName=self.companiesName)
+            schema=await interview(no_of_interviews=self.no_of_interviews,updated=self.updated,fields=self.fields,companiesName=self.companiesName,start_date=self.start_date)
             logging.info("schema generated")
             logging.info("Exiting from schemaInterviewPipeline method")
             return schema

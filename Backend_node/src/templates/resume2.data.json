@@ -1,31 +1,46 @@
 {
-    "personal": {
-        "name": "Jane Smith",
-        "title": "Product Manager",
-        "email": "jane.smith@example.com"
-    },
-    "languages": ["English", "French", "German"],
-    "summary": "Strategic Product Manager with 8+ years of experience in the tech industry. Proven track record of leading cross-functional teams to deliver high-impact products.",
-    "skills": {
-        "technical": ["Agile Methodology", "Scrum", "Product Roadmap", "Market Research"],
-        "tools": ["Jira", "Confluence", "Trello", "Google Analytics"]
-    },
-    "certifications": [
-        "Certified Scrum Master (CSM)",
-        "Professional Product Manager (PPM)"
-    ],
-    "achievements": [
-        "Increased user engagement by 25% through the implementation of a new feature set.",
-        "Successfully launched 3 major products within 18 months.",
-        "Reduced product development lifecycle by 15%."
-    ],
-    "references": [
-        {
-            "name": "Robert Brown",
-            "company": "Global Tech",
-            "position": "VP of Product",
-            "email": "robert.brown@globaltech.com",
-            "phone": "+1 555 123 4567"
-        }
-    ]
+  "avatar": "http://res.cloudinary.com/dkluatpz0/image/upload/v1768889203/jc4palybrshhbmsjtzpz.jpg",
+  "name": "Jane Smith",
+  "title": "Senior Product Manager",
+  "email": "jane.smith@example.com",
+  "phone": "+1-555-010-9999",
+  "location": "San Francisco, CA",
+  "summary": "Results-driven Product Manager with over 8 years of experience in the tech industry. Expert in Agile methodologies, product roadmapping, and cross-functional team leadership.",
+  "skills": ["Product Strategy", "Agile/Scrum", "Market Research", "Data Analysis", "Roadmapping", "Jira", "SQL"],
+  "soft_skills": ["Leadership", "Communication", "Problem Solving", "Strategic Thinking"],
+  "languages": ["English", "Spanish"],
+  "education": [
+    {
+      "degree": "MBA in Product Management",
+      "institute": "Stanford University",
+      "year": "2015 - 2017"
+    }
+  ],
+  "experience": [
+    {
+      "role": "Lead Product Manager",
+      "company": "Tech Giants Corp",
+      "duration": "2018 - Present",
+      "description": "Led the development of a flagship SaaS product, increasing user acquisition by 40% and retention by 15%."
+    }
+  ],
+  "projects": [
+    {
+      "title": "Global Expansion Project",
+      "description": "Managed the product adaptation for the European market, ensuring compliance with local regulations and user preferences.",
+      "tech_stack": ["Google Analytics", "Amplitude", "Tableau"]
+    }
+  ],
+  "certifications": [
+    "Certified Scrum Master (CSM)",
+    "Pragmatic Institute Certified (Level VI)"
+  ],
+  "achievements": [
+    "Product of the Year Award 2022",
+    "Speaker at ProductCon 2021"
+  ],
+  "someImportantUrls": {
+    "LinkedIn": "https://linkedin.com/in/janesmith",
+    "Portfolio": "https://janesmith.pm"
+  }
 }

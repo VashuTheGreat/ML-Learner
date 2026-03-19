@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import questionApi, { type Question } from '../Services/questionApi';
+import questionApi, { type Question } from '../services/questionApi';
 import { BookOpen, Code, ChevronRight, Filter, Star, Search, CheckCircle2 } from 'lucide-react';
-import Navbar from '@/components/layout/Navbar';
+
 import Footer from '@/components/layout/Footer';
 import { cn } from '@/lib/utils';
-import { type CodingSchema } from '../Services/questionApi';
+import { type CodingSchema } from '../services/questionApi';
 
 const Practice: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
@@ -100,7 +100,7 @@ const Practice: React.FC = () => {
 
     return (
         <div className="min-h-screen">
-            <Navbar />
+
             
             {/* Header Section */}
             <section className="pt-32 pb-16 mesh-gradient">

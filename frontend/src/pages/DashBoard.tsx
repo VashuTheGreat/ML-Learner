@@ -21,91 +21,33 @@ import {
   Code2,
   Bot
 } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
-import userApi from "@/Services/userApi";
-import templateApi from "@/Services/templateApi";
-import pythonApi from "@/Services/pythonApi";
-import interviewApi from "@/Services/interviewApi";
-import questionApi, { type CodingSchema } from "@/Services/questionApi";
 
-interface User {
-  _id: string;
-  fullName: string;
-  email: string;
-  resumes: any[];
-  createdAt: string;
-  updatedAt: string;
-  refreshToken?: string;
-  aboutUser?: string;
-  avatar?: string;
-}
+import userApi from "@/services/userApi";
+import templateApi from "@/services/templateApi";
+import pythonApi from "@/services/pythonApi";
+import interviewApi from "@/services/interviewApi";
+import questionApi from "@/services/questionApi";
+import { useToast } from "@/components/ui/use-toast";
+import { User, CodingSchema } from "@/types";
 
-const ResumePreview = ({ resumeId }: { resumeId: string }) => {
-  const [htmlContent, setHtmlContent] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchResume = async () => {
-      try {
-        // Safe user data retrieval
-        const userStr = localStorage.getItem('user');
-        let tempData = null;
-        if (userStr) {
-            try {
-                const parsedUser = JSON.parse(userStr);
-                tempData = parsedUser.temp_data;
-            } catch (e) {
-                console.error("Error parsing user data for preview", e);
-            }
-        }
 
-        // Fetch template with data if available, otherwise just template
-        let resume;
-        if (tempData) {
-             // Check if temp_data has userDetails, otherwise use temp_data itself
-             const dataToSend = tempData.userDetails ? tempData.userDetails : tempData;
-             resume = await templateApi.getTemplateByData(resumeId, dataToSend);
-        } else {
-             resume = await templateApi.getTemplate(resumeId);
-        }
-
-        if (resume && resume.to_render) {
-          setHtmlContent(resume.to_render);
-        }
-      } catch (error) {
-        console.error("Failed to fetch resume preview", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (resumeId) {
-      fetchResume();
-    }
-  }, [resumeId]);
-
-  if (loading) {
-    return <div className="h-32 flex items-center justify-center text-xs text-muted-foreground">Loading preview...</div>;
-  }
-
-  if (!htmlContent) {
-    return <div className="h-32 flex items-center justify-center text-xs text-muted-foreground">Preview unavailable</div>;
-  }
-
-  return (
-    <div className="h-32 overflow-hidden border rounded-md bg-white relative">
-      <iframe 
-        srcDoc={htmlContent}
-        title={`Preview ${resumeId}`}
-        className="absolute inset-0 pointer-events-none scale-[0.25] origin-top-left w-[400%] h-[400%] border-none"
-        tabIndex={-1}
-      />
-    </div>
-  );
-};
+import { ResumePreview } from "@/components/common/ResumePreview";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export const DashBoard = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditingAbout, setIsEditingAbout] = useState(false);
@@ -151,7 +93,8 @@ export const DashBoard = () => {
         setCodingSchema(Array.isArray(res.data) ? res.data[0] : res.data);
       }
     } catch (error) {
-      console.warn("Coding schema not found or failed to fetch");
+      // Non-critical: coding schema might not exist for new users
+      console.log("Initial coding schema fetch: No data found.");
     }
   };
 
@@ -196,73 +139,73 @@ export const DashBoard = () => {
     });
   };
 
-  const handleSaveAbout = async () => {
-    if (isSavingAbout) return; // Prevent multiple clicks
-    if (!aboutInput.trim()) return;
-
-    // Optimization: Check if the text actually changed (ignoring whitespace)
-    const currentAbout = user?.aboutUser || "";
-    if (aboutInput.trim() === currentAbout.trim()) {
-      setIsEditingAbout(false);
-      return;
-    }
-    
+  const saveAboutData = async (text: string, isFromResume: boolean = false) => {
+    if (isSavingAbout) return;
     setIsSavingAbout(true);
     try {
-      // Step 1: Save the aboutUser text
-      await userApi.addAboutUser({ aboutUser: aboutInput });
+      await userApi.addAboutUser({ aboutUser: text });
       const updatedUser = await userApi.getUser();
       
       if (!updatedUser) {
-        alert("Couldn't save about user, please try again");
+        toast({ title: "Error", description: "Couldn't save about user, please try again", variant: "destructive" });
         return;
       }
       
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
       
-      // Step 2: Generate schema from the aboutUser text
       try {
-        const schema = await pythonApi.createSchema(updatedUser.aboutUser || aboutInput);
+        const schema = await pythonApi.createSchema(updatedUser.aboutUser || text);
         console.log("Generated schema:", schema);
         
-        // Step 3: Validate and update user JSON with the generated schema
         if (schema && schema.userDetails) {
           const updatedUser2 = await userApi.updateUserJson(schema.userDetails);
           
           if (updatedUser2) {
             setUser(updatedUser2);
             localStorage.setItem("user", JSON.stringify(updatedUser2));
-            alert("Profile updated successfully with AI-generated schema!");
+            toast({ title: "Profile Updated", description: `Profile updated successfully with ${isFromResume ? 'text extracted from resume' : 'AI-generated schema'}!` });
           }
-        } else {
+        } else if (!isFromResume) {
           console.warn("Schema generation did not return userDetails");
-          alert("Profile saved, but schema generation was incomplete.");
+          toast({ title: "Profile Saved", description: "Profile saved, but schema generation was incomplete.", variant: "destructive" });
         }
       } catch (schemaError) {
         console.error("Error generating schema:", schemaError);
-        alert("Profile saved, but failed to generate AI schema. You can try again later.");
+        if (!isFromResume) {
+          toast({ title: "Profile Saved", description: "Profile saved, but failed to generate AI schema. You can try again later.", variant: "destructive" });
+        }
       }
       
       setIsEditingAbout(false);
     } catch (error) {
       console.error("Error saving about user:", error);
-      alert("An error occurred while saving.");
+      toast({ title: "Error", description: "An error occurred while saving.", variant: "destructive" });
     } finally {
       setIsSavingAbout(false);
     }
   };
 
-const handleUpdateUser=async()=>{
-  navigate("/updateUser")
-}
+  const handleSaveAbout = async () => {
+    if (!aboutInput.trim()) return;
+    const currentAbout = user?.aboutUser || "";
+    if (aboutInput.trim() === currentAbout.trim()) {
+      setIsEditingAbout(false);
+      return;
+    }
+    await saveAboutData(aboutInput, false);
+  };
+
+const handleUpdateUser = () => {
+    toast({ title: "Coming soon", description: "Profile settings page coming soon!" });
+};
 
   const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (file.type !== 'application/pdf') {
-      alert("Please upload a PDF file only.");
+      toast({ title: "Invalid Format", description: "Please upload a PDF file only.", variant: "destructive" });
       return;
     }
 
@@ -288,61 +231,30 @@ const handleUpdateUser=async()=>{
       
       if (extractedText) {
         setAboutInput(extractedText);
-        await handleSaveAboutWithText(extractedText);
+        await saveAboutData(extractedText, true);
       } else {
-        alert("Could not extract text from the resume. Please try again or enter manually.");
+        toast({ title: "Extraction Failed", description: "Could not extract text from the resume. Please try again or enter manually.", variant: "destructive" });
       }
     } catch (error) {
       console.error("Error uploading resume:", error);
-      alert("Failed to upload and process resume. Please try again.");
+      toast({ title: "Upload Failed", description: "Failed to upload and process resume. Please try again.", variant: "destructive" });
     } finally {
       setIsExtractingResume(false);
     }
   };
 
-  const handleSaveAboutWithText = async (textToSave: string) => {
-    if (isSavingAbout) return;
-    
-    setIsSavingAbout(true);
+  const handleCancelInterview = async (id: string) => {
     try {
-      // Step 1: Save the aboutUser text
-      await userApi.addAboutUser({ aboutUser: textToSave });
-      const updatedUser = await userApi.getUser();
-      
-      if (!updatedUser) {
-        alert("Couldn't save about user, please try again");
-        return;
-      }
-      
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      
-      // Step 2: Generate schema from the aboutUser text
-      try {
-        const schema = await pythonApi.createSchema(updatedUser.aboutUser || textToSave);
-        console.log("Generated schema:", schema);
-        
-        if (schema && schema.userDetails) {
-          const updatedUser2 = await userApi.updateUserJson(schema.userDetails);
-          
-          if (updatedUser2) {
-            setUser(updatedUser2);
-            localStorage.setItem("user", JSON.stringify(updatedUser2));
-            alert("Profile updated successfully with text extracted from resume!");
-          }
-        }
-      } catch (schemaError) {
-        console.error("Error generating schema:", schemaError);
-      }
-      
-      setIsEditingAbout(false);
+      await interviewApi.deleteInterview(id);
+      toast({ title: "Interview Cancelled", description: "The interview has been successfully removed." });
+      fetchInterviews();
     } catch (error) {
-      console.error("Error saving about user:", error);
-      alert("An error occurred while saving.");
-    } finally {
-      setIsSavingAbout(false);
+      console.error("Failed to cancel interview:", error);
+      toast({ title: "Error", description: "Failed to cancel the interview. Please try again.", variant: "destructive" });
     }
   };
+
+
 
 
   const handleUploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -355,32 +267,28 @@ const handleUpdateUser=async()=>{
       if (updatedUser) {
         setUser(updatedUser);
         localStorage.setItem("user", JSON.stringify(updatedUser));
-        alert("Avatar uploaded successfully!");
+        toast({ title: "Success", description: "Avatar uploaded successfully!" });
       }
     } catch (error) {
       console.error("Error uploading avatar:", error);
-      alert("Failed to upload avatar. Please try again.");
+      toast({ title: "Upload Failed", description: "Failed to upload avatar. Please try again.", variant: "destructive" });
     } finally {
       setIsUploadingAvatar(false);
     }
   };
 
 
-  const handleDeleteResume = async (index: number, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent navigating to resume view
-    
-    if (window.confirm("Are you sure you want to delete this resume?")) {
-      try {
-        const updatedUser = await userApi.deleteResume(index);
-        if (updatedUser) {
-          setUser(updatedUser);
-          localStorage.setItem("user", JSON.stringify(updatedUser));
-          alert("Resume deleted successfully!");
-        }
-      } catch (error) {
-        console.error("Error deleting resume:", error);
-        alert("Failed to delete resume. Please try again.");
+  const handleDeleteResume = async (index: number) => {
+    try {
+      const updatedUser = await userApi.deleteResume(index);
+      if (updatedUser) {
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        toast({ title: "Success", description: "Resume deleted successfully!" });
       }
+    } catch (error) {
+      console.error("Error deleting resume:", error);
+      toast({ title: "Delete Failed", description: "Failed to delete resume. Please try again.", variant: "destructive" });
     }
   };
 
@@ -414,13 +322,23 @@ const handleUpdateUser=async()=>{
           </p>
         </div>
         
-        <button 
-          onClick={handleLogout}
-          className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/50 border border-border text-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-all duration-300 shadow-sm"
-        >
-          <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-sm font-semibold">System Exit</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <Link 
+            to="/schedule-interview"
+            className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all duration-300"
+          >
+            <Calendar className="w-4 h-4" />
+            <span className="text-sm font-bold">Schedule Interview</span>
+          </Link>
+          
+          <button 
+            onClick={handleLogout}
+            className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/50 border border-border text-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-all duration-300 shadow-sm"
+          >
+            <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-sm font-semibold">System Exit</span>
+          </button>
+        </div>
       </div>
 
       {/* Horizontal Stats Strip */}
@@ -616,17 +534,17 @@ const handleUpdateUser=async()=>{
               Code Solved
             </h3>
             <div className="grid grid-cols-3 gap-2 mb-6">
-                <div className="bg-green-500/10 p-2 text-center rounded-xl border border-green-500/20">
-                  <div className="text-lg font-black text-green-600 dark:text-green-400">{codingSchema?.easy || 0}</div>
-                  <div className="text-[9px] font-bold text-green-600/70 uppercase">Easy</div>
+                <div className="bg-emerald-500/10 p-2 text-center rounded-xl border border-emerald-500/20">
+                  <div className="text-lg font-black text-emerald-600 dark:text-emerald-400">{codingSchema?.easy || 0}</div>
+                  <div className="text-[9px] font-bold text-emerald-600/70 dark:text-emerald-400/70 uppercase">Easy</div>
                 </div>
-                <div className="bg-yellow-500/10 p-2 text-center rounded-xl border border-yellow-500/20">
-                  <div className="text-lg font-black text-yellow-600 dark:text-yellow-400">{codingSchema?.medium || 0}</div>
-                  <div className="text-[9px] font-bold text-yellow-600/70 uppercase">Med</div>
+                <div className="bg-amber-500/10 p-2 text-center rounded-xl border border-amber-500/20">
+                  <div className="text-lg font-black text-amber-600 dark:text-amber-400">{codingSchema?.medium || 0}</div>
+                  <div className="text-[9px] font-bold text-amber-600/70 dark:text-amber-400/70 uppercase">Med</div>
                 </div>
-                <div className="bg-red-500/10 p-2 text-center rounded-xl border border-red-500/20">
-                  <div className="text-lg font-black text-red-600 dark:text-red-400">{codingSchema?.hard || 0}</div>
-                  <div className="text-[9px] font-bold text-red-600/70 uppercase">Hard</div>
+                <div className="bg-rose-500/10 p-2 text-center rounded-xl border border-rose-500/20">
+                  <div className="text-lg font-black text-rose-600 dark:text-rose-400">{codingSchema?.hard || 0}</div>
+                  <div className="text-[9px] font-bold text-rose-600/70 dark:text-rose-400/70 uppercase">Hard</div>
                 </div>
             </div>
             
@@ -637,14 +555,14 @@ const handleUpdateUser=async()=>{
                   <Link 
                     key={idx}
                     to={`/solve/${slug}`}
-                    className="px-2.5 py-1 rounded-md bg-secondary border border-border text-[10px] font-semibold hover:border-primary/50 transition-colors truncate max-w-[100px]"
+                    className="px-2.5 py-1 rounded-md bg-muted border border-border text-[10px] font-semibold hover:border-primary/50 transition-colors truncate max-w-[100px] text-muted-foreground hover:text-foreground"
                   >
                     {slug.replace(/-/g, ' ')}
                   </Link>
                 ))}
               </div>
             ) : (
-              <div className="text-xs text-muted-foreground italic bg-secondary/30 p-2 rounded-lg text-center">No questions solved.</div>
+              <div className="text-xs text-muted-foreground italic bg-muted/30 p-2 rounded-lg text-center">No questions solved.</div>
             )}
           </div>
         </div>
@@ -667,7 +585,7 @@ const handleUpdateUser=async()=>{
                     onClick={() => {
                       if (interview.status === 'live') navigate(`/interview/${interview._id}`);
                       else if (interview.status === 'done') navigate(`/performance/${interview._id}`);
-                      else alert(`Scheduled for ${formatDate(interview.time)}.`);
+                      else toast({ title: "Scheduled", description: `Scheduled for ${formatDate(interview.time)}.` });
                     }}
                     className="min-w-[320px] sm:min-w-[360px] snap-center cursor-pointer group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300"
                   >
@@ -677,16 +595,39 @@ const handleUpdateUser=async()=>{
                       <div className="absolute inset-0 opacity-30 bg-white/10" />
                       {/* Status badge top-right */}
                       <div className="absolute top-3 right-3">
-                        <span className={`text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest backdrop-blur-sm ${
+                        <span className={`text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest backdrop-blur-md shadow-sm border border-white/20 ${
                           interview.status === 'live'
                             ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/40 animate-pulse'
                             : interview.status === 'done'
-                            ? 'bg-white/20 text-white border border-white/30'
-                            : 'bg-secondary text-secondary-foreground'
+                            ? 'bg-white/20 text-white'
+                            : 'bg-muted/80 text-foreground'
                         }`}>
-                          {interview.status === 'live' ? '● Live' : interview.status === 'done' ? '✓ Done' : '⏰ Scheduled'}
                         </span>
                       </div>
+                      {/* Cancel Button */}
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button 
+                            onClick={(e) => e.stopPropagation()}
+                            className="absolute top-3 left-3 p-2 rounded-xl bg-black/20 hover:bg-destructive/20 text-white/70 hover:text-destructive backdrop-blur-md transition-all z-10 opacity-0 group-hover:opacity-100"
+                            title="Cancel Interview"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Cancel Interview?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete your upcoming interview.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Keep</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleCancelInterview(interview._id)}>Cancel Interview</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                       {/* Floating Bot icon */}
                       <div className="absolute bottom-0 left-6 translate-y-1/2">
                         <div className="w-14 h-14 rounded-2xl bg-card border-2 border-border shadow-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
@@ -698,10 +639,10 @@ const handleUpdateUser=async()=>{
                     {/* Body */}
                     <div className="pt-10 pb-5 px-6 flex flex-col flex-1">
                       <div className="mb-4">
-                        <h3 className="text-lg font-bold leading-snug group-hover:gradient-text transition-all">
+                        <h3 className="text-lg font-bold leading-snug group-hover:text-primary transition-colors">
                           {interview.job_Role}
                         </h3>
-                        <p className="text-sm text-muted-foreground font-semibold mt-0.5">
+                        <p className="text-sm text-foreground/70 font-semibold mt-0.5">
                           {interview.companyName}
                         </p>
                       </div>
@@ -721,7 +662,7 @@ const handleUpdateUser=async()=>{
                 ))}
               </div>
             ) : (
-              <div className="bg-secondary/20 border border-dashed border-border rounded-3xl p-8 text-center text-muted-foreground">
+              <div className="bg-muted/30 border border-dashed border-border rounded-3xl p-8 text-center text-muted-foreground font-medium">
                 No active interviews. Apply for jobs to start practicing.
               </div>
             )}
@@ -735,7 +676,7 @@ const handleUpdateUser=async()=>{
                 Resume Stack
               </h2>
               <Link to="/templates" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-md hover:bg-primary/90 transition-colors">
-                <Plus className="w-4 h-4" /> New Document
+                <Plus className="w-4 h-4" /> Browse Templates
               </Link>
             </div>
 
@@ -748,14 +689,14 @@ const handleUpdateUser=async()=>{
                     className="bg-card border border-border hover:border-primary/40 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 cursor-pointer group transition-all"
                   >
                     {/* Tiny visual preview replacing the huge iframe block on dashboard */}
-                    <div className="w-16 h-20 bg-secondary rounded-lg overflow-hidden border border-border relative flex-shrink-0 group-hover:border-primary/50 transition-colors hidden sm:block">
+                    <div className="w-16 h-20 bg-muted rounded-lg overflow-hidden border border-border relative flex-shrink-0 group-hover:border-primary/50 transition-colors hidden sm:block">
                        <ResumePreview resumeId={resume.id || resume} />
                     </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="text-base font-bold truncate group-hover:text-primary transition-colors">Software Engineer Details</h3>
-                        <span className="px-2 py-0.5 rounded-full bg-secondary text-[10px] font-bold uppercase text-muted-foreground">V{index + 1}</span>
+                        <span className="px-2 py-0.5 rounded-full bg-muted text-[10px] font-bold uppercase text-muted-foreground">V{index + 1}</span>
                       </div>
                       <p className="text-xs text-muted-foreground truncate flex items-center gap-2">
                          <Clock className="w-3 h-3" /> Modified {formatDate(user.updatedAt)}
@@ -763,28 +704,44 @@ const handleUpdateUser=async()=>{
                     </div>
 
                     <div className="flex items-center gap-2 mt-4 sm:mt-0 w-full sm:w-auto justify-end sm:justify-start">
-                      <button className="px-3 py-1.5 rounded-lg bg-secondary text-foreground text-xs font-semibold hover:bg-primary/10 hover:text-primary transition-colors flex items-center gap-1">
+                      <button className="px-3 py-1.5 rounded-lg bg-muted text-foreground text-xs font-semibold hover:bg-primary/10 hover:text-primary transition-colors flex items-center gap-1">
                          View
                       </button>
-                      <button
-                        onClick={(e) => handleDeleteResume(index, e)}
-                        className="p-1.5 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
-                        title="Delete Request"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button
+                            onClick={(e) => e.stopPropagation()}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                            title="Delete Resume"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Resume?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete this resume? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDeleteResume(index)}>Delete</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="bg-secondary/20 border border-dashed border-border rounded-3xl p-10 text-center flex flex-col items-center justify-center">
+              <div className="bg-muted/30 border border-dashed border-border rounded-3xl p-10 text-center flex flex-col items-center justify-center">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 text-primary">
                   <FileText className="w-8 h-8" />
                 </div>
                 <h3 className="text-lg font-bold mb-2">No Active Resumes</h3>
-                <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6">Build a powerful, ATS-friendly resume to start applying for interviews.</p>
-                <Link to="/templates" className="btn-primary py-2 px-6 rounded-xl text-sm">Deploy Template</Link>
+                <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6">Build a powerful, ATS-friendly resume to start practicing.</p>
+                <Link to="/templates" className="btn-primary py-2 px-6 rounded-xl text-sm shadow-xl shadow-primary/20">Get Started</Link>
               </div>
             )}
           </div>

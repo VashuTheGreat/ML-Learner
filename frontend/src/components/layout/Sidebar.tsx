@@ -3,18 +3,19 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Code2,
   Home, Info, BookOpen, PenTool, FlaskConical, Briefcase, Mail, LayoutDashboard,
-  LogOut, ChevronLeft, ChevronRight, Sun, Moon, User as UserIcon, Palette, X
+  LogOut, ChevronLeft, ChevronRight, Sun, Moon, User as UserIcon, Palette, X,
+  Bot, FileText, Cpu
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import userApi from "@/Services/userApi";
+import userApi from "@/services/userApi";
 import { useSidebar } from "./AppLayout";
 import { useTheme, THEMES, ThemeId } from "@/contexts/ThemeContext";
-
-interface User { _id: string; fullName: string; email: string; avatar?: string; }
+import { User } from "@/types";
 
 const mapPathToIcon: Record<string, any> = {
   "/": Home, "/about": Info, "/courses": BookOpen, "/practice": PenTool,
   "/playground": FlaskConical, "/apply": Briefcase, "/contact": Mail, "/dashboard": LayoutDashboard,
+  "/schedule-interview": Bot, "/templates": FileText, "/ml-trainer": Cpu
 };
 
 const navLinks = [
@@ -23,6 +24,9 @@ const navLinks = [
   { name: "Courses", path: "/courses" },
   { name: "Practice", path: "/practice" },
   { name: "ML Playground", path: "/playground" },
+  { name: "ML Trainer", path: "/ml-trainer" },
+  { name: "AI Interview", path: "/schedule-interview" },
+  { name: "Resume Builder", path: "/templates" },
   { name: "Apply", path: "/apply" },
   { name: "Contact", path: "/contact" },
 ];
@@ -58,15 +62,17 @@ export const Sidebar = () => {
       {/* ── Sidebar panel ───────────────────────────────── */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col",
+          "fixed inset-y-0 left-0 flex flex-col",
           "border-r border-sidebar-border shadow-2xl",
           "transition-all duration-300 ease-in-out",
+          // z-index: high only when mobile drawer is open
+          isMobileOpen ? "z-50" : "z-30",
           // Mobile responsive classes
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
         style={{
-          width: isCollapsed ? "72px" : "260px",
-          background: "hsl(var(--sidebar-background) / 0.75)",
+          width: isMobileOpen ? "280px" : isCollapsed ? "72px" : "260px",
+          background: "hsl(var(--sidebar-background) / 0.95)",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
         }}
@@ -92,11 +98,14 @@ export const Sidebar = () => {
         </button>
 
         {/* Logo */}
-        <div className="flex h-[64px] items-center px-4 border-b border-sidebar-border flex-shrink-0">
+        <div className={cn(
+          "flex h-[64px] items-center border-b border-sidebar-border flex-shrink-0",
+          isCollapsed && !isMobileOpen ? "justify-center px-0" : "px-4"
+        )}>
           <Link
             to="/"
             onClick={() => setIsMobileOpen(false)}
-            className={cn("flex items-center gap-3 overflow-hidden", isCollapsed && "lg:justify-center w-full")}
+            className="flex items-center gap-3 overflow-hidden min-w-0"
           >
             <div className="w-9 h-9 min-w-[36px] rounded-xl gradient-bg flex items-center justify-center shadow-md flex-shrink-0">
               <Code2 className="w-5 h-5 text-white" />
@@ -104,7 +113,7 @@ export const Sidebar = () => {
             <span
               className={cn(
                 "text-lg font-bold whitespace-nowrap text-sidebar-foreground overflow-hidden transition-all duration-300",
-                isCollapsed ? "lg:w-0 lg:opacity-0" : "w-auto opacity-100"
+                isCollapsed && !isMobileOpen ? "w-0 opacity-0 pointer-events-none" : "w-auto opacity-100"
               )}
             >
               <span className="text-primary">ML</span> Learner
@@ -131,7 +140,7 @@ export const Sidebar = () => {
                   isActive
                     ? "bg-primary/10 text-primary"
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                  isCollapsed && "lg:justify-center lg:px-0"
+                  isCollapsed && !isMobileOpen && "lg:justify-center lg:px-0"
                 )}
               >
                 {/* Active left bar */}
@@ -148,7 +157,7 @@ export const Sidebar = () => {
                 <span
                   className={cn(
                     "truncate transition-all duration-300",
-                    isCollapsed ? "lg:w-0 lg:opacity-0 lg:overflow-hidden" : "w-auto opacity-100"
+                    isCollapsed && !isMobileOpen ? "lg:w-0 lg:opacity-0 lg:overflow-hidden" : "w-auto opacity-100"
                   )}
                 >
                   {link.name}
@@ -168,14 +177,14 @@ export const Sidebar = () => {
             title={isCollapsed ? "Change Theme" : undefined}
             className={cn(
               "flex w-full items-center rounded-xl p-2.5 text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors",
-              isCollapsed ? "justify-center" : "gap-3"
+              isCollapsed && !isMobileOpen ? "justify-center" : "gap-3"
             )}
           >
             <Palette className="h-5 w-5 flex-shrink-0" />
-            <span className={cn("transition-all duration-300 whitespace-nowrap", isCollapsed ? "w-0 opacity-0 overflow-hidden" : "w-auto opacity-100")}>
+            <span className={cn("transition-all duration-300 whitespace-nowrap", isCollapsed && !isMobileOpen ? "w-0 opacity-0 overflow-hidden" : "w-auto opacity-100")}>
               Theme
             </span>
-            {!isCollapsed && (
+            {(!isCollapsed || isMobileOpen) && (
               <span
                 className="ml-auto w-4 h-4 rounded-full border-2 border-sidebar-border flex-shrink-0"
                 style={{ background: `hsl(var(--primary))` }}
@@ -189,18 +198,18 @@ export const Sidebar = () => {
             title={isCollapsed ? "Toggle theme" : undefined}
             className={cn(
               "flex w-full items-center rounded-xl p-2.5 text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors",
-              isCollapsed ? "justify-center" : "gap-3"
+              isCollapsed && !isMobileOpen ? "justify-center" : "gap-3"
             )}
           >
             {isDark ? <Sun className="h-5 w-5 flex-shrink-0" /> : <Moon className="h-5 w-5 flex-shrink-0" />}
-            <span className={cn("transition-all duration-300 whitespace-nowrap", isCollapsed ? "w-0 opacity-0 overflow-hidden" : "w-auto opacity-100")}>
+            <span className={cn("transition-all duration-300 whitespace-nowrap", isCollapsed && !isMobileOpen ? "w-0 opacity-0 overflow-hidden" : "w-auto opacity-100")}>
               {isDark ? "Light Mode" : "Dark Mode"}
             </span>
           </button>
 
           {/* User section */}
           {user ? (
-            <div className={cn("flex items-center pt-1", isCollapsed ? "justify-center" : "justify-between gap-2")}>
+            <div className={cn("flex items-center pt-1", isCollapsed && !isMobileOpen ? "justify-center" : "justify-between gap-2")}>
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-9 h-9 min-w-[36px] rounded-lg gradient-bg flex items-center justify-center text-sm font-bold text-white overflow-hidden shadow-sm flex-shrink-0">
                   {user.avatar
@@ -208,7 +217,7 @@ export const Sidebar = () => {
                     : user.fullName.charAt(0).toUpperCase()
                   }
                 </div>
-                <div className={cn("flex flex-col overflow-hidden transition-all duration-300 min-w-0", isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100")}>
+                <div className={cn("flex flex-col overflow-hidden transition-all duration-300 min-w-0", isCollapsed && !isMobileOpen ? "w-0 opacity-0" : "w-auto opacity-100")}>
                   <span className="text-sm font-bold truncate text-sidebar-foreground">{user.fullName}</span>
                   <span className="text-xs text-sidebar-foreground/55 truncate">{user.email}</span>
                 </div>
@@ -222,7 +231,7 @@ export const Sidebar = () => {
               </button>
             </div>
           ) : (
-            <div className={cn("flex flex-col gap-2 pt-1", isCollapsed ? "items-center" : "")}>
+            <div className={cn("flex flex-col gap-2 pt-1", isCollapsed && !isMobileOpen ? "items-center" : "")}>
               <Link
                 to="/login"
                 title={isCollapsed ? "Login" : undefined}

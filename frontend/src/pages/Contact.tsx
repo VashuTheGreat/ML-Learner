@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Mail, Phone, MapPin, Send, MessageSquare, Twitter, Github, Linkedin, ArrowRight } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
+
 import Footer from "@/components/layout/Footer";
 
 const Contact = () => {
@@ -58,7 +58,7 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen">
-      <Navbar />
+
 
       {/* ── Hero ─────────────────────────────────────────── */}
       <section className="relative pt-32 pb-24 mesh-gradient overflow-hidden">

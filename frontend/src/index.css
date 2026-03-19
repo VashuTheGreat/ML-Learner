@@ -48,6 +48,14 @@
   --sidebar-accent-foreground: 207 20% 14%;
   --sidebar-border: 190 10% 82%;
   --sidebar-ring: 197 70% 28%;
+
+  /* Status Colors */
+  --success: 142 70% 45%;
+  --success-foreground: 142 70% 10%;
+  --warning: 48 96% 53%;
+  --warning-foreground: 48 96% 10%;
+  --error: 0 84% 60%;
+  --error-foreground: 0 84% 10%;
 }
 
 [data-theme="teal"].dark {
@@ -878,6 +886,12 @@
   @keyframes fadeIn  { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
   @keyframes slideUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
   @keyframes scaleIn { from { opacity:0; transform:scale(0.94); } to { opacity:1; transform:scale(1); } }
+
+  /* Global Invisible Transparent Scrollbar */
+  ::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: transparent; }
+  * { scrollbar-width: none; -ms-overflow-style: none; }
 
   .scrollbar-thin { scrollbar-width: thin; scrollbar-color: hsl(var(--border)) transparent; }
   .scrollbar-thin::-webkit-scrollbar        { width: 5px; height: 5px; }

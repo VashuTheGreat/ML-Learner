@@ -3,7 +3,7 @@ import mlTrainerApi, {
   AvailableAttributes,
   TrainPayload,
   TrainResult,
-} from "@/Services/mlTrainerApi";
+} from "@/services/mlTrainerApi";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Brain, ChevronRight, Loader2, AlertCircle, TrendingUp, BarChart3, Cpu, FlaskConical } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // ─── Local type alias so LS resolves even without @/ path alias ───────────────
 type ParamMeta = {
@@ -94,10 +95,10 @@ export default function MLTrainer() {
     ] ?? {};
 
   // model params are read from model_train_config if present
-  const modelParamsMeta: Record<string, ParamMeta> =
+  const modelParamsMeta: Record<string, any> =
     (attrs?.model_train_config?.[
       taskType === "regression" ? "regression_models" : "classification_models"
-    ]?.[modelName]?.params ?? {}) as Record<string, ParamMeta>;
+    ]?.[modelName]?.default_params ?? {}) as Record<string, any>;
 
   const handleTrain = async () => {
     if (!modelName) return;
@@ -138,74 +139,77 @@ export default function MLTrainer() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
+    <div className="min-h-screen bg-transparent text-foreground transition-colors duration-300">
       {/* Header */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-violet-600/20 via-cyan-500/10 to-violet-600/20 blur-3xl" />
+      <div className="relative overflow-hidden bg-secondary/5 border-b border-border/50">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-accent/5 to-primary/10 blur-3xl" />
         <div className="relative mx-auto max-w-6xl px-6 py-16">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500">
-              <Brain className="h-6 w-6 text-white" />
+          <div className="flex items-center gap-4 mb-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl gradient-bg shadow-lg shadow-primary/20">
+              <Brain className="h-7 w-7 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-violet-300 via-cyan-300 to-violet-300 bg-clip-text text-transparent">
-                ML Model Trainer
+              <h1 className="text-4xl md:text-5xl font-black tracking-tight">
+                ML Model <span className="gradient-text">Trainer</span>
               </h1>
-              <p className="text-slate-400 mt-1 text-sm">
-                Interactively train regression &amp; classification models via the Python backend
+              <p className="text-muted-foreground mt-1 text-base max-w-lg">
+                Interactively train regression & classification models via the Python backend with real-time feedback.
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-6 pb-20 space-y-8">
+      <div className="mx-auto max-w-6xl px-6 pb-20 pt-10 space-y-8">
         {/* Loading / Error state */}
         {loadingAttrs && (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-violet-400 mr-3" />
-            <span className="text-slate-400">Fetching available models from backend…</span>
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            <span className="text-muted-foreground font-medium animate-pulse">Fetching available models from backend…</span>
           </div>
         )}
 
         {attrsError && (
-          <Card className="border-red-500/30 bg-red-950/20">
-            <CardContent className="flex items-center gap-3 pt-6">
-              <AlertCircle className="h-5 w-5 text-red-400 shrink-0" />
+          <Card className="border-destructive/30 bg-destructive/5 backdrop-blur-sm">
+            <CardContent className="flex items-center gap-4 pt-6">
+              <div className="h-10 w-10 rounded-full bg-destructive/20 flex items-center justify-center shrink-0">
+                <AlertCircle className="h-6 w-6 text-destructive" />
+              </div>
               <div>
-                <p className="font-medium text-red-300">Could not connect to Python backend</p>
-                <p className="text-sm text-slate-400 mt-1">{attrsError}</p>
-                <p className="text-xs text-slate-500 mt-1">
-                  Make sure the Python backend is running: <code className="text-cyan-400">uvicorn src.app:app --reload --port 8000</code>
-                </p>
+                <p className="font-bold text-destructive">Could not connect to Python backend</p>
+                <p className="text-sm text-muted-foreground mt-1 font-medium">{attrsError}</p>
+                <div className="flex items-center gap-2 mt-3 p-2 bg-background/50 rounded-lg border border-destructive/10">
+                  <span className="text-xs font-bold text-muted-foreground uppercase">Solution:</span>
+                  <code className="text-xs text-primary font-mono font-bold">uv run main.py</code>
+                </div>
               </div>
             </CardContent>
           </Card>
         )}
 
         {attrs && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             {/* ── Left: Config ── */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-8">
 
               {/* Task Type */}
-              <Card className="border-slate-800/60 bg-slate-900/60 backdrop-blur">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-base flex items-center gap-2 text-slate-200">
-                    <Cpu className="h-4 w-4 text-cyan-400" />
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-xl rounded-3xl overflow-hidden">
+                <CardHeader className="pb-4 bg-secondary/5">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Cpu className="h-5 w-5 text-primary" />
                     Task Type
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex gap-3">
+                <CardContent className="pt-6">
+                  <div className="flex flex-col sm:flex-row gap-4">
                     {(["regression", "classification"] as const).map((t) => (
                       <button
                         key={t}
                         onClick={() => setTaskType(t)}
-                        className={`flex-1 rounded-lg border py-3 px-4 text-sm font-medium transition-all duration-200 ${
+                        className={`flex-1 rounded-2xl border-2 py-4 px-6 text-sm font-bold transition-all duration-300 transform active:scale-95 ${
                           taskType === t
-                            ? "border-violet-500 bg-violet-500/10 text-violet-300"
-                            : "border-slate-700 bg-slate-800/50 text-slate-400 hover:border-slate-600"
+                            ? "border-primary bg-primary/10 text-primary shadow-lg shadow-primary/10"
+                            : "border-border bg-background/50 text-muted-foreground hover:border-primary/50 hover:bg-primary/5"
                         }`}
                       >
                         {t === "regression" ? "📈 Regression" : "🗂️ Classification"}
@@ -216,19 +220,19 @@ export default function MLTrainer() {
               </Card>
 
               {/* Model Selection */}
-              <Card className="border-slate-800/60 bg-slate-900/60 backdrop-blur">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-base flex items-center gap-2 text-slate-200">
-                    <FlaskConical className="h-4 w-4 text-violet-400" />
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-xl rounded-3xl overflow-hidden">
+                <CardHeader className="pb-4 bg-secondary/5">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <FlaskConical className="h-5 w-5 text-primary" />
                     Select Model
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                   <Select value={modelName} onValueChange={setModelName}>
-                    <SelectTrigger className="bg-slate-800 border-slate-700 text-slate-200">
+                    <SelectTrigger className="bg-background border-border h-12 text-base rounded-xl focus:ring-primary/20 transition-all">
                       <SelectValue placeholder="Choose a model…" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectContent className="bg-card border-border rounded-xl">
                       {(taskType === "regression"
                         ? attrs.regression_models
                         : attrs.classification_models
@@ -236,7 +240,7 @@ export default function MLTrainer() {
                         <SelectItem
                           key={m}
                           value={m}
-                          className="text-slate-200 focus:bg-slate-700"
+                          className="focus:bg-primary/10 transition-colors"
                         >
                           {m}
                         </SelectItem>
@@ -246,35 +250,39 @@ export default function MLTrainer() {
 
                   {/* Model params from config */}
                   {Object.keys(modelParamsMeta).length > 0 && (
-                    <div className="mt-4 space-y-3">
-                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Model Hyperparameters</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {Object.entries(modelParamsMeta).map(([key, meta]) => (
-                          <div key={key} className="space-y-1">
-                            <Label className="text-slate-400 text-xs">
+                    <div className="mt-8 space-y-4">
+                      <div className="flex items-center gap-3">
+                        <Separator className="flex-1" />
+                        <p className="text-xs font-black text-muted-foreground uppercase tracking-widest whitespace-nowrap">Model Hyperparameters</p>
+                        <Separator className="flex-1" />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {Object.entries(modelParamsMeta).map(([key, defaultValue]) => (
+                          <div key={key} className="space-y-2">
+                            <Label className="text-foreground/80 text-sm font-bold ml-1">
                               {key}{" "}
-                              <span className="text-slate-600">({meta?.type ?? "any"})</span>
+                              <span className="text-muted-foreground font-normal text-xs uppercase tracking-tighter">({typeof defaultValue})</span>
                             </Label>
-                            {meta?.type === "bool" ? (
+                            {typeof defaultValue === "boolean" ? (
                               <Select
-                                value={modelParams[key] ?? defaultStr(meta?.default)}
+                                value={modelParams[key] ?? defaultStr(defaultValue)}
                                 onValueChange={(v) =>
                                   setModelParams((p) => ({ ...p, [key]: v }))
                                 }
                               >
-                                <SelectTrigger className="bg-slate-800 border-slate-700 text-slate-200 h-8 text-xs">
+                                <SelectTrigger className="bg-background border-border h-10 text-sm rounded-xl">
                                   <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="bg-slate-800 border-slate-700">
-                                  <SelectItem value="true" className="text-slate-200 text-xs">true</SelectItem>
-                                  <SelectItem value="false" className="text-slate-200 text-xs">false</SelectItem>
+                                <SelectContent className="bg-card border-border">
+                                  <SelectItem value="true">true</SelectItem>
+                                  <SelectItem value="false">false</SelectItem>
                                 </SelectContent>
                               </Select>
                             ) : (
                               <Input
-                                className="bg-slate-800 border-slate-700 text-slate-200 h-8 text-xs"
-                                placeholder={defaultStr(meta?.default) || "leave blank for default"}
-                                value={modelParams[key] ?? defaultStr(meta?.default)}
+                                className="bg-background border-border h-10 text-sm rounded-xl focus:ring-primary/20 transition-all"
+                                placeholder={defaultStr(defaultValue) || "Default"}
+                                value={modelParams[key] ?? defaultStr(defaultValue)}
                                 onChange={(e) =>
                                   setModelParams((p) => ({ ...p, [key]: e.target.value }))
                                 }
@@ -289,23 +297,23 @@ export default function MLTrainer() {
               </Card>
 
               {/* Dataset Params */}
-              <Card className="border-slate-800/60 bg-slate-900/60 backdrop-blur">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-base flex items-center gap-2 text-slate-200">
-                    <BarChart3 className="h-4 w-4 text-cyan-400" />
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-xl rounded-3xl overflow-hidden">
+                <CardHeader className="pb-4 bg-secondary/5">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-primary" />
                     Dataset Configuration
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <CardContent className="pt-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {Object.entries(datasetParamsMeta as Record<string, ParamMeta>).map(([key, meta]) => (
-                      <div key={key} className="space-y-1">
+                      <div key={key} className="space-y-2">
                         <Label
                           title={meta.description}
-                          className="text-slate-400 text-xs cursor-help"
+                          className="text-foreground/80 text-sm font-bold ml-1 cursor-help flex items-center gap-1.5"
                         >
                           {key}{" "}
-                          <span className="text-slate-600">({meta.type})</span>
+                          <span className="text-muted-foreground font-normal text-xs uppercase tracking-tighter">({meta.type})</span>
                         </Label>
                         {meta.type === "bool" ? (
                           <Select
@@ -314,17 +322,17 @@ export default function MLTrainer() {
                               setDatasetParams((p) => ({ ...p, [key]: v }))
                             }
                           >
-                            <SelectTrigger className="bg-slate-800 border-slate-700 text-slate-200 h-8 text-xs">
+                            <SelectTrigger className="bg-background border-border h-10 text-sm rounded-xl">
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              <SelectItem value="true" className="text-slate-200 text-xs">true</SelectItem>
-                              <SelectItem value="false" className="text-slate-200 text-xs">false</SelectItem>
+                            <SelectContent className="bg-card border-border">
+                              <SelectItem value="true">true</SelectItem>
+                              <SelectItem value="false">false</SelectItem>
                             </SelectContent>
                           </Select>
                         ) : (
                           <Input
-                            className="bg-slate-800 border-slate-700 text-slate-200 h-8 text-xs"
+                            className="bg-background border-border h-10 text-sm rounded-xl focus:ring-primary/20 transition-all"
                             placeholder={defaultStr(meta.default) || "null"}
                             value={datasetParams[key] ?? defaultStr(meta.default)}
                             onChange={(e) =>
@@ -344,74 +352,78 @@ export default function MLTrainer() {
                 size="lg"
                 onClick={handleTrain}
                 disabled={training || !modelName}
-                className="w-full bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white font-semibold h-12 rounded-xl transition-all duration-300 shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 disabled:opacity-50"
+                className="w-full btn-primary h-14 rounded-2xl text-lg font-black transition-all duration-300 shadow-xl shadow-primary/20 hover:shadow-primary/40 active:scale-[0.98] disabled:opacity-50"
               >
                 {training ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-3 h-5 w-5 animate-spin" />
                     Training {modelName}…
                   </>
                 ) : (
                   <>
-                    <Brain className="mr-2 h-4 w-4" />
-                    Train Model
-                    <ChevronRight className="ml-2 h-4 w-4" />
+                    <Brain className="mr-3 h-6 w-6" />
+                    Launch Training Session
+                    <ChevronRight className="ml-3 h-5 w-5" />
                   </>
                 )}
               </Button>
 
               {trainError && (
-                <Card className="border-red-500/30 bg-red-950/20">
-                  <CardContent className="flex items-center gap-3 pt-4 pb-4">
-                    <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
-                    <p className="text-sm text-red-300">{trainError}</p>
+                <Card className="border-destructive/30 bg-destructive/5 backdrop-blur-sm">
+                  <CardContent className="flex items-center gap-3 py-4">
+                    <AlertCircle className="h-5 w-5 text-destructive shrink-0" />
+                    <p className="text-sm font-medium text-destructive">{trainError}</p>
                   </CardContent>
                 </Card>
               )}
             </div>
 
             {/* ── Right: Results + Sidebar ── */}
-            <div className="space-y-6">
+            <div className="space-y-8 lg:sticky lg:top-24">
 
               {/* Quick reference */}
-              <Card className="border-slate-800/60 bg-slate-900/60 backdrop-blur">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm text-slate-400 uppercase tracking-wider">Available Models</CardTitle>
+              <Card className="border-border/50 bg-card shadow-xl rounded-3xl overflow-hidden">
+                <CardHeader className="pb-4 bg-secondary/5">
+                  <CardTitle className="text-xs font-black text-muted-foreground uppercase tracking-widest">Available Models</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="pt-6 space-y-6">
                   <div>
-                    <p className="text-xs font-medium text-violet-400 mb-2">Regression</p>
-                    <div className="flex flex-wrap gap-1.5">
+                    <p className="text-xs font-bold text-primary mb-3 uppercase tracking-tighter">Regression Models</p>
+                    <div className="flex flex-wrap gap-2">
                       {attrs.regression_models.map((m) => (
                         <Badge
                           key={m}
                           variant="outline"
                           onClick={() => { setTaskType("regression"); setModelName(m); }}
-                          className={`cursor-pointer text-xs border-slate-700 transition-colors ${
+                          className={cn(
+                            "cursor-pointer px-3 py-1 text-xs transition-all duration-300 rounded-lg",
                             taskType === "regression" && modelName === m
-                              ? "border-violet-500 bg-violet-500/10 text-violet-300"
-                              : "text-slate-400 hover:border-slate-500"
-                          }`}
+                              ? "bg-primary text-white border-primary shadow-md shadow-primary/20 scale-105"
+                              : "text-muted-foreground border-border hover:border-primary/50 hover:bg-primary/5"
+                          )}
                         >
                           {m}
                         </Badge>
                       ))}
                     </div>
                   </div>
-                  <Separator className="bg-slate-800" />
+                  
+                  <Separator />
+
                   <div>
-                    <p className="text-xs font-medium text-cyan-400 mb-2">Classification</p>
-                    <div className="flex flex-wrap gap-1.5">
+                    <p className="text-xs font-bold text-accent mb-3 uppercase tracking-tighter">Classification Models</p>
+                    <div className="flex flex-wrap gap-2">
                       {attrs.classification_models.map((m) => (
                         <Badge
                           key={m}
                           variant="outline"
                           onClick={() => { setTaskType("classification"); setModelName(m); }}
-                          className={`cursor-pointer text-xs border-slate-700 transition-colors ${
+                          className={cn(
+                            "cursor-pointer px-3 py-1 text-xs transition-all duration-300 rounded-lg",
                             taskType === "classification" && modelName === m
-                              ? "border-cyan-500 bg-cyan-500/10 text-cyan-300"
-                              : "text-slate-400 hover:border-slate-500"
-                          }`}
+                              ? "bg-accent text-white border-accent shadow-md shadow-accent/20 scale-105"
+                              : "text-muted-foreground border-border hover:border-accent/50 hover:bg-accent/5"
+                          )}
                         >
                           {m}
                         </Badge>
@@ -423,22 +435,27 @@ export default function MLTrainer() {
 
               {/* Training Results */}
               {result && (
-                <Card className="border-emerald-500/30 bg-emerald-950/10 backdrop-blur">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm flex items-center gap-2 text-emerald-300">
-                      <TrendingUp className="h-4 w-4" />
-                      Results — {result.model_name ?? modelName}
+                <Card className="border-green-500/30 bg-green-500/5 backdrop-blur-sm shadow-xl rounded-3xl overflow-hidden animate-in slide-in-from-bottom duration-500">
+                  <CardHeader className="pb-4 bg-green-500/10">
+                    <CardTitle className="text-sm font-black flex items-center gap-2 text-green-600 dark:text-green-400 uppercase tracking-widest">
+                      <TrendingUp className="h-5 w-5" />
+                      Analysis Results
                     </CardTitle>
-                    <Badge className="w-fit bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-xs">
-                      {result.type ?? taskType}
-                    </Badge>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge className="bg-green-500 text-white border-none text-[10px] font-bold">
+                        {result.model_name ?? modelName}
+                      </Badge>
+                      <Badge variant="outline" className="border-green-500/30 text-green-600 dark:text-green-400 text-[10px]">
+                        {result.type ?? taskType}
+                      </Badge>
+                    </div>
                   </CardHeader>
-                  <CardContent className="space-y-2">
+                  <CardContent className="pt-6 space-y-4">
                     {result.metrics && Object.entries(result.metrics).map(([k, v]) => (
-                      <div key={k} className="flex justify-between items-center py-1.5 border-b border-slate-800/60 last:border-0">
-                        <span className="text-xs text-slate-400 font-mono">{k}</span>
-                        <span className="text-sm font-semibold text-white tabular-nums">
-                          {typeof v === "number" ? v.toFixed(4) : String(v)}
+                      <div key={k} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
+                        <span className="text-xs font-bold text-muted-foreground uppercase">{k}</span>
+                        <span className="text-sm font-black text-foreground tabular-nums">
+                          {typeof v === "number" ? v.toFixed(6) : String(v)}
                         </span>
                       </div>
                     ))}
@@ -446,11 +463,13 @@ export default function MLTrainer() {
                     {Object.entries(result)
                       .filter(([k]) => !["model_name", "type", "metrics"].includes(k))
                       .map(([k, v]) => (
-                        <div key={k} className="py-1.5 border-b border-slate-800/60 last:border-0">
-                          <p className="text-xs text-slate-500 font-mono mb-1">{k}</p>
-                          <pre className="text-xs text-slate-300 whitespace-pre-wrap break-all">
-                            {typeof v === "object" ? JSON.stringify(v, null, 2) : String(v)}
-                          </pre>
+                        <div key={k} className="py-3 border-b border-border/50 last:border-0 group">
+                          <p className="text-[10px] font-black text-muted-foreground uppercase mb-2 tracking-widest group-hover:text-primary transition-colors">{k}</p>
+                          <div className="bg-background/80 rounded-xl p-3 border border-border/40">
+                             <pre className="text-xs text-foreground/80 whitespace-pre-wrap break-all font-mono leading-relaxed">
+                              {typeof v === "object" ? JSON.stringify(v, null, 2) : String(v)}
+                            </pre>
+                          </div>
                         </div>
                       ))}
                   </CardContent>
@@ -458,10 +477,15 @@ export default function MLTrainer() {
               )}
 
               {!result && !training && (
-                <Card className="border-slate-800/40 bg-slate-900/30 border-dashed">
-                  <CardContent className="flex flex-col items-center justify-center py-10 text-center gap-2">
-                    <Brain className="h-8 w-8 text-slate-700" />
-                    <p className="text-sm text-slate-600">Results will appear here after training</p>
+                <Card className="border-border/40 bg-card/30 border-dashed rounded-3xl">
+                  <CardContent className="flex flex-col items-center justify-center py-16 text-center gap-4">
+                    <div className="h-16 w-16 rounded-full bg-secondary/5 flex items-center justify-center">
+                      <Brain className="h-8 w-8 text-muted-foreground/30" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-muted-foreground">Neural Matrix Ready</p>
+                      <p className="text-xs text-muted-foreground/60">Awaiting model configuration and data initialization</p>
+                    </div>
                   </CardContent>
                 </Card>
               )}

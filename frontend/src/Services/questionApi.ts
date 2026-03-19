@@ -3,6 +3,8 @@ import axios from "axios";
 const NODE_BASE_URL = 'http://localhost:3000/api';
 const PYTHON_BASE_URL = 'http://localhost:8000';
 
+import { Question, CodingSchema, UpdateCodingSchemaBody } from '@/types';
+
 const nodeApiInstance = axios.create({
     baseURL: NODE_BASE_URL,
     headers: {
@@ -15,41 +17,10 @@ const pythonApiInstance = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
+    withCredentials: true
 });
 
-export interface Question {
-    id: number;
-    title: string;
-    difficulty: string;
-    category: string;
-    problem_description: string;
-    starter_code: string;
-    example_input: string;
-    example_output: string;
-    example_reasoning: string;
-    learn_content?: string;
-    solution_code?: string;
-    test_cases: { test: any; expected_output: any }[];
-}
 
-export interface CodingSchema {
-    recently_solved: string[];
-    recently_visited: string[];
-    all_questions_solved: string[];
-    easy: number;
-    medium: number;
-    hard: number;
-    user: string;
-}
-
-export interface UpdateCodingSchemaBody {
-    recently_solved?: string[];
-    recently_visited?: string[];
-    all_questions_solved?: string[];
-    easy?: number;
-    medium?: number;
-    hard?: number;
-}
 
 class QuestionApi {
     /** Coding Schema Methods */

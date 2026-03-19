@@ -50,8 +50,7 @@ tools = [google_search]
 # ===================== QUESTION GENERATOR =====================
 def generate_questions(topic: str) -> str:
     prompt = QuestionGeneraterPrompt.format(topic=topic)
-    llm_with_tools = llm.bind_tools(tools=tools)
-    res = llm_with_tools.invoke(prompt)
+    res = llm.invoke(prompt)
     return res.content
 
 # ===================== CHAT PROMPT =====================
@@ -69,23 +68,33 @@ async def chat(state: ChatState):
 
         questions = generate_questions(state.topic)
 
+        # Return the generated questions to be stored in the state, but don't show them to the user
         return {
             "questions_generated": True,
+            "questions": questions,
             "messages": messages + [
                 AIMessage(
                     content=(
                         f"📝 Interview Topic: **{state.topic}**\n\n"
-                        f"Here are your interview questions:\n\n{questions}\n\n"
-                        "Let's start.\n\nQuestion 1:"
+                        "I have prepared your interview questions and I am ready to begin. "
+                        "What would you like to start with, or should I ask the first question?"
                     )
                 )
             ]
         }
 
-    # Normal interview flow with remaining time
-    response = await llm_chat.ainvoke(
-        state.messages + [SystemMessage(content=f"Time remaining: {state.time_remaining} seconds")]
-    )
+    # Normal interview flow
+    # Pass the stored questions in a SystemMessage so the LLM knows what to ask
+    system_messages = [
+        SystemMessage(content=f"Time remaining: {state.time_remaining} seconds"),
+    ]
+    
+    if state.questions:
+        system_messages.append(
+            SystemMessage(content=f"Reference questions provided to you (ASK ONLY ONE AT A TIME): {state.questions}")
+        )
+
+    response = await llm_chat.ainvoke(state.messages + system_messages)
 
     # If time is 0, end politely
     if state.time_remaining <= 0:

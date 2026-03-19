@@ -120,19 +120,28 @@ export const getAllTemplates = expressRepre(
   },
   asyncHandler(async (req, res) => {
     try {
-        console.log("me call hua")
-      const templateData = await Template.find().lean(); // fetch all templates
+        console.log("getAllTemplates called");
+      const templateData = await Template.find().lean();
+      console.log(`Found ${templateData.length} templates in DB`);
 
       
 
       if (!templateData || templateData.length === 0) {
-        // agar collection empty ho
-          throw new ApiError(400, "interview performance not found");;
+        // Return empty array gracefully instead of throwing error
+        return res
+          .status(200)
+          .json(new ApiResponse(200, [], "Templates fetched successfully (empty)"));
       }
       const final_response: any[] = []
-      templateData.map((template: any) => {
-        final_response.push({ ...template, to_render: reder_html(template.template, template.temp_data) })
-      })
+      templateData.forEach((template: any) => {
+        try {
+          const rendered = reder_html(template.template, template.temp_data);
+          final_response.push({ ...template, to_render: rendered });
+        } catch (renderErr) {
+          logger.error(`Error rendering template ${template.title}:`, renderErr);
+          // Skip this template if it fails to render
+        }
+      });
 
     //   console.log(final_response)
       // agar templates mil gaye

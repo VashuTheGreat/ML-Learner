@@ -8,3 +8,4 @@ class ChatState(BaseModel):
     topic: Optional[str] = None
     time_remaining: int  # in seconds
     questions_generated: bool = False
+    questions: Optional[str] = None
