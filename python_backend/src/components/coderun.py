@@ -120,15 +120,12 @@ async def run_code(sub):
                 
                 raw_test_input = test.get("test")
                 
-                # Robust argument parsing
                 try:
                     if isinstance(raw_test_input, str):
                         try:
-                            # Try to parse as a literal (handles "1, 2", "[1, 2]", etc.)
                             parsed = ast.literal_eval(f"[{raw_test_input}]")
                             call_args = _smart_args(parsed) if isinstance(parsed, list) else _smart_args([parsed])
                         except (ValueError, SyntaxError):
-                            # Fallback for bare strings like "hello"
                             call_args = _smart_args([raw_test_input])
                     elif isinstance(raw_test_input, (list, tuple)):
                         call_args = _smart_args(list(raw_test_input))

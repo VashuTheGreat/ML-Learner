@@ -93,7 +93,6 @@ export const DashBoard = () => {
         setCodingSchema(Array.isArray(res.data) ? res.data[0] : res.data);
       }
     } catch (error) {
-      // Non-critical: coding schema might not exist for new users
       console.log("Initial coding schema fetch: No data found.");
     }
   };

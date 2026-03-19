@@ -61,14 +61,12 @@ llm_chat = prompt_template | llm
 async def chat(state: ChatState):
     messages = state.messages
 
-    # Generate questions only once
     if not state.questions_generated:
         if not state.topic:
             raise ValueError("Topic must be provided to start the interview")
 
         questions = generate_questions(state.topic)
 
-        # Return the generated questions to be stored in the state, but don't show them to the user
         return {
             "questions_generated": True,
             "questions": questions,
@@ -83,8 +81,6 @@ async def chat(state: ChatState):
             ]
         }
 
-    # Normal interview flow
-    # Pass the stored questions in a SystemMessage so the LLM knows what to ask
     system_messages = [
         SystemMessage(content=f"Time remaining: {state.time_remaining} seconds"),
     ]
