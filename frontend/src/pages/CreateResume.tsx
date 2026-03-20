@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import pythonApi from '@/Services/pythonApi'
-import templateApi from '@/Services/templateApi'
-import userApi from '@/Services/userApi'
+import pythonApi from '@/services/pythonApi'
+import templateApi from '@/services/templateApi'
+import userApi from '@/services/userApi'
+import { useToast } from "@/components/ui/use-toast"
 
 interface Template {
     _id: string,
@@ -13,6 +14,7 @@ interface Template {
 export const CreateResume = () => {
     const navigate = useNavigate()
     const { slug } = useParams()
+    const { toast } = useToast()
     const [template, setTemplate] = useState<Template | null>(null);
     const [user, setUser] = useState<any>(null);
     const [resume, setResume] = useState<any>(null);
@@ -24,7 +26,7 @@ export const CreateResume = () => {
         const updatedUser = await userApi.addResume(resume_id);
         console.log(updatedUser);
         localStorage.setItem("user", JSON.stringify(updatedUser));
-        alert("Resume saved");
+        toast({ title: "Success", description: "Resume saved" });
     }
 
     useEffect(() => {
@@ -32,14 +34,14 @@ export const CreateResume = () => {
             try {
                 const userStr = localStorage.getItem("user");
                 if (!userStr) {
-                    alert("user not found");
+                    toast({ title: "Error", description: "User not found", variant: "destructive" });
                     return;
                 }
                 let userData = JSON.parse(userStr);
                 
                 const aboutUser = userData.aboutUser;
                 if (!aboutUser) {
-                    alert("please fill aboutUser in Dashboard");
+                    toast({ title: "Profile Incomplete", description: "Please fill aboutUser in Dashboard", variant: "destructive" });
                     navigate("/dashboard");
                     return;
                 }
@@ -112,33 +114,40 @@ export const CreateResume = () => {
     }, [slug, navigate]);
 
     if (loading) return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="text-xl font-semibold text-gray-600">Loading...</div>
+        <div className="min-h-screen flex items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                <p className="text-muted-foreground animate-pulse">Generating your resume...</p>
+            </div>
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 p-8">
+        <div className="min-h-screen p-8 pt-24">
             <div className="max-w-7xl mx-auto">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold text-gray-800">Create Resume: {template?.title || slug}</h1>
+                <div className="flex justify-between items-center mb-10">
+                    <div className="space-y-1">
+                        <h1 className="text-3xl font-bold tracking-tight">Create Resume</h1>
+                        <p className="text-muted-foreground">{template?.title || 'Custom Template'}</p>
+                    </div>
                     <button 
                         onClick={() => saveResume(template?._id || "")}
-                        className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-md"
+                        className="btn-primary flex items-center gap-2 px-8 py-3 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all font-bold"
                     >
                         Save Resume
                     </button>
                 </div>
 
-                <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-200 overflow-auto">
+                <div className="bg-white p-8 rounded-3xl shadow-2xl overflow-auto border border-border/50 max-w-[850px] mx-auto min-h-[1100px]">
                     {resume && resume.to_render ? (
                         <div 
-                            className="resume-preview"
+                            className="resume-preview w-full h-full"
                             dangerouslySetInnerHTML={{ __html: resume.to_render }} 
                         />
                     ) : (
-                        <div className="text-center py-12 text-gray-500">
-                            Generating preview...
+                        <div className="flex flex-col items-center justify-center py-32 gap-6 opacity-50">
+                            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+                            <p className="text-lg font-medium">Preparing preview...</p>
                         </div>
                     )}
                 </div>

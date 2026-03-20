@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Check, Building2 } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
+
 import { cn } from "@/lib/utils";
 
 const ThanksForYou = () => {
@@ -31,7 +31,7 @@ const ThanksForYou = () => {
 
   return (
     <div className="min-h-screen mesh-gradient">
-      <Navbar />
+
       
       <div className="pt-32 pb-16">
         <div className="container mx-auto px-4">

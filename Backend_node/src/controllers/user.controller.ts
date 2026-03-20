@@ -228,7 +228,7 @@ export const uploadAvatar=expressRepre(
             throw new ApiError(404,"User not found");
         }
         if (user.avatar){
-            throw new ApiError(400,"Avatar already exists");
+            await deleteOnCloudinary(user.avatar);
         }
 
         const avatar = (req.files as any)?.avatar?.[0];

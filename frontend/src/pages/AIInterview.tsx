@@ -5,14 +5,14 @@ import {
   Clock, Bot, User, Volume2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import pythonApi from '@/Services/pythonApi';
-import performanceApi from '@/Services/performanceApi';
-import interviewApi from '@/Services/interviewApi';
+import pythonApi from '@/services/pythonApi';
+import performanceApi from '@/services/performanceApi';
+import interviewApi from '@/services/interviewApi';
 
 export const AIInterview = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const [timeRemaining, setTimeRemaining] = useState(1* 60); // 10 minutes default
+  const [timeRemaining, setTimeRemaining] = useState(10 * 60); // 10 minutes default
   const [isMicOn, setIsMicOn] = useState(true);
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [userAnswer, setUserAnswer] = useState("");
@@ -20,6 +20,54 @@ export const AIInterview = () => {
   const [messages, setMessages] = useState<Array<{role: 'ai' | 'user', content: string}>>([]);
   const [threadId, setThreadId] = useState<string>("");
   const [topic, setTopic] = useState<string>("");
+  const [recognition, setRecognition] = useState<any>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
+
+  // Initialize Speech Recognition
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const rec = new SpeechRecognition();
+      rec.continuous = true;
+      rec.interimResults = false;
+      
+      rec.onresult = (event: any) => {
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            const text = event.results[i][0].transcript;
+            setUserAnswer(prev => (prev ? prev + " " : "") + text);
+          }
+        }
+      };
+      
+      rec.onend = () => setIsListening(false);
+      rec.onerror = (e: any) => {
+        console.error("Speech reco error:", e.error);
+        setIsListening(false);
+      };
+      
+      setRecognition(rec);
+    } else {
+      console.warn("Speech recognition not supported");
+    }
+  }, []);
+
+  // Manage Mic State
+  useEffect(() => {
+    if (!recognition) return;
+    try {
+      if (isMicOn && !isAISpeaking && !isListening) {
+        recognition.start();
+        setIsListening(true);
+      } else if ((!isMicOn || isAISpeaking) && isListening) {
+        recognition.stop();
+        setIsListening(false);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [isMicOn, isAISpeaking, isListening, recognition]);
 
   // Initialize unique threadId for the interview session
   useEffect(() => {
@@ -30,9 +78,15 @@ export const AIInterview = () => {
       // Generate a new unique ID if none exists for this session
       id = crypto.randomUUID();
       sessionStorage.setItem('interview_thread_id', id);
+      localStorage.setItem('interview_thread_id', id);
       console.log("New Interview Thread ID generated:", id);
     } else {
       console.log("Resuming Interview with Thread ID:", id);
+    }
+    
+    if (slug) {
+      sessionStorage.setItem('interview_slug', slug);
+      localStorage.setItem('interview_slug', slug);
     }
     
     setThreadId(id);
@@ -72,9 +126,8 @@ export const AIInterview = () => {
 
     const startInterview = async () => {
       try {
-        // Send initial greeting twice as requested
+        // Send initial greeting
         const currentTopic = topic || slug;
-        await pythonApi.chatInterviewer(threadId, timeRemaining, currentTopic, "Hello, I am ready for the interview.");
         const response = await pythonApi.chatInterviewer(threadId, timeRemaining, currentTopic, "Hello, I am ready for the interview.");
         
         const aiMsg = response.ai_response || "Hello! I am your AI interviewer. Let's begin.";
@@ -85,10 +138,10 @@ export const AIInterview = () => {
       }
     };
 
-    if (topic || !slug) { // Wait for topic if slug exists
+    if (hasStarted && (topic || !slug)) { // Wait for topic and start trigger
         startInterview();
     }
-  }, [threadId, slug, topic, speak]);
+  }, [threadId, slug, topic, speak, hasStarted]);
 
   // Timer countdown
   useEffect(() => {
@@ -195,9 +248,30 @@ export const AIInterview = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+        {!hasStarted && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md">
+            <div className="text-center space-y-6 max-w-md p-8 bg-card border border-border rounded-3xl shadow-2xl animate-in zoom-in-95 duration-300">
+              <div className="w-20 h-20 rounded-2xl gradient-bg flex items-center justify-center mx-auto mb-4">
+                <Bot className="w-12 h-12 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold">Ready to Start?</h2>
+              <p className="text-muted-foreground">
+                Your interview on <strong>{topic || slug}</strong> is ready. 
+                Make sure your mic and camera are working correctly before we begin.
+              </p>
+              <button 
+                onClick={() => setHasStarted(true)}
+                className="w-full btn-primary h-14 rounded-2xl text-lg font-bold"
+              >
+                Start Interview
+              </button>
+            </div>
+          </div>
+        )}
+        
         {/* Video Section */}
-        <div className="w-1/3 border-r border-border/50 p-4 flex flex-col">
+        <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-border/50 p-4 flex flex-col h-2/5 md:h-full shrink-0">
           {/* AI Video */}
           <div className="flex-1 bg-secondary/10 rounded-2xl relative overflow-hidden mb-4 border border-border/50">
             <div className="absolute inset-0 flex items-center justify-center">
@@ -236,6 +310,11 @@ export const AIInterview = () => {
             {!isMicOn && (
               <div className="absolute top-3 right-3 p-1.5 bg-destructive/20 rounded-full">
                 <MicOff className="w-4 h-4 text-destructive" />
+              </div>
+            )}
+            {isListening && (
+              <div className="absolute top-3 right-3 flex items-center gap-2 px-3 py-1 bg-green-500/20 backdrop-blur-sm rounded-full text-xs font-medium text-green-500 animate-pulse">
+                <Mic className="w-3 h-3" /> Listening...
               </div>
             )}
           </div>

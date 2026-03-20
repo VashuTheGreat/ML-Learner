@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { CheckCircle, ArrowRight, Home, RotateCcw, Trophy, Loader2, BarChart2 } from "lucide-react";
 import heroPerson from "@/assets/hero-person.png";
-import Navbar from "@/components/layout/Navbar";
-import pythonApi from "@/Services/pythonApi";
-import performanceApi from "@/Services/performanceApi";
-import interviewApi from "@/Services/interviewApi";
+
+import pythonApi from "@/services/pythonApi";
+import performanceApi from "@/services/performanceApi";
+import interviewApi from "@/services/interviewApi";
 
 const ThanksParticipating = () => {
   const navigate = useNavigate();
@@ -48,8 +48,8 @@ const ThanksParticipating = () => {
 
   useEffect(() => {
     const generatePerformance = async () => {
-      const threadId = stateThreadId || sessionStorage.getItem('interview_thread_id');
-      const slug = stateSlug || "unknown";
+      const threadId = stateThreadId || sessionStorage.getItem('interview_thread_id') || localStorage.getItem('interview_thread_id');
+      const slug = stateSlug || sessionStorage.getItem('interview_slug') || localStorage.getItem('interview_slug') || "unknown";
 
       console.log("Starting performance generation for:", { threadId, slug });
 
@@ -138,6 +138,7 @@ const ThanksParticipating = () => {
         
         // Always clear storage even if backend deletion fails
         sessionStorage.removeItem('interview_thread_id');
+        sessionStorage.removeItem('interview_slug');
         localStorage.removeItem('interview_thread_id');
         console.log("Local/Session storage cleared for thread:", threadId);
         
@@ -154,7 +155,7 @@ const ThanksParticipating = () => {
 
   return (
     <div className="min-h-screen mesh-gradient">
-      <Navbar />
+
       
       <div className="pt-32 pb-16">
         <div className="container mx-auto px-4">
@@ -214,7 +215,7 @@ const ThanksParticipating = () => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex flex-wrap sm:flex-row gap-4">
                     {performanceData && (
                       <button 
                         onClick={() => navigate(`/performance/${stateSlug || "unknown"}`)}

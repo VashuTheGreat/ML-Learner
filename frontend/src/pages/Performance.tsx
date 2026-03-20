@@ -9,8 +9,8 @@ import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
   ResponsiveContainer, Tooltip
 } from 'recharts';
-import performanceApi from '@/Services/performanceApi';
-import Navbar from '@/components/layout/Navbar';
+import performanceApi from '@/services/performanceApi';
+
 import { cn } from "@/lib/utils";
 
 const Performance = () => {
@@ -80,8 +80,8 @@ const Performance = () => {
 
   return (
     <div className="min-h-screen bg-background selection:bg-primary/20">
-      <Navbar />
-      <main className="container mx-auto px-4 pt-24 pb-12">
+
+      <main className="container mx-auto px-4 pt-8 pb-12">
         <button 
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-all mb-8 group"

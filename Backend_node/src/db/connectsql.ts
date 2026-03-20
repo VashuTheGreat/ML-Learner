@@ -7,10 +7,30 @@ async function connectsql() {
         const db=await mysql.createConnection({
      host: 'localhost',
   user: 'root',
-  password:"Vansh@1234mysql",
+  password:"Sarthak@20021978$",
   database:"ml_learner"
 })
     logger.info("mysql connected");
+    // Ensure the questions table exists to prevent ER_NO_SUCH_TABLE errors
+    const createTableQuery = `
+      CREATE TABLE IF NOT EXISTS questions (
+          id INT PRIMARY KEY,
+          title VARCHAR(255),
+          difficulty VARCHAR(50),
+          category VARCHAR(100),
+          problem_description TEXT,
+          starter_code TEXT,
+          example_input TEXT,
+          example_output TEXT,
+          example_reasoning TEXT,
+          learn_content TEXT,
+          solution_code TEXT,
+          test_cases JSON,
+          function_name VARCHAR(255)
+      )
+    `;
+    await db.execute(createTableQuery);
+
     return db
         
     } catch (error) {

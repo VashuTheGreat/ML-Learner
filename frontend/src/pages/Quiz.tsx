@@ -142,11 +142,11 @@ const Quiz = () => {
         </div>
       </div>
 
-      <div className="flex h-[calc(100vh-73px)]">
+      <div className="flex flex-col md:flex-row h-[calc(100vh-73px)]">
         {/* Left Panel - Question */}
         <div className={cn(
-          "border-r border-code-foreground/10 overflow-y-auto transition-all",
-          showCode ? "w-1/2" : "w-full"
+          "border-b md:border-b-0 md:border-r border-code-foreground/10 overflow-y-auto transition-all shrink-0",
+          showCode ? "h-1/2 md:h-full w-full md:w-1/2" : "h-full w-full"
         )}>
           <div className="p-6">
             {/* Question Header */}
@@ -232,7 +232,7 @@ const Quiz = () => {
 
         {/* Right Panel - Code */}
         {showCode && (
-          <div className="w-1/2 overflow-y-auto">
+          <div className="h-1/2 md:h-full w-full md:w-1/2 overflow-y-auto">
             <div className="p-4 border-b border-code-foreground/10 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4" />

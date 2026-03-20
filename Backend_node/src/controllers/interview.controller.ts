@@ -156,3 +156,29 @@ export const getInterviewById = expressRepre(
       .json(new ApiResponse(200, interview, "Interview fetched successfully"));
   })
 );
+
+export const deleteInterview = expressRepre(
+  {
+    summary: "delete an interview",
+    params: {
+      id: "69671fa2d697bab6f0176ccc"
+    },
+    response: "interview deleted"
+  },
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const user_id = req.user?._id;
+
+    logger.info(`Deleting interview ${id} for user ${user_id}`);
+
+    const interview = await Interview.findOneAndDelete({ _id: id, user_id });
+
+    if (!interview) {
+      throw new ApiError(404, "Interview not found or unauthorized");
+    }
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, null, "Interview deleted successfully"));
+  })
+);

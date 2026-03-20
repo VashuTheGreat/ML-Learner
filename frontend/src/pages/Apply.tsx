@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import pythonApi from '@/Services/pythonApi';
-import Navbar from '@/components/layout/Navbar';
-import { Briefcase, Calendar, MapPin, Loader2, Tag, Clock, Building2, ShieldCheck, ChevronDown } from 'lucide-react';
-import interviewApi from '@/Services/interviewApi';
+import { useNavigate } from 'react-router-dom';
+import pythonApi from '@/services/pythonApi';
+
+import { Briefcase, Calendar, MapPin, Loader2, Tag, Clock, Building2, ShieldCheck, ChevronDown, Bot } from 'lucide-react';
+import interviewApi from '@/services/interviewApi';
+import { useToast } from "@/components/ui/use-toast";
 const COMPANY_LOGOS: { [key: string]: string } = {
     "Google": "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",
     "Amazon": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Amazon_icon.svg",
@@ -13,10 +15,14 @@ const COMPANY_LOGOS: { [key: string]: string } = {
 };
 
 export const Apply = () => {
+    const { toast } = useToast();
+    const navigate = useNavigate();
     const [interviews, setInterviews] = useState<any[] | null>(null);
     const [loading, setLoading] = useState(true);
     const [userAplied,setUserAplied]=useState<any>(null);
     const [isUpdated, setIsUpdated] = useState(false);
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [adminPassword, setAdminPassword] = useState("");
 
     const fetchRunningApplyingInterviews = async (updated: boolean = false) => {
         setLoading(true);
@@ -49,29 +55,45 @@ export const Apply = () => {
         fetchUserAppliedInterviews();
     }, [isUpdated]);
 
+
+
     const handleUpdateChange = (value: boolean) => {
         if (value === true) {
-            const password = prompt("Please enter admin password to enable updated interviews:");
-            if (password === "admin") {
-                setIsUpdated(true);
-            } else {
-                alert("Incorrect password!");
-            }
+            setIsPasswordModalOpen(true);
         } else {
             setIsUpdated(false);
         }
     };
 
-    const handleApply = async (job: any) => {
-        // Temporary function - logic will be added later
+    const verifyAdminPassword = () => {
+        if (adminPassword === "admin") {
+            setIsUpdated(true);
+            setIsPasswordModalOpen(false);
+            setAdminPassword("");
+        } else {
+            toast({ title: "Error", description: "Incorrect password!", variant: "destructive" });
+        }
+    };
+
+    const handleApply = async (job: any, withAi: boolean = false) => {
         try {
-            const response = await interviewApi.scheduleInterview(job);
+            const payload = {
+                ...job,
+                status: "pending",
+                aiInterview: withAi
+            };
+            const response = await interviewApi.scheduleInterview(payload);
             console.log(response)
-            alert(`Applied for ${job.job_Role} at ${job.companyName}...`);
-            window.location.reload();
+            toast({ title: "Application Submitted", description: `Applied for ${job.job_Role} at ${job.companyName}...` });
+            
+            if (withAi && response && response._id) {
+                navigate(`/interview/${response._id}`);
+            } else {
+                window.location.reload();
+            }
         } catch (e: any) {
             console.log("Error while registering", e);
-            alert(`Error while applying. Try again later.`)
+            toast({ title: "Error", description: "Error while applying. Try again later.", variant: "destructive" });
         }
     };
   
@@ -85,8 +107,8 @@ export const Apply = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background">
-            <Navbar />
+        <div className="min-h-screen">
+
             <main className="container mx-auto px-4 pt-24 pb-12">
                 <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>
@@ -165,13 +187,23 @@ export const Apply = () => {
                                         </div>
                                     </div>
 
-                                    <button 
-                                        onClick={() => handleApply(job)}
-                                        disabled={userAplied?.some((applied: any) => applied.companyName === job.companyName && applied.job_Role === job.job_Role)}
-                                        className="w-full py-3 rounded-xl bg-secondary/10 hover:bg-primary hover:text-white transition-all duration-300 font-bold text-sm"
-                                    >
-                                        {userAplied?.some((applied: any) => applied.companyName === job.companyName && applied.job_Role === job.job_Role) ? "Applied" : "Apply Now"}
-                                    </button>
+                                    <div className="flex flex-col gap-2">
+                                        <button 
+                                            onClick={() => handleApply(job, true)}
+                                            disabled={userAplied?.some((applied: any) => applied.companyName === job.companyName && applied.job_Role === job.job_Role)}
+                                            className="w-full py-2.5 flex items-center justify-center gap-2 rounded-xl bg-primary text-white hover:bg-primary/90 transition-all duration-300 font-bold text-sm"
+                                        >
+                                            <Bot className="w-4 h-4" />
+                                            {userAplied?.some((applied: any) => applied.companyName === job.companyName && applied.job_Role === job.job_Role) ? "Applied" : "Apply & Take AI Interview"}
+                                        </button>
+                                        <button 
+                                            onClick={() => handleApply(job, false)}
+                                            disabled={userAplied?.some((applied: any) => applied.companyName === job.companyName && applied.job_Role === job.job_Role)}
+                                            className="w-full py-2 rounded-xl bg-secondary/10 hover:bg-secondary/20 text-muted-foreground transition-all duration-300 font-bold text-xs"
+                                        >
+                                            {userAplied?.some((applied: any) => applied.companyName === job.companyName && applied.job_Role === job.job_Role) ? "Applied" : "Apply Normally"}
+                                        </button>
+                                    </div>
                                 </div>
                             ))
                         ) : (

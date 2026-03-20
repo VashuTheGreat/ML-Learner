@@ -1,4 +1,4 @@
-const url="http://localhost:3002/api/question/add_questions"
+const url="http://localhost:3000/api/question/add_questions"
 import fs from "fs"
 
 const content=fs.readFileSync("./problems.json")

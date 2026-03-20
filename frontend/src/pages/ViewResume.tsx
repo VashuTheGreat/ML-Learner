@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, redirect } from 'react-router-dom';
 import { Download, ArrowLeft, Code, Table, X } from 'lucide-react';
-import templateApi from '@/Services/templateApi';
-import userApi from '@/Services/userApi';
+import templateApi from '@/services/templateApi';
+import userApi from '@/services/userApi';
 import html2pdf from 'html2pdf.js';
+import { useToast } from "@/components/ui/use-toast";
 
 export const View_resume = () => {
     const { slug } = useParams();
     const navigate = useNavigate();
+    const { toast } = useToast();
     const [resumeHtml, setResumeHtml] = useState<string>('');
     const [tempData, setTempData] = useState<any>(null);
     const [editMode, setEditMode] = useState<'json' | 'form'>('json');
@@ -55,7 +57,7 @@ export const View_resume = () => {
             try {
                 const userStr = localStorage.getItem('user');
                 if (!userStr) {
-                    alert('User not found');
+                    toast({ title: "Error", description: "User not found", variant: "destructive" });
                     navigate('/login');
                     return;
                 }
@@ -64,7 +66,7 @@ export const View_resume = () => {
                 let userData = user.temp_data;
 
                 if (!userData) {
-                    alert('No resume data found');
+                    toast({ title: "Warning", description: "No resume data found" });
                     navigate('/dashboard');
                     return;
                 }
@@ -89,12 +91,12 @@ export const View_resume = () => {
                 if (resume && resume.to_render) {
                     setResumeHtml(resume.to_render);
                 } else {
-                    alert('Failed to load resume');
+                    toast({ title: "Error", description: "Failed to load resume", variant: "destructive" });
                     navigate('/dashboard');
                 }
             } catch (error) {
                 console.error('Error fetching resume:', error);
-                alert('Failed to load resume');
+                toast({ title: "Error", description: "Failed to load resume", variant: "destructive" });
                 navigate('/dashboard');
             } finally {
                 setLoading(false);
@@ -138,7 +140,7 @@ export const View_resume = () => {
         await userApi.updateUserJson(sanitizedData);
         const updatedUser = await userApi.getUser();
         localStorage.setItem('user', JSON.stringify(updatedUser));
-        alert('Resume saved successfully!');
+        toast({ title: "Success", description: "Resume saved successfully!" });
         navigate('/dashboard');
         
         // TODO: User will implement save logic
@@ -151,7 +153,7 @@ export const View_resume = () => {
             const parsedData = JSON.parse(jsonText);
             handleSave(parsedData);
         } catch (error) {
-            alert('Invalid JSON! Please check your syntax.');
+            toast({ title: "Error", description: "Invalid JSON! Please check your syntax.", variant: "destructive" });
         }
     };
 
@@ -160,7 +162,7 @@ export const View_resume = () => {
         const element = iframe?.contentWindow?.document.body;
         
         if (!element) {
-            alert('Resume content not found');
+            toast({ title: "Error", description: "Resume content not found", variant: "destructive" });
             return;
         }
 
@@ -177,17 +179,17 @@ export const View_resume = () => {
 
     const renderFormView = () => {
         const data = tempData?.userDetails || tempData;
-        if (!data) return <div className="text-gray-500">No data available</div>;
+        if (!data) return <div className="text-muted-foreground">No data available</div>;
 
         return (
             <div className="space-y-4">
                 {Object.entries(data).map(([key, value]) => (
-                    <div key={key} className="border-b pb-4">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2 capitalize">
+                    <div key={key} className="border-b border-border pb-4">
+                        <label className="block text-sm font-semibold text-foreground/80 mb-2 capitalize">
                             {key.replace(/([A-Z])/g, ' $1').trim()}
                         </label>
                         {typeof value === 'object' ? (
-                            <pre className="bg-gray-50 p-3 rounded text-xs overflow-auto max-h-40">
+                            <pre className="bg-muted p-3 rounded text-xs overflow-auto max-h-40 text-muted-foreground">
                                 {JSON.stringify(value, null, 2)}
                             </pre>
                         ) : (
@@ -204,14 +206,14 @@ export const View_resume = () => {
                                     setTempData(newData);
                                     setJsonText(JSON.stringify(newData, null, 2));
                                 }}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-input bg-background text-foreground rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                             />
                         )}
                     </div>
                 ))}
                 <button
                     onClick={() => handleSave(tempData)}
-                    className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                    className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors font-semibold"
                 >
                     Save Changes
                 </button>
@@ -221,21 +223,21 @@ export const View_resume = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-background text-foreground">
             {/* Header */}
-            <div className="bg-white shadow-sm border-b print:hidden">
+            <div className="bg-card shadow-sm border-b border-border print:hidden">
                 <div className="max-w-7xl mx-auto px-4 py-4">
                     <div className="flex justify-between items-center">
                         <button
                             onClick={() => navigate('/dashboard')}
-                            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+                            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
                         >
                             <ArrowLeft className="w-5 h-5" />
                             <span>Back to Dashboard</span>
@@ -246,14 +248,14 @@ export const View_resume = () => {
                                 <>
                                     <button
                                         onClick={() => setIsEditing(true)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                        className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-lg hover:bg-primary/20 transition-colors"
                                     >
                                         <Code className="w-4 h-4" />
                                         Edit
                                     </button>
                                     <button
                                         onClick={handleDownloadPDF}
-                                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                                        className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors"
                                     >
                                         <Download className="w-4 h-4" />
                                         Download PDF
@@ -262,7 +264,7 @@ export const View_resume = () => {
                             ) : (
                                 <button
                                     onClick={() => setIsEditing(false)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors"
                                 >
                                     <X className="w-4 h-4" />
                                     Close Editor
@@ -278,16 +280,16 @@ export const View_resume = () => {
                 {isEditing ? (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Left: Editor */}
-                        <div className="bg-white rounded-lg shadow-lg p-6">
+                        <div className="bg-card rounded-2xl border border-border shadow-lg p-6">
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-xl font-bold">Edit Resume Data</h2>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => setEditMode('json')}
-                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
+                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-xs font-bold uppercase tracking-wider ${
                                             editMode === 'json'
-                                                ? 'bg-purple-600 text-white'
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                ? 'bg-primary text-primary-foreground shadow-md'
+                                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                         }`}
                                     >
                                         <Code className="w-4 h-4" />
@@ -295,10 +297,10 @@ export const View_resume = () => {
                                     </button>
                                     <button
                                         onClick={() => setEditMode('form')}
-                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
+                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-xs font-bold uppercase tracking-wider ${
                                             editMode === 'form'
-                                                ? 'bg-purple-600 text-white'
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                ? 'bg-primary text-primary-foreground shadow-md'
+                                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                         }`}
                                     >
                                         <Table className="w-4 h-4" />
@@ -322,12 +324,12 @@ export const View_resume = () => {
                                                     // Invalid JSON, don't update tempData yet
                                                 }
                                             }}
-                                            className="w-full h-[500px] p-4 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                            className="w-full h-[500px] p-4 border border-input bg-background text-foreground rounded-xl font-mono text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                                             spellCheck={false}
                                         />
                                         <button
                                             onClick={handleSaveJson}
-                                            className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                                            className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors font-semibold"
                                         >
                                             Save Changes
                                         </button>
@@ -339,18 +341,18 @@ export const View_resume = () => {
                         </div>
 
                         {/* Right: Preview */}
-                        <div className="bg-white rounded-lg shadow-lg p-6 sticky top-8">
+                        <div className="bg-card rounded-2xl border border-border shadow-lg p-6 sticky top-8">
                             <div className="flex items-center justify-between mb-4">
                                 <h2 className="text-xl font-bold">Preview</h2>
                                 {isUpdatingPreview && (
-                                    <span className="text-sm text-gray-500 flex items-center gap-2">
-                                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-purple-600"></div>
+                                    <span className="text-sm text-muted-foreground flex items-center gap-2">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-primary"></div>
                                         Updating...
                                     </span>
                                 )}
                             </div>
                             <div 
-                                className="border border-gray-300 rounded-lg overflow-auto bg-white" 
+                                className="border border-border rounded-xl overflow-auto bg-white" 
                                 style={{ height: 'calc(100vh - 250px)' }}
                             >
                                 <iframe
@@ -363,7 +365,7 @@ export const View_resume = () => {
                     </div>
                 ) : (
                     <div className="max-w-4xl mx-auto">
-                        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                        <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-border">
                             <iframe
                                 id="resume-iframe"
                                 srcDoc={resumeHtml}

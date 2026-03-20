@@ -1,153 +1,155 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Play, Star, Users, BookOpen, Award } from "lucide-react";
-import heroPerson from "@/assets/hero-person.png";
-import Navbar from "@/components/layout/Navbar";
+import { ArrowRight, Play, Star, Users, BookOpen, Bot, FileText, Code2 } from "lucide-react";
 import Footer from "@/components/layout/Footer";
+import { FloatingStudyHero } from "@/components/layout/FloatingStudyHero";
+import Magnetic from "@/components/ui/Magnetic";
+import TiltCard from "@/components/ui/TiltCard";
 
 const Home = () => {
-  const stats = [
-    { icon: Users, label: "Active Students", value: "10K+" },
-    { icon: BookOpen, label: "Courses", value: "50+" },
-    { icon: Award, label: "Certificates", value: "5K+" },
-    { icon: Star, label: "Rating", value: "4.9" },
-  ];
-
-  const courses = [
-    { title: "JavaScript Fundamentals", level: "Beginner", lessons: 24, duration: "8 hours" },
-    { title: "React Masterclass", level: "Intermediate", lessons: 32, duration: "12 hours" },
-    { title: "Data Structures & Algorithms", level: "Advanced", lessons: 40, duration: "16 hours" },
-  ];
-
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      
-      {/* Hero Section */}
-      <section className="pt-24 mesh-gradient min-h-screen flex items-center">
-        <div className="container mx-auto px-4 py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left Content */}
-            <div className="space-y-8 animate-fade-in">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                <Star className="w-4 h-4 fill-primary" />
-                Top Rated Learning Platform
+    <div className="min-h-screen flex flex-col pt-6 px-4 md:px-8 max-w-7xl mx-auto space-y-6 md:space-y-8 animate-in fade-in pb-20">
+
+      {/* ── BENTO GRID ───────────────────────────────────── */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[minmax(180px,auto)]" style={{ perspective: "1000px" }}>
+
+        {/* BIG HERO – spans 3 cols, 2 rows */}
+          <div className="md:col-span-3 md:row-span-2 relative rounded-3xl overflow-hidden p-8 md:p-12 shadow-2xl flex flex-col md:flex-row items-center gap-6 justify-between group gradient-bg">
+          {/* ambient glow orbs */}
+          <div className="absolute top-0 right-0 w-[480px] h-[480px] rounded-full blur-[110px] -translate-y-1/3 translate-x-1/4 transition-all duration-700 bg-primary/10" />
+          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full blur-[90px] translate-y-1/3 -translate-x-1/4 bg-primary/20" />
+
+          {/* Text side */}
+          <div className="relative z-10 max-w-xl flex flex-col justify-between h-full py-2">
+            <div>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-medium mb-8 text-white">
+                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                <span>Top Rated Tech Platform 2025</span>
               </div>
-              
-              <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight">
-                A New Way To{" "}
-                <span className="gradient-text">Learn</span>
+
+              <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.1] tracking-tight mb-6 text-white">
+                Master The <br />
+                <span className="gradient-text brightness-125">Future of AI.</span>
               </h1>
-              
-              <p className="text-lg text-muted-foreground max-w-lg leading-relaxed">
-                Master coding with our interactive courses, real-world projects, and 
-                expert guidance. Start your journey to becoming a professional developer today.
+
+              <p className="text-lg md:text-xl max-w-lg mb-10 leading-relaxed text-white/80">
+                Accelerate your tech career with personalized coding
+                challenges and real-time AI-driven mock interviews.
               </p>
-              
-              <div className="flex flex-wrap items-center gap-4">
-                <Link to="/courses" className="btn-primary flex items-center gap-2">
-                  Get Started
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-                <button className="flex items-center gap-3 px-6 py-3 rounded-xl border-2 border-border hover:border-primary transition-colors">
-                  <div className="w-10 h-10 rounded-full gradient-bg flex items-center justify-center">
-                    <Play className="w-4 h-4 text-primary-foreground fill-primary-foreground ml-0.5" />
-                  </div>
-                  <span className="font-semibold">Watch Demo</span>
-                </button>
-              </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8">
-                {stats.map((stat, index) => (
-                  <div key={index} className="text-center sm:text-left">
-                    <div className="text-3xl font-bold gradient-text">{stat.value}</div>
-                    <div className="text-sm text-muted-foreground">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
             </div>
 
-            {/* Right Content - Hero Image */}
-            <div className="relative flex justify-center lg:justify-end">
-              <div className="relative">
-                <div className="absolute inset-0 gradient-bg rounded-3xl blur-3xl opacity-30 scale-90"></div>
-                <img 
-                  src={heroPerson} 
-                  alt="Student learning to code" 
-                  className="relative z-10 w-full max-w-md rounded-3xl shadow-2xl animate-float"
-                />
-                
-                {/* Floating Card */}
-                <div className="absolute -left-8 top-1/4 glass-card rounded-2xl p-4 animate-fade-in">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl gradient-bg flex items-center justify-center">
-                      <BookOpen className="w-6 h-6 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <div className="font-bold">50+ Courses</div>
-                      <div className="text-sm text-muted-foreground">Available Now</div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Another Floating Card */}
-                <div className="absolute -right-4 bottom-1/4 glass-card rounded-2xl p-4 animate-fade-in">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center">
-                      <Award className="w-6 h-6 text-accent-foreground" />
-                    </div>
-                    <div>
-                      <div className="font-bold">Certified</div>
-                      <div className="text-sm text-muted-foreground">Upon Completion</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="flex items-center gap-4">
+              <Magnetic>
+                <Link to="/courses" className="btn-primary">Start Learning Now</Link>
+              </Magnetic>
             </div>
+          </div>
+
+          {/* 3D Knowledge Graph */}
+          <div className="hidden md:block relative z-10 flex-shrink-0 w-[44%] h-[320px] rounded-2xl overflow-hidden">
+            <FloatingStudyHero />
           </div>
         </div>
-      </section>
 
-      {/* Featured Courses Section */}
-      <section className="py-24 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Popular Courses</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Explore our most popular courses designed to help you master programming skills
-            </p>
+        {/* STATS STACK – top right, 1 col 2 rows */}
+        <div className="md:col-span-1 md:row-span-2 flex flex-col gap-4 md:gap-6">
+          <div className="flex-1 rounded-3xl bg-card border border-border p-6 shadow-sm flex flex-col justify-center relative overflow-hidden group">
+            <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all" />
+            <Users className="w-8 h-8 text-primary mb-4" />
+            <div className="text-4xl font-extrabold text-foreground mb-1">10,000+</div>
+            <div className="text-sm text-muted-foreground font-medium">Active Students Worldwide</div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {courses.map((course, index) => (
-              <div 
-                key={index} 
-                className="bg-card rounded-2xl p-6 shadow-soft card-hover"
-              >
-                <div className="h-40 rounded-xl gradient-bg mb-6 flex items-center justify-center">
-                  <BookOpen className="w-16 h-16 text-primary-foreground" />
-                </div>
-                <div className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary mb-4">
-                  {course.level}
-                </div>
-                <h3 className="text-xl font-bold mb-2">{course.title}</h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  {course.lessons} lessons • {course.duration}
-                </p>
-                <Link 
-                  to="/courses" 
-                  className="flex items-center gap-2 text-primary font-medium text-sm hover:gap-3 transition-all"
-                >
-                  Start Learning
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
+          <div className="flex-1 rounded-3xl bg-primary/5 border border-primary/20 p-6 shadow-sm flex flex-col justify-center group">
+            <div className="flex items-center gap-1 mb-3">
+              {[1,2,3,4,5].map(i => <Star key={i} className="w-5 h-5 text-yellow-500 fill-yellow-500" />)}
+            </div>
+            <div className="text-3xl font-extrabold text-foreground mb-1">4.9 / 5.0</div>
+            <div className="text-sm text-muted-foreground font-medium">Average Platform Rating</div>
+          </div>
+        </div>
+
+        {/* FEATURE CARDS – middle row, 3 cards */}
+        <TiltCard className="md:col-span-1">
+          <Link
+            to="/courses"
+            className="rounded-3xl p-6 md:p-8 flex flex-col justify-between group h-full relative overflow-hidden border border-border bg-card"
+          >
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-primary/5" />
+            <BookOpen className="w-8 h-8 text-primary mb-8 relative z-10" />
+            <div className="relative z-10">
+              <div className="text-3xl font-bold mb-1 text-foreground group-hover:text-primary transition-colors">50+</div>
+              <div className="text-lg font-medium text-muted-foreground">Premium Courses</div>
+            </div>
+          </Link>
+        </TiltCard>
+
+        <TiltCard className="md:col-span-1">
+          <Link
+            to="/schedule-interview"
+            className="rounded-3xl text-white p-6 md:p-8 flex flex-col justify-between group h-full relative overflow-hidden shadow-lg gradient-bg glow-primary"
+          >
+            <div className="absolute top-6 right-6 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold animate-pulse">
+              Live Now
+            </div>
+            <Bot className="w-8 h-8 text-white mb-8" />
+            <div>
+              <div className="text-2xl font-bold mb-1">AI Interviewer</div>
+              <div className="font-medium leading-tight text-white/80">
+                Practice with FAANG-level AI
               </div>
+            </div>
+          </Link>
+        </TiltCard>
+
+        <TiltCard className="md:col-span-1">
+          <Link
+            to="/dashboard"
+            className="rounded-3xl bg-card border border-border p-6 md:p-8 flex flex-col justify-between group h-full transition-all"
+          >
+            <FileText className="w-8 h-8 text-primary mb-8" />
+            <div>
+              <div className="text-2xl font-bold text-foreground mb-1">Resume Builder</div>
+              <div className="text-muted-foreground font-medium leading-tight">ATS-friendly templates</div>
+            </div>
+          </Link>
+        </TiltCard>
+
+        {/* BOTTOM ROW */}
+        <div className="md:col-span-2 rounded-3xl border border-border p-8 flex items-center justify-between group cursor-pointer hover:bg-primary/5 transition-colors overflow-hidden relative">
+          <div className="absolute -right-10 top-1/2 -translate-y-1/2 opacity-5 group-hover:opacity-10 group-hover:scale-110 transition-all duration-500">
+            <Play className="w-64 h-64" />
+          </div>
+          <div>
+            <h3 className="text-2xl md:text-3xl font-bold italic text-foreground mb-2">See How It Works</h3>
+            <p className="text-muted-foreground">Take a 2-minute tour of our learning environment.</p>
+          </div>
+          <div className="w-14 h-14 rounded-full border-2 border-primary text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors z-10 flex-shrink-0">
+            <Play className="w-6 h-6 ml-1 fill-current" />
+          </div>
+        </div>
+
+        <div className="md:col-span-2 rounded-3xl bg-card border border-border p-6 md:p-8 flex flex-col justify-center">
+          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-4">Trending Paths</h3>
+          <div className="flex flex-col gap-3">
+            {['Advanced JavaScript & TS', 'React Modern Architecture', 'DSA Mastery for Interviews'].map((course, i) => (
+              <Link key={i} to="/courses" className="flex items-center justify-between p-3 rounded-2xl hover:bg-muted transition-colors group">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                    <Code2 className="w-5 h-5" />
+                  </div>
+                  <span className="font-semibold text-foreground group-hover:text-primary transition-colors">{course}</span>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+              </Link>
             ))}
           </div>
         </div>
-      </section>
 
-      <Footer />
+      </div>
+
+      <div className="mt-12">
+        <Footer />
+      </div>
     </div>
   );
 };

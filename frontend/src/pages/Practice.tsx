@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import questionApi, { type Question } from '../Services/questionApi';
+import questionApi, { type Question } from '../services/questionApi';
 import { BookOpen, Code, ChevronRight, Filter, Star, Search, CheckCircle2 } from 'lucide-react';
-import Navbar from '@/components/layout/Navbar';
+
 import Footer from '@/components/layout/Footer';
 import { cn } from '@/lib/utils';
-import { type CodingSchema } from '../Services/questionApi';
+import { type CodingSchema } from '../services/questionApi';
 
 const Practice: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
@@ -99,8 +99,8 @@ const Practice: React.FC = () => {
     );
 
     return (
-        <div className="min-h-screen bg-background">
-            <Navbar />
+        <div className="min-h-screen">
+
             
             {/* Header Section */}
             <section className="pt-32 pb-16 mesh-gradient">
@@ -225,8 +225,8 @@ const Practice: React.FC = () => {
                                                 Solved
                                             </span>
                                         ) : (
-                                            <span className="text-sm font-medium text-blue-400 flex items-center gap-1.5 bg-blue-400/10 px-3 py-1 rounded-lg border border-blue-400/20">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                                            <span className="text-sm font-medium text-primary flex items-center gap-1.5 bg-primary/10 px-3 py-1 rounded-lg border border-primary/20">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
                                                 Available
                                             </span>
                                         )}

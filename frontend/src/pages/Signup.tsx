@@ -1,55 +1,64 @@
 import { useEffect, useState } from "react";
-import { Link, redirect, useNavigate } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Code2, User } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
-import userApi from "@/Services/userApi";
+import { Link, useNavigate } from "react-router-dom";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Code2, User, AlertCircle, Loader2 } from "lucide-react";
+import userApi from "@/services/userApi";
+import { useToast } from "@/hooks/use-toast";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Redirect already-logged-in users — runs only once on mount
+  useEffect(() => {
+    const stored = localStorage.getItem("user");
+    if (stored) navigate("/dashboard");
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    setIsLoading(true);
 
-    const trimmedName = name.trim();
-    const trimmedUsername = username.trim();
-    const trimmedEmail = email.trim();
-    const trimmedPassword = password.trim();
+    try {
+      const trimmedName = name.trim();
+      const trimmedUsername = username.trim();
+      const trimmedEmail = email.trim();
+      const trimmedPassword = password.trim();
 
-    const user = await userApi.create({ 
-      fullname: trimmedName, 
-      email: trimmedEmail, 
-      password: trimmedPassword, 
-      username: trimmedUsername 
-    });
+      // userApi.create() already writes to localStorage
+      const user = await userApi.create({
+        fullname: trimmedName,
+        email: trimmedEmail,
+        password: trimmedPassword,
+        username: trimmedUsername,
+      });
 
-    if (!user) alert("Error while registering");
-    else {
-      localStorage.setItem("user", JSON.stringify(user));
+      if (!user) {
+        setError("Registration failed. Please try again.");
+        toast({ title: "Signup Failed", description: "Could not create account.", variant: "destructive" });
+        return;
+      }
+
+      toast({ title: "Account created!", description: "Welcome to ML Learner!" });
+      navigate("/dashboard");
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "An error occurred. Please try again.";
+      setError(msg);
+      toast({ title: "Signup Failed", description: msg, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
     }
-
-    console.log("Signup attempt:", { name, username, email, password });
-    navigate("/dashboard");
   };
-
-  useEffect(()=>{
-    const user=localStorage.getItem("user")||null
-
-    if (user){
-    navigate("/dashboard");
-
-    }
-
-  })
 
   return (
     <div className="min-h-screen mesh-gradient">
-      <Navbar />
-      
       <div className="pt-32 pb-16">
         <div className="container mx-auto px-4">
           <div className="max-w-md mx-auto">
@@ -66,6 +75,14 @@ const Signup = () => {
                 </p>
               </div>
 
+              {/* Error Banner */}
+              {error && (
+                <div className="flex items-center gap-2 p-3 mb-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Name */}
@@ -80,6 +97,7 @@ const Signup = () => {
                       placeholder="Your full name"
                       className="input-field pl-12"
                       required
+                      disabled={isLoading}
                     />
                   </div>
                 </div>
@@ -96,6 +114,7 @@ const Signup = () => {
                       placeholder="Choose a unique username"
                       className="input-field pl-12"
                       required
+                      disabled={isLoading}
                     />
                   </div>
                 </div>
@@ -112,6 +131,7 @@ const Signup = () => {
                       placeholder="you@example.com"
                       className="input-field pl-12"
                       required
+                      disabled={isLoading}
                     />
                   </div>
                 </div>
@@ -128,6 +148,7 @@ const Signup = () => {
                       placeholder="Create a strong password"
                       className="input-field pl-12 pr-12"
                       required
+                      disabled={isLoading}
                     />
                     <button
                       type="button"
@@ -144,16 +165,29 @@ const Signup = () => {
                   <input type="checkbox" className="w-4 h-4 rounded border-border mt-0.5" required />
                   <span className="text-sm text-muted-foreground">
                     I agree to the{" "}
-                    <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link>
+                    <span className="text-primary">Terms of Service</span>
                     {" "}and{" "}
-                    <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
+                    <span className="text-primary">Privacy Policy</span>
                   </span>
                 </label>
 
                 {/* Submit Button */}
-                <button type="submit" className="btn-primary w-full flex items-center justify-center gap-2">
-                  Create Account
-                  <ArrowRight className="w-5 h-5" />
+                <button
+                  type="submit"
+                  className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-60"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Creating Account...
+                    </>
+                  ) : (
+                    <>
+                      Create Account
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
                 </button>
 
                 {/* Divider */}
@@ -168,7 +202,7 @@ const Signup = () => {
 
                 {/* Social Signup */}
                 <div className="grid grid-cols-2 gap-4">
-                  <button 
+                  <button
                     type="button"
                     className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-border hover:border-primary transition-colors"
                   >
@@ -180,7 +214,7 @@ const Signup = () => {
                     </svg>
                     <span className="font-medium">Google</span>
                   </button>
-                  <button 
+                  <button
                     type="button"
                     className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-border hover:border-primary transition-colors"
                   >
