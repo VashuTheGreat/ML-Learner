@@ -16,9 +16,9 @@ from langchain_core.messages import BaseMessage
 from langchain_community.tools import DuckDuckGoSearchResults
 from langchain_core.prompts import PromptTemplate
 from pydantic import Field
-from Agents.graphs.interview_graph_builder import load_conversation
+from src.Agents.graphs.interview_graph_builder import load_conversation
 from src.Agents.prompts import generateInterviewPerformance_prompts as GenerateInterviewPerformancePrompt
-from Agents.llm.llm_loader import llm
+from src.Agents.llm.llm_loader import llm
 from src.Agents.models.Performance_model import Performance
 from src.Agents.prompts import interview_performance_prompt
 from utils.asyncHandler import asyncHandler

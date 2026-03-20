@@ -2,7 +2,7 @@ import os
 import sys
 import logging
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
-from Agents.llm.llm_loader import llm as summerizer_llm
+from src.Agents.llm.llm_loader import llm as summerizer_llm
 from src.Agents.prompts import resumeSummary_prompts as ResumeSummaryPrompt
 from exception import MyException
 from src.Agents.utils.rag_utils import document_loader

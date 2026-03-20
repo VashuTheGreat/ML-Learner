@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Live Face Detection</h2>
+
+<video id="video" autoplay playsinline></video>
+<canvas id="canvas"></canvas>
+
+<script>
+const ws = new WebSocket("ws://localhost:7836/api/face/findFace");
+
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+ws.onopen = () => console.log("✅ Connected");
+ws.onclose = (e) => {
+    console.log("❌ Disconnected", e.code, e.reason);
+    clearInterval(sendInterval);
+};
+ws.onerror = (e) => console.error("🔥 WebSocket Error", e);
+
+// 🎥 Start webcam
+navigator.mediaDevices.getUserMedia({ video: true })
+.then(stream => {
+    video.srcObject = stream;
+});
+
+// 🔁 Send frames continuously
+const sendInterval = setInterval(() => {
+    if (ws.readyState !== WebSocket.OPEN) return;
+    if (video.videoWidth === 0) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    ctx.drawImage(video, 0, 0);
+
+    canvas.toBlob(blob => {
+        blob.arrayBuffer().then(buffer => {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(buffer); // 🔥 binary send
+            }
+        });
+    }, "image/jpeg", 0.7); // compress for speed
+
+}, 100); // ⚡ 10 FPS
+
+// 📩 Receive result
+ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+
+    if (data.is_error) {
+        console.error("Server Error:", data.error_message);
+        return;
+    }
+
+    if (!data.data || !data.data.relative_bounding_box) return;
+
+    const bbox = data.data.relative_bounding_box;
+
+    const x = bbox.xmin * canvas.width;
+    const y = bbox.ymin * canvas.height;
+    const w = bbox.width * canvas.width;
+    const h = bbox.height * canvas.height;
+
+    // Draw video frame again
+    ctx.drawImage(video, 0, 0);
+
+    // Draw box
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(x, y, w, h);
+};
+</script>
+
+</body>
+</html>

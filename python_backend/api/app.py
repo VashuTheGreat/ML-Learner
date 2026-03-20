@@ -11,7 +11,7 @@ from api.Agents.routes.health_router import router as HealthRouter
 from src.Agents.graphs.interview_graph_builder import close_checkpointer
 from api.CodeRunAndModelTrain.routes.modelTraining_router import router as ModelTrainRouter
 from api.CodeRunAndModelTrain.routes.modelTrainConfig_router import router as ModelTrainConfigRouter
-
+from api.Predictors.routes.faceFind_routes import router as FaceDetetorRouter
 from api.middlewares.form_to_json import FormToJSONMiddleware
 
 @asynccontextmanager
@@ -46,6 +46,8 @@ app.include_router(DeleteThreadRouter, prefix="/api/thread")
 app.include_router(HealthRouter, prefix="/api/health")
 app.include_router(ModelTrainRouter, prefix="/api/modelTraining")
 app.include_router(ModelTrainConfigRouter, prefix="/api/modelTrainingConfig")
+
+app.include_router(FaceDetetorRouter,prefix="/api/face")
 
 @app.get("/")
 async def root():
