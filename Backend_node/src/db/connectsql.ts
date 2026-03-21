@@ -4,12 +4,14 @@ import logger from "../logger/create.logger.js";
 
 async function connectsql() {
     try {
-        const db=await mysql.createConnection({
-     host: 'localhost',
-  user: 'root',
-  password:"Sarthak@20021978$",
-  database:"ml_learner"
-})
+       const db = await mysql.createConnection({
+    host: process.env.SQL_HOST,
+    user: process.env.SQL_USER,
+    port: process.env.SQL_PORT,
+    password: process.env.SQL_PASSWORD,
+    database: process.env.SQL_DATABASE,
+    // ssl: { rejectUnauthorized: true } // agar SSL enforce ho to
+  });
     logger.info("mysql connected");
     // Ensure the questions table exists to prevent ER_NO_SUCH_TABLE errors
     const createTableQuery = `
