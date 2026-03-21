@@ -1,2 +1,77 @@
+# 🔥 Logs
+
 logs/
 *.log
+
+# 🔥 SQLite Database
+
+db.sqlite
+db.sqlite-shm
+db.sqlite-wal
+
+# 🔥 ML Generated Files (plots, outputs)
+
+fig/
+outputs/
+artifacts/
+
+# 🔥 Python cache
+
+**pycache**/
+*.pyc
+*.pyo
+*.pyd
+*.pyc.*
+
+# 🔥 Virtual Environment
+
+venv/
+.env/
+.venv/
+env/
+
+# 🔥 Environment variables
+
+.env
+.env.*
+
+# 🔥 Jupyter Notebook
+
+.ipynb_checkpoints/
+
+# 🔥 VS Code
+
+.vscode/
+
+# 🔥 PyCharm
+
+.idea/
+
+# 🔥 OS files
+
+.DS_Store
+Thumbs.db
+
+# 🔥 Build / Distribution
+
+build/
+dist/
+*.egg-info/
+
+# 🔥 Testing
+
+.pytest_cache/
+.coverage
+
+# 🔥 Model files (optional - ML projects)
+
+*.h5
+*.pt
+*.pth
+*.joblib
+*.pkl
+
+# 🔥 Temporary files
+
+*.tmp
+*.temp
