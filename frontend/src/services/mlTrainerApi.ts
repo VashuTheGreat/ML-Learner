@@ -74,14 +74,15 @@ export interface TrainResult {
 class MLTrainerApi {
     /** Fetch all available models and their configurable parameters */
     async getAvailableAttributes(): Promise<AvailableAttributes> {
-        const response = await pythonApiInstance.get('/api/train/get_available_attributes');
+        const response = await pythonApiInstance.get('/api/modelTrainingConfig/get_available_attributes');
         return response.data;
     }
 
     /** Train a regression or classification model with custom config */
     async trainModel(payload: TrainPayload): Promise<TrainResult> {
-        const response = await pythonApiInstance.post('/api/train/train', payload);
-        return response.data;
+        const response = await pythonApiInstance.post('/api/modelTraining/train', payload);
+        console.log(response.data)
+        return response.data.data;
     }
 }
 

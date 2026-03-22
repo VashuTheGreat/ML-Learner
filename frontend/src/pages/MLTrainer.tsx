@@ -450,18 +450,50 @@ export default function MLTrainer() {
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-6 space-y-4">
-                    {result.metrics && Object.entries(result.metrics).map(([k, v]) => (
-                      <div key={k} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
-                        <span className="text-xs font-bold text-muted-foreground uppercase">{k}</span>
-                        <span className="text-sm font-black text-foreground tabular-nums">
-                          {typeof v === "number" ? v.toFixed(6) : String(v)}
-                        </span>
+                  <CardContent className="pt-6 space-y-6">
+                    {/* Metrics */}
+                    <div className="space-y-3">
+                      {(taskType === "regression"
+                        ? ["mae", "mse", "rmse", "r2"]
+                        : ["accuracy", "precision", "recall", "f1"]
+                      ).map((k) => {
+                        const v = result[k];
+                        if (v === undefined || v === null) return null;
+                        return (
+                          <div key={k} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0 hover:bg-primary/5 transition-colors px-2 rounded-lg">
+                            <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">{k}</span>
+                            <span className="text-sm font-black text-foreground tabular-nums">
+                              {typeof v === "number" ? v.toFixed(6) : String(v)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Plots */}
+                    {result.plots && result.plots.length > 0 && (
+                      <div className="pt-6 space-y-4">
+                        <div className="flex items-center gap-2">
+                          <BarChart3 className="h-4 w-4 text-primary" />
+                          <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">Visualizations</p>
+                        </div>
+                        <div className="grid grid-cols-1 gap-4">
+                          {result.plots.map((plot, idx) => (
+                            <div key={idx} className="rounded-2xl border border-border/50 overflow-hidden bg-muted/30 group">
+                              <img
+                                src={`data:image/png;base64,${plot}`}
+                                alt={`Plot ${idx + 1}`}
+                                className="w-full h-auto transition-transform duration-500 group-hover:scale-[1.02]"
+                              />
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    ))}
-                    {/* Render any extra top-level keys */}
+                    )}
+
+                    {/* Other Keys (excluding metrics and plots) */}
                     {Object.entries(result)
-                      .filter(([k]) => !["model_name", "type", "metrics"].includes(k))
+                      .filter(([k]) => !["model_name", "type", "metrics", "plots", "mae", "mse", "rmse", "r2", "accuracy", "precision", "recall", "f1"].includes(k))
                       .map(([k, v]) => (
                         <div key={k} className="py-3 border-b border-border/50 last:border-0 group">
                           <p className="text-[10px] font-black text-muted-foreground uppercase mb-2 tracking-widest group-hover:text-primary transition-colors">{k}</p>

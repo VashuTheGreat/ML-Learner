@@ -23,6 +23,11 @@ export const AIInterview = () => {
   const [recognition, setRecognition] = useState<any>(null);
   const [isListening, setIsListening] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisStatus, setAnalysisStatus] = useState("");
+  
+  // Ref for handleEndInterview to avoid stale closures in timer
+  const handleEndInterviewRef = React.useRef<() => Promise<void>>();
 
   // Initialize Speech Recognition
   useEffect(() => {
@@ -122,15 +127,17 @@ export const AIInterview = () => {
   }, []);
 
   useEffect(() => {
-    if (!threadId || !slug) return;
+    if (!threadId || !slug || !hasStarted) return;
 
     const startInterview = async () => {
       try {
-        // Send initial greeting
         const currentTopic = topic || slug;
         const response = await pythonApi.chatInterviewer(threadId, timeRemaining, currentTopic, "Hello, I am ready for the interview.");
         
-        const aiMsg = response.ai_response || "Hello! I am your AI interviewer. Let's begin.";
+        // Handle both string and object responses
+        const aiMsg = (typeof response === 'string' ? response : (response.ai_response)) 
+          || "Hello! I am your AI interviewer. Let's begin.";
+          
         setMessages([{ role: 'ai', content: aiMsg }]);
         speak(aiMsg);
       } catch (error) {
@@ -138,7 +145,7 @@ export const AIInterview = () => {
       }
     };
 
-    if (hasStarted && (topic || !slug)) { // Wait for topic and start trigger
+    if (topic || !slug) {
         startInterview();
     }
   }, [threadId, slug, topic, speak, hasStarted]);
@@ -149,7 +156,9 @@ export const AIInterview = () => {
       setTimeRemaining(prev => {
         if (prev <= 0) {
           clearInterval(timer);
-          handleEndInterview();
+          if (handleEndInterviewRef.current) {
+            handleEndInterviewRef.current();
+          }
           return 0;
         }
         return prev - 1;
@@ -166,7 +175,7 @@ export const AIInterview = () => {
   };
 
   const handleSendAnswer = async () => {
-    if (!userAnswer.trim() || isAISpeaking) return;
+    if (!userAnswer.trim() || isAISpeaking || isAnalyzing) return;
 
     const currentAnswer = userAnswer;
     setMessages(prev => [...prev, { role: 'user', content: currentAnswer }]);
@@ -175,38 +184,130 @@ export const AIInterview = () => {
     try {
       setIsAISpeaking(true);
       const response = await pythonApi.chatInterviewer(threadId, timeRemaining, topic || slug || "General", currentAnswer);
-      const aiMsg = response.ai_response;
       
-      setMessages(prev => [...prev, { role: 'ai', content: aiMsg }]);
-      speak(aiMsg);
+      // Handle both string and object responses
+      const aiMsg = typeof response === 'string' ? response : response.ai_response;
+      
+      if (aiMsg) {
+        setMessages(prev => [...prev, { role: 'ai', content: aiMsg }]);
+        speak(aiMsg);
+      } else {
+        console.warn("Empty AI response received");
+        setIsAISpeaking(false);
+      }
     } catch (error) {
       console.error("Error sending answer:", error);
       setIsAISpeaking(false);
     }
   };
 
-  const handleEndInterview = async () => {
-    console.log("Ending interview...");
+  const normalizeSkills = (skills: any) => {
+    const defaultSkill = { score: 0, feedback: "Not evaluated" };
+    if (!skills || typeof skills !== 'object') {
+       return {
+         technical: defaultSkill, dsa: defaultSkill, problemSolving: defaultSkill,
+         communication: defaultSkill, systemDesign: defaultSkill, projects: defaultSkill, behaviour: defaultSkill
+       };
+    }
+
+    const skillKeys = ['technical', 'dsa', 'problemSolving', 'communication', 'systemDesign', 'projects', 'behaviour'];
+    const normalized: any = {};
     
-    const finalMsg = "Thanks for the interview! Redirecting to your performance results...";
+    skillKeys.forEach(key => {
+      const val = skills[key];
+      if (val && typeof val === 'object' && val.score !== undefined) {
+        normalized[key] = {
+          score: Math.min(10, Math.max(0, Number(val.score) || 0)),
+          feedback: String(val.feedback || "Good performance")
+        };
+      } else if (typeof val === 'string') {
+        normalized[key] = {
+          score: 7, 
+          feedback: val
+        };
+      } else {
+        normalized[key] = defaultSkill;
+      }
+    });
+    return normalized;
+  };
+
+  const handleEndInterview = async () => {
+    if (isAnalyzing) return;
+    
+    console.log("Ending interview...");
+    setIsAnalyzing(true);
+    setAnalysisStatus("Wrapping up conversation...");
+    
+    const finalMsg = "Thanks for the interview! Please wait while I analyze your performance...";
     setMessages(prev => [...prev, { role: 'ai', content: finalMsg }]);
     speak(finalMsg);
 
-    // Wait for the final message to finish speaking before navigating
-    // We can use a small timeout or check isAISpeaking in an interval
-    const checkSpeech = setInterval(() => {
-      if (!window.speechSynthesis.speaking) {
-        clearInterval(checkSpeech);
-        console.log("Speech finished, navigating to thanks page with:", { threadId, slug });
-        navigate("/thanks-participating", { 
-          state: { 
-            threadId, 
-            slug 
-          } 
-        });
+    try {
+      // 1. Get Performance Evaluation from Python backend
+      setAnalysisStatus("Evaluating performance...");
+      const response = await pythonApi.getPerformance(threadId);
+      console.log("Python performance response:", response);
+      
+      let performanceRes = response.performance;
+      
+      // Secondary fallback if it's the raw result or wrapped differently
+      if (!performanceRes && response.data) performanceRes = response.data;
+      if (!performanceRes) performanceRes = response;
+
+      if (performanceRes) {
+        // 2. Normalize and Save to Node.js backend
+        setAnalysisStatus("Saving results to your profile...");
+        const normalizedData = {
+          interview_id: slug || "unknown",
+          overallScore: Math.min(10, Math.max(0, Number(performanceRes.overallScore ?? performanceRes.score) || 0)),
+          verdict: (performanceRes.verdict || "maybe").toLowerCase(),
+          summaryFeedback: performanceRes.summaryFeedback || "Interview completed successfully.",
+          skills: normalizeSkills(performanceRes.skills),
+          strengths: Array.isArray(performanceRes.strengths) ? performanceRes.strengths : [],
+          weaknesses: Array.isArray(performanceRes.weaknesses) ? performanceRes.weaknesses : [],
+          practiceRecommendations: Array.isArray(performanceRes.practiceRecommendations) ? performanceRes.practiceRecommendations : [],
+          studyRecommendations: Array.isArray(performanceRes.studyRecommendations) ? performanceRes.studyRecommendations : [],
+          lowPriorityOrAvoid: Array.isArray(performanceRes.lowPriorityOrAvoid) ? performanceRes.lowPriorityOrAvoid : [],
+          confidenceLevel: Math.min(10, Math.max(0, Number(performanceRes.confidenceLevel) || 5))
+        };
+
+        await performanceApi.createPerformance(normalizedData);
+        
+        // 3. Update status in Node.js
+        await interviewApi.updateInterviewStatus({ id: slug!, status: 'done' });
       }
-    }, 500);
+
+      // 4. Cleanup Python thread
+      setAnalysisStatus("Cleaning up session...");
+      await pythonApi.deleteThread(threadId);
+      
+      // 5. Clear Local Storage
+      localStorage.removeItem('interview_thread_id');
+      localStorage.removeItem('interview_slug');
+      sessionStorage.removeItem('interview_thread_id');
+      sessionStorage.removeItem('interview_slug');
+
+      setAnalysisStatus("Success! Redirecting...");
+      
+      // Final delay to ensure user sees the success state
+      setTimeout(() => {
+        navigate(`/performance/${slug}`);
+      }, 1000);
+
+    } catch (error) {
+      console.error("Error during interview wrap-up:", error);
+      setAnalysisStatus("Failed to analyze. Redirecting to backup page...");
+      setTimeout(() => {
+        navigate("/thanks-participating", { state: { threadId, slug } });
+      }, 2000);
+    }
   };
+
+  // Update ref whenever handleEndInterview changes
+  useEffect(() => {
+    handleEndInterviewRef.current = handleEndInterview;
+  }, [handleEndInterview]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -249,7 +350,24 @@ export const AIInterview = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
-        {!hasStarted && (
+        {isAnalyzing && (
+          <div className="absolute inset-0 z-[60] flex items-center justify-center bg-background/90 backdrop-blur-xl">
+            <div className="text-center space-y-8 max-w-md p-10 bg-card/50 border border-primary/20 rounded-[2rem] shadow-2xl animate-in fade-in zoom-in-95 duration-500">
+               <div className="relative w-24 h-24 mx-auto">
+                 <div className="absolute inset-0 rounded-full border-4 border-primary/10 border-t-primary animate-spin"></div>
+                 <div className="absolute inset-0 flex items-center justify-center">
+                    <Trophy className="w-10 h-10 text-primary animate-bounce" />
+                 </div>
+               </div>
+               <div className="space-y-2">
+                 <h2 className="text-2xl font-bold gradient-text">Analysis in Progress</h2>
+                 <p className="text-muted-foreground font-medium">{analysisStatus}</p>
+               </div>
+            </div>
+          </div>
+        )}
+
+        {!hasStarted && !isAnalyzing && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md">
             <div className="text-center space-y-6 max-w-md p-8 bg-card border border-border rounded-3xl shadow-2xl animate-in zoom-in-95 duration-300">
               <div className="w-20 h-20 rounded-2xl gradient-bg flex items-center justify-center mx-auto mb-4">

@@ -34,7 +34,7 @@ class DummyInterview:
             )
             with open(self.dummy_interview_config.INTERVIEW_JSON_FILE_PATH, "r") as f:
                 res = json.load(f)
-            return res
+            return DummyInterviewArtifact(interviews=res)
 
         logging.info(
             "Cache missing or update requested. Proceeding to generation."

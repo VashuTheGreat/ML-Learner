@@ -73,3 +73,11 @@ dump.rdb
 *.log
 
 
+# Database files
+python_backend/db.sqlite
+python_backend/db.sqlite-shm
+python_backend/db.sqlite-wal
+
+# Entire fig folder
+python_backend/fig/
+

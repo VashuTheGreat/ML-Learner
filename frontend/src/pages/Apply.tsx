@@ -28,7 +28,7 @@ export const Apply = () => {
         setLoading(true);
         try {
             const response = await pythonApi.generateInterviewSchemas(3, undefined, undefined, updated);
-            setInterviews(response.interviews || []);
+            setInterviews(Array.isArray(response) ? response : (response.interviews || []));
             console.log("Fetched interviews:", response);
         } catch (error) {
             console.error("Error fetching interviews:", error);
