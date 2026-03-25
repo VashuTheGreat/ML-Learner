@@ -6,10 +6,12 @@ from utils.asyncHandler import asyncHandler
 from langchain_core.messages import AIMessage,SystemMessage
 from src.Agents.prompts import interview_prompts2
 from src.Agents.llm.llm_loader import llm
+from langsmith import traceable
 
 # ===================== CHAT NODE =====================
 
 @asyncHandler
+@traceable(name="Chat_node",tags=['interview:chat'])
 async def chat(state: ChatState):
     llm_chat = interview_prompts2 | llm
 

@@ -6,9 +6,10 @@ from src.Agents.llm.llm_loader import llm
 from src.Agents.prompts import resumeGeneration_prompts as ResumeGenerationPrompt
 
 from utils.asyncHandler import asyncHandler
-
+from langsmith import traceable
 
 @asyncHandler
+@traceable(name="resume_builder",tags=['summary_generator'])
 async def resume_maker(state: ResumeState):
     logging.info("Entering resume_maker node")
     logging.info(f"userDetails for LLM: {state.userDetails}")

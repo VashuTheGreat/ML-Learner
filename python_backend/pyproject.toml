@@ -24,4 +24,5 @@ dependencies = [
     "mediapipe==0.10.14",
     "opencv-python>=4.13.0.92",
     "websockets>=16.0",
+    "langsmith>=0.6.6",
 ]

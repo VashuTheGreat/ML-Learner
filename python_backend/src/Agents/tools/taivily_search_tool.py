@@ -5,7 +5,7 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from exception import MyException
 from utils.asyncHandler import asyncHandler
 from langchain.tools import tool
-
+# from langsmith import traceable
 
 class Taivily_search:
     def __init__(self):
