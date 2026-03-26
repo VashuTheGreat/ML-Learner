@@ -83,7 +83,7 @@ const Performance = () => {
 
       <main className="container mx-auto px-4 pt-8 pb-12">
         <button 
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/dashboard")}
           className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-all mb-8 group"
         >
           <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center group-hover:bg-primary/10 transition-colors">

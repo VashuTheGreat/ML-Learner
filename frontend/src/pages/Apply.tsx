@@ -23,6 +23,7 @@ export const Apply = () => {
     const [isUpdated, setIsUpdated] = useState(false);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [adminPassword, setAdminPassword] = useState("");
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     const fetchRunningApplyingInterviews = async (updated: boolean = false) => {
         setLoading(true);
@@ -51,9 +52,37 @@ export const Apply = () => {
     };
 
     useEffect(() => {
-        fetchRunningApplyingInterviews(isUpdated);
-        fetchUserAppliedInterviews();
-    }, [isUpdated]);
+        let isMounted = true;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
+        const load = async () => {
+            setLoading(true);
+            try {
+                const response = await pythonApi.generateInterviewSchemas(3, undefined, undefined, isUpdated);
+                if (isMounted) setInterviews(Array.isArray(response) ? response : (response.interviews || []));
+            } catch (error: any) {
+                console.error("Error fetching interviews:", error);
+                if (isMounted) setInterviews([]);
+            }
+
+            if (!isUpdated) {
+                try {
+                    const applied = await interviewApi.getUserAppliedInterviews();
+                    if (isMounted) setUserAplied(applied || []);
+                } catch {
+                    if (isMounted) setUserAplied([]);
+                }
+            } else {
+                if (isMounted) setUserAplied([]); // In updated mode, clear so all new interviews show enabled
+            }
+            if (isMounted) setLoading(false);
+            clearTimeout(timeoutId);
+        };
+
+        load();
+        return () => { isMounted = false; clearTimeout(timeoutId); };
+    }, [isUpdated, refreshTrigger]);
 
 
 
@@ -68,6 +97,7 @@ export const Apply = () => {
     const verifyAdminPassword = () => {
         if (adminPassword === "admin") {
             setIsUpdated(true);
+            setRefreshTrigger(prev => prev + 1);
             setIsPasswordModalOpen(false);
             setAdminPassword("");
         } else {
@@ -105,6 +135,11 @@ export const Apply = () => {
             year: 'numeric'
         });
     };
+
+    const isApplied = (job: any) =>
+        !isUpdated && userAplied?.some((applied: any) =>
+            applied.companyName === job.companyName && applied.job_Role === job.job_Role
+        );
 
     return (
         <div className="min-h-screen">
@@ -190,18 +225,18 @@ export const Apply = () => {
                                     <div className="flex flex-col gap-2">
                                         <button 
                                             onClick={() => handleApply(job, true)}
-                                            disabled={userAplied?.some((applied: any) => applied.companyName === job.companyName && applied.job_Role === job.job_Role)}
-                                            className="w-full py-2.5 flex items-center justify-center gap-2 rounded-xl bg-primary text-white hover:bg-primary/90 transition-all duration-300 font-bold text-sm"
+                                            disabled={!!isApplied(job)}
+                                            className="w-full py-2.5 flex items-center justify-center gap-2 rounded-xl bg-primary text-white hover:bg-primary/90 transition-all duration-300 font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             <Bot className="w-4 h-4" />
-                                            {userAplied?.some((applied: any) => applied.companyName === job.companyName && applied.job_Role === job.job_Role) ? "Applied" : "Apply & Take AI Interview"}
+                                            {isApplied(job) ? "Already Applied" : "Apply & Take AI Interview"}
                                         </button>
                                         <button 
                                             onClick={() => handleApply(job, false)}
-                                            disabled={userAplied?.some((applied: any) => applied.companyName === job.companyName && applied.job_Role === job.job_Role)}
-                                            className="w-full py-2 rounded-xl bg-secondary/10 hover:bg-secondary/20 text-muted-foreground transition-all duration-300 font-bold text-xs"
+                                            disabled={!!isApplied(job)}
+                                            className="w-full py-2 rounded-xl bg-secondary/10 hover:bg-secondary/20 text-muted-foreground transition-all duration-300 font-bold text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            {userAplied?.some((applied: any) => applied.companyName === job.companyName && applied.job_Role === job.job_Role) ? "Applied" : "Apply Normally"}
+                                            {isApplied(job) ? "Already Applied" : "Apply Normally"}
                                         </button>
                                     </div>
                                 </div>
@@ -211,6 +246,28 @@ export const Apply = () => {
                                 <p className="text-muted-foreground">No opportunities found at the moment.</p>
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* Admin Password Modal */}
+                {isPasswordModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+                        <div className="bg-card border border-border p-6 rounded-2xl shadow-xl max-w-sm w-full mx-4 animate-in zoom-in-95 duration-200">
+                            <h3 className="text-xl font-bold mb-4">Admin Access</h3>
+                            <input 
+                                type="password" 
+                                value={adminPassword}
+                                onChange={(e) => setAdminPassword(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && verifyAdminPassword()}
+                                placeholder="Enter Admin Password"
+                                className="w-full px-4 py-2 border border-border rounded-xl mb-4 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                autoFocus
+                            />
+                            <div className="flex gap-3 justify-end">
+                                <button onClick={() => setIsPasswordModalOpen(false)} className="px-4 py-2 rounded-xl text-sm font-bold text-muted-foreground hover:bg-secondary/20 transition-all">Cancel</button>
+                                <button onClick={verifyAdminPassword} className="px-4 py-2 rounded-xl text-sm font-bold bg-primary text-white hover:bg-primary/90 transition-all">Verify</button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </main>
