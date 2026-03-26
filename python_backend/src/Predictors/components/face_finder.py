@@ -25,17 +25,22 @@ class FaceFinder:
                 return {
                     "is_error": True,
                     "error_message": "Face not found",
+                    "face_count": 0,
                     "data": None
                 }
 
             detections = results.detections
-
             detections = sorted(detections, key=lambda d: d.score[0], reverse=True)
 
-            if len(detections) > 1 and detections[1].score[0] > 0.6:
+            # Count high-confidence detections
+            high_conf = [d for d in detections if d.score[0] > 0.6]
+            face_count = len(high_conf) if len(high_conf) > 0 else 1
+
+            if face_count > 1:
                 return {
                     "is_error": True,
-                    "error_message": "Multiple faces detected",
+                    "error_message": f"{face_count} faces detected",
+                    "face_count": face_count,
                     "data": None
                 }
 
@@ -46,6 +51,7 @@ class FaceFinder:
             return {
                 "is_error": False,
                 "error_message": None,
+                "face_count": 1,
                 "data": {
                     "score": float(detection.score[0]),
                     "relative_bounding_box": {

@@ -19,7 +19,8 @@ import {
   FlaskConical,
   Trophy,
   Code2,
-  Bot
+  Bot,
+  RefreshCw
 } from "lucide-react";
 
 import userApi from "@/services/userApi";
@@ -56,9 +57,11 @@ export const DashBoard = () => {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isExtractingResume, setIsExtractingResume] = useState(false);
   const [appliedInterviews, setAppliedInterviews] = useState<any[]>([]);
+  const [isRefreshingInterviews, setIsRefreshingInterviews] = useState(false);
   const [codingSchema, setCodingSchema] = useState<CodingSchema | null>(null);
 
-  const fetchInterviews = async () => {
+  const fetchInterviews = async (showSpinner = false) => {
+    if (showSpinner) setIsRefreshingInterviews(true);
     try {
       const interviews = await interviewApi.getUserAppliedInterviews();
       if (!interviews) return;
@@ -73,7 +76,7 @@ export const DashBoard = () => {
         if (isToday && interview.status === 'pending') {
           await interviewApi.updateInterviewStatus({ id: interview._id, status: 'live' });
           return { ...interview, status: 'live' };
-        } else if (isPassed && interview.status === 'live') {
+        } else if (isPassed && (interview.status === 'live' || interview.status === 'pending')) {
           await interviewApi.updateInterviewStatus({ id: interview._id, status: 'done' });
           return { ...interview, status: 'done' };
         }
@@ -83,6 +86,8 @@ export const DashBoard = () => {
       setAppliedInterviews(updatedInterviews);
     } catch (error) {
       console.error("Failed to fetch interviews", error);
+    } finally {
+      if (showSpinner) setIsRefreshingInterviews(false);
     }
   };
 
@@ -218,10 +223,15 @@ const handleUpdateUser = () => {
       // 2. { text: "..." }
       // 3. Just the text string
       let extractedText = "";
+      // Handle different possible JSON structures returned by the LLM / Backend
       if (response?.data?.text) {
         extractedText = response.data.text;
       } else if (response?.text) {
         extractedText = response.text;
+      } else if (response?.summary) {
+        extractedText = response.summary;
+      } else if (response?.data?.summary) {
+        extractedText = response.data.summary;
       } else if (typeof response === 'string') {
         extractedText = response;
       } else if (response?.data && typeof response.data === 'string') {
@@ -571,10 +581,21 @@ const handleUpdateUser = () => {
           
           {/* Interview Carousel (Horizontal Scrolling Row) */}
           <div className="space-y-4">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-primary" />
-              Upcoming Interviews
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-primary" />
+                Upcoming Interviews
+              </h2>
+              <button
+                onClick={() => fetchInterviews(true)}
+                disabled={isRefreshingInterviews}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary/40 hover:bg-secondary/70 border border-border text-sm font-semibold text-muted-foreground hover:text-foreground transition-all disabled:opacity-50"
+                title="Refresh interviews"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshingInterviews ? 'animate-spin' : ''}`} />
+                {isRefreshingInterviews ? 'Refreshing...' : 'Refresh'}
+              </button>
+            </div>
             
             {appliedInterviews.length > 0 ? (
               <div className="flex overflow-x-auto gap-5 pb-4 snap-x scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
@@ -601,6 +622,7 @@ const handleUpdateUser = () => {
                             ? 'bg-white/20 text-white'
                             : 'bg-muted/80 text-foreground'
                         }`}>
+                          {interview.status === 'live' ? '• LIVE' : interview.status === 'done' ? 'Done' : 'Scheduled'}
                         </span>
                       </div>
                       {/* Cancel Button */}

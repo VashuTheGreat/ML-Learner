@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import questionApi, { type Question } from '../services/questionApi';
+import questionApi from '../services/questionApi';
 import { BookOpen, Code, ChevronRight, Filter, Star, Search, CheckCircle2 } from 'lucide-react';
 
 import Footer from '@/components/layout/Footer';
 import { cn } from '@/lib/utils';
-import { type CodingSchema } from '../services/questionApi';
+import { type Question, type CodingSchema } from '@/types';
 
 const Practice: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
@@ -136,47 +136,51 @@ const Practice: React.FC = () => {
                 {/* Filters Section */}
                 <div className="space-y-8 mb-12">
                     {/* Category Filter */}
-                    <div className="flex flex-wrap items-center gap-3">
-                        <div className="flex items-center gap-2 text-muted-foreground mr-2">
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-2 text-muted-foreground px-1">
                             <Filter className="w-4 h-4" />
                             <span className="text-sm font-medium">Categories:</span>
                         </div>
-                        {categories.map((category) => (
-                            <button
-                                key={category}
-                                onClick={() => setActiveCategory(category)}
-                                className={cn(
-                                    "px-4 py-1.5 rounded-xl text-sm font-medium transition-all border",
-                                    activeCategory === category 
-                                        ? "gradient-bg text-white border-transparent shadow-lg shadow-primary/20" 
-                                        : "bg-secondary/5 text-muted-foreground border-border/50 hover:border-primary/30 hover:text-primary"
-                                )}
-                            >
-                                {category}
-                            </button>
-                        ))}
+                        <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
+                            {categories.map((category) => (
+                                <button
+                                    key={category}
+                                    onClick={() => setActiveCategory(category)}
+                                    className={cn(
+                                        "px-4 py-1.5 rounded-xl text-sm font-medium transition-all border whitespace-nowrap shrink-0",
+                                        activeCategory === category 
+                                            ? "gradient-bg text-white border-transparent shadow-lg shadow-primary/20" 
+                                            : "bg-secondary/5 text-muted-foreground border-border/50 hover:border-primary/30 hover:text-primary"
+                                    )}
+                                >
+                                    {category}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Difficulty Filter */}
-                    <div className="flex flex-wrap items-center gap-3">
-                        <div className="flex items-center gap-2 text-muted-foreground mr-2">
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-2 text-muted-foreground px-1">
                             <Star className="w-4 h-4" />
                             <span className="text-sm font-medium">Difficulty:</span>
                         </div>
-                        {["All", "Easy", "Medium", "Hard"].map((difficulty) => (
-                            <button
-                                key={difficulty}
-                                onClick={() => setActiveDifficulty(difficulty)}
-                                className={cn(
-                                    "px-4 py-1.5 rounded-xl text-sm font-medium transition-all border",
-                                    activeDifficulty === difficulty 
-                                        ? "bg-primary text-white border-transparent shadow-lg shadow-primary/20" 
-                                        : "bg-secondary/5 text-muted-foreground border-border/50 hover:border-primary/30 hover:text-primary"
-                                )}
-                            >
-                                {difficulty}
-                            </button>
-                        ))}
+                        <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
+                            {["All", "Easy", "Medium", "Hard"].map((difficulty) => (
+                                <button
+                                    key={difficulty}
+                                    onClick={() => setActiveDifficulty(difficulty)}
+                                    className={cn(
+                                        "px-4 py-1.5 rounded-xl text-sm font-medium transition-all border whitespace-nowrap shrink-0",
+                                        activeDifficulty === difficulty 
+                                            ? "bg-primary text-white border-transparent shadow-lg shadow-primary/20" 
+                                            : "bg-secondary/5 text-muted-foreground border-border/50 hover:border-primary/30 hover:text-primary"
+                                    )}
+                                >
+                                    {difficulty}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
@@ -192,53 +196,53 @@ const Practice: React.FC = () => {
                             <div 
                                 key={q.id}
                                 onClick={() => navigate(`/solve/${q.id}`)}
-                                className="group glass-card p-6 rounded-2xl border border-border/50 hover:border-primary/50 transition-all duration-300 cursor-pointer flex items-center justify-between card-hover"
+                                className="group glass-card p-4 sm:p-6 rounded-2xl border border-border/50 hover:border-primary/50 transition-all duration-300 cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4 card-hover overflow-hidden"
                             >
-                                <div className="flex items-center gap-6">
-                                    <div className="h-14 w-14 rounded-2xl gradient-bg flex items-center justify-center text-white shadow-lg shadow-primary/10 group-hover:scale-110 transition-transform duration-500">
-                                        <Code size={28} />
+                                <div className="flex items-center gap-4 sm:gap-6 min-w-0">
+                                    <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl gradient-bg flex items-center justify-center text-white shadow-lg shadow-primary/10 group-hover:scale-110 transition-transform duration-500 shrink-0">
+                                        <Code size={24} className="sm:w-7 sm:h-7" />
                                     </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+                                    <div className="min-w-0 flex-1">
+                                        <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2 group-hover:text-primary transition-colors truncate">
                                             {q.title}
                                         </h3>
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                                             <span className={cn(
-                                                "px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border",
+                                                "px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider border whitespace-nowrap",
                                                 getDifficultyColor(q.difficulty)
                                             )}>
                                                 {q.difficulty}
                                             </span>
-                                            <span className="flex items-center gap-1.5 text-sm text-muted-foreground bg-secondary/10 px-3 py-1 rounded-lg border border-border/50">
-                                                <BookOpen size={14} className="text-primary/60" />
+                                            <span className="flex items-center gap-1.5 text-[10px] sm:text-sm text-muted-foreground bg-secondary/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg border border-border/50 whitespace-nowrap">
+                                                <BookOpen size={12} className="text-primary/60" />
                                                 {q.category}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-6">
-                                    <div className="hidden sm:flex flex-col items-end mr-4">
-                                        <span className="text-xs text-muted-foreground uppercase tracking-widest font-bold mb-1">Status</span>
+                                <div className="flex items-center justify-between md:justify-end gap-3 sm:gap-6 pt-3 md:pt-0 border-t md:border-t-0 border-border/30">
+                                    <div className="flex flex-col items-start md:items-end md:mr-4">
+                                        <span className="text-[9px] sm:text-xs text-muted-foreground uppercase tracking-widest font-bold mb-0.5 sm:mb-1">Status</span>
                                         {solvedIds.includes(String(q.id)) ? (
-                                            <span className="text-sm font-bold text-green-500 flex items-center gap-1.5 bg-green-500/10 px-3 py-1 rounded-lg border border-green-500/20">
-                                                <CheckCircle2 size={14} />
+                                            <span className="text-[10px] sm:text-sm font-bold text-green-500 flex items-center gap-1.5 bg-green-500/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg border border-green-500/20 whitespace-nowrap">
+                                                <CheckCircle2 size={12} className="sm:w-3.5 sm:h-3.5" />
                                                 Solved
                                             </span>
                                         ) : (
-                                            <span className="text-sm font-medium text-primary flex items-center gap-1.5 bg-primary/10 px-3 py-1 rounded-lg border border-primary/20">
+                                            <span className="text-[10px] sm:text-sm font-medium text-primary flex items-center gap-1.5 bg-primary/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg border border-primary/20 whitespace-nowrap">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
                                                 Available
                                             </span>
                                         )}
                                     </div>
                                     <button className={cn(
-                                        "px-8 py-2.5 rounded-xl flex items-center gap-2 group/btn font-bold transition-all duration-300",
+                                        "px-5 sm:px-8 py-2 sm:py-2.5 rounded-xl flex items-center gap-2 group/btn font-bold text-sm sm:text-base transition-all duration-300 whitespace-nowrap",
                                         solvedIds.includes(String(q.id))
                                             ? "bg-secondary/10 text-muted-foreground hover:bg-secondary/20 border border-border/50"
                                             : "btn-primary shadow-lg shadow-primary/20"
                                     )}>
                                         {solvedIds.includes(String(q.id)) ? 'Review' : 'Solve'}
-                                        <ChevronRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
+                                        <ChevronRight size={16} className="sm:w-[18px] sm:h-[18px] group-hover/btn:translate-x-1 transition-transform" />
                                     </button>
                                 </div>
                             </div>
