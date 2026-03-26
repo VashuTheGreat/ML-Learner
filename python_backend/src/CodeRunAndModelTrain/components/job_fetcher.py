@@ -76,7 +76,7 @@ class JobFetcher:
         os.makedirs(dirname, exist_ok=True)
 
         logger.info(f"Found {len(jobs)} potential jobs. Scraping top 20.")
-
+        self.job_fetcher_config.saved_jobs_file_path=os.path.join(dirname, jobtile+".csv")
         with open(self.job_fetcher_config.saved_jobs_file_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(["Title", "Company", "Job Link", "Apply Link", "Description", "img_link"])
@@ -90,36 +90,73 @@ class JobFetcher:
                     job.click()
                     time.sleep(4)
 
+                    # ✅ JOB LINK (From browser URL after click)
                     job_link = self.driver.current_url.split('?')[0]
 
+                    # ✅ TITLE (Specific to the job detail pane)
                     try:
-                        title = self.driver.find_element(By.CSS_SELECTOR, "h2.t-24").text.strip()
+                        title_elem = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".job-details-jobs-unified-top-card__job-title, .jobs-unified-top-card__job-title")))
+                        title = title_elem.text.strip()
                     except:
-                        title = "N/A"
+                        try:
+                            title = self.driver.find_element(By.CSS_SELECTOR, "h2.t-24").text.strip()
+                        except:
+                            title = "N/A"
 
+                    # ✅ COMPANY
                     try:
-                        company = self.driver.find_element(
-                            By.CSS_SELECTOR,
-                            ".jobs-unified-top-card__company-name"
-                        ).text.strip()
+                        company_elem = self.driver.find_element(By.CSS_SELECTOR, ".job-details-jobs-unified-top-card__company-name, .jobs-unified-top-card__company-name, .job-details-jobs-unified-top-card__primary-description-container a")
+                        company = company_elem.text.strip()
                     except:
                         company = "N/A"
 
+                    # ✅ IMAGE LINK
                     try:
-                        img_elem = job.find_element(By.CSS_SELECTOR, "img")
+                        img_elem = job.find_element(By.CSS_SELECTOR, "img.ivm-view-attr__img--centered, .ivm-view-attr__img-wrapper img, .job-card-container__company-logo img")
                         img_link = img_elem.get_attribute("src")
                     except:
-                        img_link = "N/A"
+                        try:
+                            img_elem = self.driver.find_element(By.CSS_SELECTOR, ".job-details-jobs-unified-top-card__company-logo img, .jobs-unified-top-card__company-logo img")
+                            img_link = img_elem.get_attribute("src")
+                        except:
+                            img_link = "N/A"
 
+                    # ✅ DESCRIPTION
                     try:
-                        description = self.driver.find_element(
-                            By.CSS_SELECTOR,
-                            ".jobs-description__content"
-                        ).text.strip()
+                        description_elem = self.driver.find_element(By.ID, "job-details")
+                        description = description_elem.text.strip()
                     except:
-                        description = "N/A"
+                        try:
+                            description = self.driver.find_element(By.CSS_SELECTOR, ".jobs-description__content, .jobs-box__html-content").text.strip()
+                        except:
+                            description = "N/A"
 
-                    apply_link = job_link
+                    # ✅ APPLY LINK
+                    apply_link = "LinkedIn (No direct button found)"
+                    try:
+                        # 1. Check for Easy Apply
+                        try:
+                            self.driver.find_element(By.CSS_SELECTOR, "button.jobs-apply-button")
+                            apply_link = job_link 
+                        except:
+                            # 2. Check for External Apply
+                            external_btn = self.driver.find_element(By.CSS_SELECTOR, "a.jobs-apply-button")
+                            original_window = self.driver.current_window_handle
+                            external_btn.click()
+                            time.sleep(3)
+                            
+                            if len(self.driver.window_handles) > 1:
+                                for window_handle in self.driver.window_handles:
+                                    if window_handle != original_window:
+                                        self.driver.switch_to.window(window_handle)
+                                        apply_link = self.driver.current_url
+                                        self.driver.close() 
+                                        self.driver.switch_to.window(original_window)
+                                        break
+                            else:
+                                apply_link = external_btn.get_attribute("href")
+                    except:
+                        pass
 
                     logger.info(f"Scraped {idx+1}: {title} | {company}")
                     writer.writerow([title, company, job_link, apply_link, description, img_link])

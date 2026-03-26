@@ -26,4 +26,5 @@ dependencies = [
     "websockets>=16.0",
     "langsmith>=0.6.6",
     "selenium>=4.41.0",
+    "pandas>=2.0.0",
 ]
