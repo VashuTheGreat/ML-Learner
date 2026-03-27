@@ -14,6 +14,7 @@ from api.CodeRunAndModelTrain.routes.modelTrainConfig_router import router as Mo
 from api.Predictors.routes.faceFind_routes import router as FaceDetetorRouter
 from api.middlewares.form_to_json import FormToJSONMiddleware
 from api.CodeRunAndModelTrain.routes.jobFetcher_router import router as JobFetcherRouter
+from api.Agents.routes.FormFiller_router import router as FormFillerRouter
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -50,6 +51,7 @@ app.include_router(ModelTrainConfigRouter, prefix="/api/modelTrainingConfig")
 
 app.include_router(FaceDetetorRouter,prefix="/api/face")
 app.include_router(JobFetcherRouter,prefix="/api/jobFetcher")
+app.include_router(FormFillerRouter,prefix="/api/form")
 
 @app.get("/")
 async def root():

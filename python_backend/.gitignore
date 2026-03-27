@@ -75,3 +75,6 @@ dist/
 
 *.tmp
 *.temp
+*zip
+python_backend/notebook/resume-score-details/
+python_backend/notebook/*.zip
