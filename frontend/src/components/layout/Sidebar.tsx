@@ -40,16 +40,28 @@ export const Sidebar = () => {
   const [showThemePicker, setShowThemePicker] = useState(false);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try { setUser(JSON.parse(storedUser)); } catch { /* ignore */ }
-    }
+    const handleStorageChange = () => {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try { setUser(JSON.parse(storedUser)); } catch { setUser(null); }
+      } else {
+        setUser(null);
+      }
+    };
+    handleStorageChange();
+    window.addEventListener("auth-change", handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("auth-change", handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, []);
 
   const handleLogout = async () => {
     try { await userApi.logout(); } catch { /* ignore */ } finally {
       localStorage.removeItem("user");
       setUser(null);
+      window.dispatchEvent(new Event("auth-change"));
       navigate("/login");
     }
   };

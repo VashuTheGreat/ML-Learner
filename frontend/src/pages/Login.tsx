@@ -38,6 +38,7 @@ const Login = () => {
       }
 
       toast({ title: "Welcome back!", description: "Logged in successfully." });
+      window.dispatchEvent(new Event("auth-change"));
       navigate("/dashboard");
     } catch (err: any) {
       const msg = err?.response?.data?.message || "An error occurred. Please try again.";

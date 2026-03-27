@@ -46,112 +46,24 @@ const ThanksParticipating = () => {
     return normalized;
   };
 
+  // Helper to normalize the LLM verdict string into the strict Mongoose enum
+  const mapVerdict = (v: any): "hire" | "maybe" | "reject" => {
+    const lower = String(v || "").toLowerCase();
+    if (lower.includes("hire") && !lower.includes("no") && !lower.includes("not")) return "hire";
+    if (lower.includes("reject") || lower.includes("no")) return "reject";
+    return "maybe";
+  };
+
   useEffect(() => {
-    const generatePerformance = async () => {
-      const threadId = stateThreadId || sessionStorage.getItem('interview_thread_id') || localStorage.getItem('interview_thread_id');
-      const slug = stateSlug || sessionStorage.getItem('interview_slug') || localStorage.getItem('interview_slug') || "unknown";
-
-      console.log("Starting performance generation for:", { threadId, slug });
-
-      if (!threadId) {
-        console.warn("No threadId found in state or sessionStorage");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        // 1. Get Performance from Python API
-        const response = await pythonApi.getPerformance(threadId);
-        console.log("Raw response from Python API:", response);
-        
-        let performanceRes: any = null;
-
-        // Handle the case where Python returns a set {"data", res} -> serialized as array ["data", res]
-        if (Array.isArray(response)) {
-          console.log("Response is an array (likely Python set)");
-          const jsonStr = response.find(item => item !== "data");
-          if (jsonStr) {
-            performanceRes = JSON.parse(jsonStr);
-          }
-        } else if (response && response.data) {
-          // Handle {"data": "..."}
-          console.log("Response has data field");
-          performanceRes = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
-        } else {
-          // Fallback
-          console.log("Falling back to direct response");
-          performanceRes = response;
-        }
-
-        console.log("Parsed performance data:", performanceRes);
-        
-        // 2. Normalize and Save Performance to Backend
-        if (performanceRes) {
-          const normalizedData = {
-            interview_id: slug,
-            overallScore: Math.min(10, Math.max(0, Number(performanceRes.overallScore ?? performanceRes.score) || 0)),
-            verdict: (performanceRes.verdict || "maybe").toLowerCase(),
-            summaryFeedback: performanceRes.summaryFeedback || "Interview completed.",
-            skills: normalizeSkills(performanceRes.skills),
-            strengths: Array.isArray(performanceRes.strengths) ? performanceRes.strengths : [],
-            weaknesses: Array.isArray(performanceRes.weaknesses) ? performanceRes.weaknesses : [],
-            practiceRecommendations: Array.isArray(performanceRes.practiceRecommendations) ? performanceRes.practiceRecommendations : [],
-            studyRecommendations: Array.isArray(performanceRes.studyRecommendations) ? performanceRes.studyRecommendations : [],
-            lowPriorityOrAvoid: Array.isArray(performanceRes.lowPriorityOrAvoid) ? performanceRes.lowPriorityOrAvoid : [],
-            confidenceLevel: Math.min(10, Math.max(0, Number(performanceRes.confidenceLevel) || 5))
-          };
-
-          console.log("Saving normalized performance to backend:", normalizedData);
-          try {
-            await performanceApi.createPerformance(normalizedData);
-            setPerformanceData(normalizedData);
-            console.log("Performance saved successfully");
-            navigate(`/performance/${slug}`); // Redirect on success
-          } catch (saveErr) {
-            console.error("Failed to save performance to backend:", saveErr);
-            // We set the data anyway so the UI can show something, even if DB save failed
-            setPerformanceData(normalizedData);
-            setError("Performance generated but failed to save to history. You can still see results below.");
-          }
-
-          // 3. Update interview status to 'done' (Always try this)
-          try {
-            await interviewApi.updateInterviewStatus({ id: slug, status: 'done' });
-            console.log("Interview status updated to 'done'");
-          } catch (statusErr) {
-            console.error("Error updating interview status:", statusErr);
-          }
-        } else {
-          console.warn("No performance data received");
-          setError("Could not generate performance data.");
-        }
-
-        // 4. Cleanup (Always try this)
-        console.log("Cleaning up thread from backend and storage...");
-        try {
-          await pythonApi.deleteThread(threadId);
-          console.log("Thread deleted from backend successfully");
-        } catch (delErr) {
-          console.error("Error deleting thread from backend:", delErr);
-        }
-        
-        // Always clear storage even if backend deletion fails
-        sessionStorage.removeItem('interview_thread_id');
-        sessionStorage.removeItem('interview_slug');
-        localStorage.removeItem('interview_thread_id');
-        console.log("Local/Session storage cleared for thread:", threadId);
-        
-      } catch (err) {
-        console.error("Error in generatePerformance:", err);
-        setError("Failed to generate performance feedback. Please check console for details.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    generatePerformance();
-  }, [stateThreadId, stateSlug]);
+    // This page now only serves as a final landing page. 
+    // Performance generation and backend saving is handled in AIInterview.tsx.
+    setIsLoading(false);
+    
+    // Check if we arrived here due to an error in the interview page
+    if (location.state?.error) {
+      setError("We encountered an issue during analysis. Please check your Dashboard to see if the result was saved.");
+    }
+  }, [location.state]);
 
   return (
     <div className="min-h-screen mesh-gradient">
@@ -226,11 +138,11 @@ const ThanksParticipating = () => {
                       </button>
                     )}
                     <Link 
-                      to="/" 
+                      to="/dashboard" 
                       className="btn-outline flex items-center justify-center gap-2"
                     >
                       <Home className="w-5 h-5" />
-                      Back to Home
+                      Back to Dashboard
                     </Link>
                     <Link 
                       to="/apply" 

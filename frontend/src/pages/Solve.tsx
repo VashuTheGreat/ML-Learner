@@ -232,7 +232,7 @@ const Solve: React.FC = () => {
     const EditorPanel = (
         <div className={cn(
             "flex flex-col gap-3 transition-all duration-300",
-            fullscreen ? "fixed inset-0 z-[100] bg-background" : "flex-1"
+            fullscreen ? "fixed inset-0 z-[100] bg-background" : "flex-1 h-full min-h-0 w-full"
         )}>
             {/* Editor Card */}
             <div className={cn(
@@ -542,20 +542,20 @@ const Solve: React.FC = () => {
     );
 
     return (
-        <div className="flex flex-col h-screen overflow-hidden">
+        <div className="flex flex-col h-[100dvh] pt-16 lg:pt-0 overflow-hidden">
             {/* Sub-header — accounts for mobile top header (lg:pt-0 since AppLayout handles desktop) */}
-            <div className="h-14 mt-16 lg:mt-0 border-b border-border/50 bg-background/40 backdrop-blur-xl flex items-center justify-between px-3 sm:px-6 shrink-0">
+            <div className="min-h-[3.5rem] py-2 border-b border-border/50 bg-background/40 backdrop-blur-xl flex flex-wrap items-center justify-between px-3 sm:px-6 shrink-0 gap-2">
                 <div className="flex items-center gap-2 sm:gap-4 min-w-0">
                     <button
                         onClick={() => navigate('/practice')}
-                        className="p-2 hover:bg-secondary/10 rounded-lg text-muted-foreground hover:text-primary transition-colors shrink-0"
+                        className="p-1 sm:p-2 hover:bg-secondary/10 rounded-lg text-muted-foreground hover:text-primary transition-colors shrink-0"
                     >
                         <ChevronLeft size={18} />
                     </button>
                     <div className="h-4 w-px bg-border hidden sm:block"></div>
-                    <h2 className="font-bold text-sm sm:text-base gradient-text truncate max-w-[120px] sm:max-w-[200px]">{question.title}</h2>
+                    <h2 className="font-bold text-[11px] sm:text-base gradient-text truncate max-w-[100px] sm:max-w-[200px]">{question.title}</h2>
                     <span className={cn(
-                        "text-[9px] px-2 py-0.5 rounded-full uppercase tracking-widest font-black border shrink-0",
+                        "text-[9px] px-1.5 sm:px-2 py-0.5 rounded-full uppercase tracking-widest font-black border shrink-0",
                         question.difficulty === 'easy' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
                         question.difficulty === 'medium' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
                         'bg-red-500/10 text-red-500 border-red-500/20'
@@ -564,7 +564,7 @@ const Solve: React.FC = () => {
                     </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 overflow-x-auto pb-1 sm:pb-0">
                     {/* Hide/Show panel (desktop only) */}
                     <button
                         onClick={() => setShowDescription(!showDescription)}
@@ -578,29 +578,29 @@ const Solve: React.FC = () => {
                     {/* Mobile view toggle */}
                     <button
                         onClick={() => setMobileView(mobileView === 'description' ? 'editor' : 'description')}
-                        className="flex md:hidden items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-muted-foreground hover:text-foreground transition-all border border-border/50 hover:bg-secondary/10"
+                        className="flex md:hidden items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-muted-foreground hover:text-foreground transition-all border border-border/50 hover:bg-secondary/10 shrink-0"
                         title={mobileView === 'description' ? "Open Editor" : "Open Description"}
                     >
-                        {mobileView === 'description' ? <Code2 size={15} /> : <AlignLeft size={15} />}
-                        <span className="text-xs font-medium">{mobileView === 'description' ? 'Editor' : 'Problem'}</span>
+                        {mobileView === 'description' ? <Code2 size={14} /> : <AlignLeft size={14} />}
+                        <span className="text-[10px] font-medium">{mobileView === 'description' ? 'Editor' : 'Problem'}</span>
                     </button>
 
-                    <div className="h-4 w-px bg-border"></div>
+                    <div className="h-4 w-px bg-border hidden sm:block"></div>
                     <button
                         onClick={handleReset}
-                        className="flex items-center gap-1 px-2 sm:px-3 py-1.5 hover:bg-secondary/10 rounded-xl text-muted-foreground hover:text-foreground transition-all border border-transparent hover:border-border"
+                        className="flex items-center gap-1 px-2 sm:px-3 py-1.5 hover:bg-secondary/10 rounded-xl text-muted-foreground hover:text-foreground transition-all border border-transparent hover:border-border shrink-0"
                         title="Reset Code"
                     >
                         <RotateCcw size={14} />
-                        <span className="text-xs font-medium hidden sm:inline">Reset</span>
+                        <span className="text-[10px] sm:text-xs font-medium">Reset</span>
                     </button>
                     <button
                         onClick={handleRun}
                         disabled={running}
-                        className="btn-primary flex items-center gap-1.5 px-3 sm:px-5 py-1.5 shadow-lg shadow-primary/20"
+                        className="btn-primary flex items-center gap-1.5 px-3 sm:px-5 py-1.5 shadow-lg shadow-primary/20 shrink-0"
                     >
-                        {running ? <Loader2 className="animate-spin" size={15} /> : <Play size={15} fill="currentColor" />}
-                        <span className="font-bold text-sm">Run</span>
+                        {running ? <Loader2 className="animate-spin" size={14} /> : <Play size={14} fill="currentColor" />}
+                        <span className="font-bold text-[10px] sm:text-sm">Run</span>
                     </button>
                 </div>
             </div>
@@ -609,14 +609,14 @@ const Solve: React.FC = () => {
             <main className="flex-1 overflow-hidden p-2 sm:p-4 pt-3 sm:pt-5 gap-3 sm:gap-4">
 
                 {/* Desktop layout */}
-                <div className="hidden md:flex h-full gap-4">
+                <div className="hidden md:flex h-full gap-4 min-h-0">
                     {showDescription && (
-                        <div className="w-1/2 animate-in slide-in-from-left duration-300">
+                        <div className="w-1/2 h-full min-h-0 animate-in slide-in-from-left duration-300">
                             {DescriptionPanel}
                         </div>
                     )}
                     <div className={cn(
-                        "flex flex-col gap-3 transition-all duration-300",
+                        "flex flex-col gap-3 transition-all duration-300 h-full min-h-0",
                         showDescription ? "w-1/2" : "w-full"
                     )}>
                         {EditorPanel}
@@ -624,13 +624,13 @@ const Solve: React.FC = () => {
                 </div>
 
                 {/* Mobile layout */}
-                <div className="flex md:hidden h-full">
+                <div className="flex md:hidden h-full min-h-0">
                     {mobileView === 'description' ? (
-                        <div className="w-full animate-in fade-in duration-200">
+                        <div className="w-full h-full min-h-0 animate-in fade-in duration-200">
                             {DescriptionPanel}
                         </div>
                     ) : (
-                        <div className="w-full flex flex-col gap-2 animate-in fade-in duration-200">
+                        <div className="w-full h-full min-h-0 flex flex-col gap-2 animate-in fade-in duration-200">
                             {EditorPanel}
                         </div>
                     )}

@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Mic, MicOff, Video, VideoOff, PhoneOff, Send, 
-  Clock, Bot, User, Volume2
+  Clock, Bot, User, Volume2, Trophy, ShieldCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import pythonApi from '@/services/pythonApi';
 import performanceApi from '@/services/performanceApi';
 import interviewApi from '@/services/interviewApi';
+import { FaceDetectionVideo } from '@/components/common/FaceDetectionVideo';
 
 export const AIInterview = () => {
   const { slug } = useParams();
@@ -25,40 +26,62 @@ export const AIInterview = () => {
   const [hasStarted, setHasStarted] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState("");
+  const hasInterviewStarted = useRef(false);
   
   // Ref for handleEndInterview to avoid stale closures in timer
   const handleEndInterviewRef = React.useRef<() => Promise<void>>();
+
+  // Ref to auto-focus textarea when user starts speaking
+  const answerRef = useRef<HTMLTextAreaElement>(null);
+  // Ref to scroll chat to latest message
+  const chatBottomRef = useRef<HTMLDivElement>(null);
 
   // Initialize Speech Recognition
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
       const rec = new SpeechRecognition();
-      rec.continuous = true;
+      // Do NOT use continuous=true — it causes a 'network' error on many browsers.
+      // Instead we restart manually in onend when the mic is still supposed to be on.
+      rec.continuous = false;
       rec.interimResults = false;
-      
+      rec.lang = 'en-US';
+
       rec.onresult = (event: any) => {
+        let currentInterim = "";
+        let finalTranscripts = "";
+        
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (event.results[i].isFinal) {
-            const text = event.results[i][0].transcript;
-            setUserAnswer(prev => (prev ? prev + " " : "") + text);
+            finalTranscripts += event.results[i][0].transcript + " ";
           }
         }
+        
+        if (finalTranscripts) {
+          setUserAnswer(prev => (prev ? prev + " " : "") + finalTranscripts.trim());
+        }
       };
-      
-      rec.onend = () => setIsListening(false);
-      rec.onerror = (e: any) => {
-        console.error("Speech reco error:", e.error);
+
+      rec.onend = () => {
         setIsListening(false);
       };
-      
+
+      rec.onerror = (e: any) => {
+        if (e.error === 'network') {
+          console.warn("Speech reco network error observed. This usually happens in Chrome without internet or due to a bug. Restarting...");
+        } else if (e.error !== 'no-speech') {
+          console.error("Speech reco error:", e.error);
+        }
+        setIsListening(false);
+      };
+
       setRecognition(rec);
     } else {
       console.warn("Speech recognition not supported");
     }
   }, []);
 
-  // Manage Mic State
+  // Manage Mic State — restart recognition each time it ends (non-continuous workaround)
   useEffect(() => {
     if (!recognition) return;
     try {
@@ -70,9 +93,27 @@ export const AIInterview = () => {
         setIsListening(false);
       }
     } catch (e) {
-      // ignore
+      // ignore AbortError / InvalidStateError from rapid start/stop
     }
   }, [isMicOn, isAISpeaking, isListening, recognition]);
+
+  // Auto-focus textarea when user starts speaking OR when AI finishes speaking
+  useEffect(() => {
+    if (!isAISpeaking && answerRef.current) {
+      answerRef.current.focus();
+    }
+  }, [isAISpeaking]);
+
+  useEffect(() => {
+    if (isListening && answerRef.current) {
+      answerRef.current.focus();
+    }
+  }, [isListening]);
+
+  // Auto-scroll chat to bottom whenever messages change
+  useEffect(() => {
+    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isAISpeaking]);
 
   // Initialize unique threadId for the interview session
   useEffect(() => {
@@ -128,13 +169,17 @@ export const AIInterview = () => {
 
   useEffect(() => {
     if (!threadId || !slug || !hasStarted) return;
+    // Guard set SYNCHRONOUSLY before any async call to prevent React Strict Mode double-fire
+    if (hasInterviewStarted.current) return;
+    if (!topic && slug) return; // Wait for topic to load before starting
+
+    hasInterviewStarted.current = true;
 
     const startInterview = async () => {
       try {
         const currentTopic = topic || slug;
         const response = await pythonApi.chatInterviewer(threadId, timeRemaining, currentTopic, "Hello, I am ready for the interview.");
         
-        // Handle both string and object responses
         const aiMsg = (typeof response === 'string' ? response : (response.ai_response)) 
           || "Hello! I am your AI interviewer. Let's begin.";
           
@@ -142,13 +187,13 @@ export const AIInterview = () => {
         speak(aiMsg);
       } catch (error) {
         console.error("Error starting interview:", error);
+        hasInterviewStarted.current = false; // Reset on error to allow retry
       }
     };
 
-    if (topic || !slug) {
-        startInterview();
-    }
-  }, [threadId, slug, topic, speak, hasStarted]);
+    startInterview();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [threadId, slug, topic, hasStarted]);
 
   // Timer countdown
   useEffect(() => {
@@ -232,6 +277,14 @@ export const AIInterview = () => {
     return normalized;
   };
 
+  // Helper to map LLM string to precise enum values for Mongoose
+  const mapVerdict = (v: any): "hire" | "maybe" | "reject" => {
+    const lower = String(v || "").toLowerCase();
+    if (lower.includes("hire") && !lower.includes("no") && !lower.includes("not")) return "hire";
+    if (lower.includes("reject") || lower.includes("no")) return "reject";
+    return "maybe";
+  };
+
   const handleEndInterview = async () => {
     if (isAnalyzing) return;
     
@@ -261,7 +314,7 @@ export const AIInterview = () => {
         const normalizedData = {
           interview_id: slug || "unknown",
           overallScore: Math.min(10, Math.max(0, Number(performanceRes.overallScore ?? performanceRes.score) || 0)),
-          verdict: (performanceRes.verdict || "maybe").toLowerCase(),
+          verdict: mapVerdict(performanceRes.verdict),
           summaryFeedback: performanceRes.summaryFeedback || "Interview completed successfully.",
           skills: normalizeSkills(performanceRes.skills),
           strengths: Array.isArray(performanceRes.strengths) ? performanceRes.strengths : [],
@@ -276,30 +329,32 @@ export const AIInterview = () => {
         
         // 3. Update status in Node.js
         await interviewApi.updateInterviewStatus({ id: slug!, status: 'done' });
+        
+        // 4. Cleanup Python thread
+        setAnalysisStatus("Cleaning up session...");
+        await pythonApi.deleteThread(threadId);
+        
+        // 5. Clear Local Storage
+        const itemsToClear = ['interview_thread_id', 'interview_slug'];
+        itemsToClear.forEach(item => {
+          localStorage.removeItem(item);
+          sessionStorage.removeItem(item);
+        });
+
+        setAnalysisStatus("Success! Redirecting...");
+        
+        setTimeout(() => {
+          navigate(`/performance/${slug}`);
+        }, 1000);
+      } else {
+        throw new Error("Analysis completed but no data was generated. Please contact support.");
       }
-
-      // 4. Cleanup Python thread
-      setAnalysisStatus("Cleaning up session...");
-      await pythonApi.deleteThread(threadId);
-      
-      // 5. Clear Local Storage
-      localStorage.removeItem('interview_thread_id');
-      localStorage.removeItem('interview_slug');
-      sessionStorage.removeItem('interview_thread_id');
-      sessionStorage.removeItem('interview_slug');
-
-      setAnalysisStatus("Success! Redirecting...");
-      
-      // Final delay to ensure user sees the success state
-      setTimeout(() => {
-        navigate(`/performance/${slug}`);
-      }, 1000);
 
     } catch (error) {
       console.error("Error during interview wrap-up:", error);
-      setAnalysisStatus("Failed to analyze. Redirecting to backup page...");
+      setAnalysisStatus("Failed to analyze. Please try again or check your dashboard.");
       setTimeout(() => {
-        navigate("/thanks-participating", { state: { threadId, slug } });
+        navigate("/thanks-participating", { state: { threadId, slug, error: true } });
       }, 2000);
     }
   };
@@ -319,37 +374,37 @@ export const AIInterview = () => {
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
       {/* Top Bar */}
-      <div className="h-16 border-b border-border/50 flex items-center justify-between px-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center">
-            <Bot className="w-6 h-6 text-white" />
+      <div className="h-16 border-b border-border/50 flex items-center justify-between px-4 sm:px-6 gap-2 sm:gap-4 overflow-hidden">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl gradient-bg flex items-center justify-center shrink-0">
+            <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
-          <div>
-            <h1 className="text-foreground font-bold">AI Technical Interview</h1>
-            <p className="text-muted-foreground text-xs">{slug} Position</p>
+          <div className="min-w-0">
+            <h1 className="text-foreground font-bold text-sm sm:text-base truncate">Technical Interview</h1>
+            <p className="text-muted-foreground text-[10px] sm:text-xs truncate">{topic || slug}</p>
           </div>
         </div>
 
-        {/* Timer */}
+        {/* Timer - Compact on small mobile */}
         <div className={cn(
-          "flex items-center gap-2 px-4 py-2 rounded-full",
+          "flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full shrink-0",
           timeRemaining < 60 ? "bg-destructive/20 text-destructive" : "bg-secondary/20 text-foreground"
         )}>
-          <Clock className="w-5 h-5" />
-          <span className="font-mono font-bold text-lg">{formatTime(timeRemaining)}</span>
-          <span className="text-xs opacity-70">remaining</span>
+          <Clock className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+          <span className="font-mono font-bold text-sm sm:text-lg">{formatTime(timeRemaining)}</span>
         </div>
 
         <button
           onClick={handleEndInterview}
-          className="px-4 py-2 rounded-xl bg-destructive text-white font-bold text-sm hover:bg-destructive/90 transition-colors"
+          disabled={isAnalyzing}
+          className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-destructive text-white font-bold text-[10px] sm:text-sm hover:bg-destructive/90 transition-colors shrink-0 whitespace-nowrap disabled:opacity-50"
         >
-          End Interview
+          {isAnalyzing ? "Saving..." : "End"}
         </button>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative min-h-0">
         {isAnalyzing && (
           <div className="absolute inset-0 z-[60] flex items-center justify-center bg-background/90 backdrop-blur-xl">
             <div className="text-center space-y-8 max-w-md p-10 bg-card/50 border border-primary/20 rounded-[2rem] shadow-2xl animate-in fade-in zoom-in-95 duration-500">
@@ -388,84 +443,85 @@ export const AIInterview = () => {
           </div>
         )}
         
-        {/* Video Section */}
-        <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-border/50 p-4 flex flex-col h-2/5 md:h-full shrink-0">
-          {/* AI Video */}
-          <div className="flex-1 bg-secondary/10 rounded-2xl relative overflow-hidden mb-4 border border-border/50">
+        {/* Video Section - Split View for Mobile */}
+        <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-border/50 p-2 sm:p-3 md:p-4 flex flex-row md:flex-col h-auto md:h-full shrink-0 items-center md:items-stretch gap-2 sm:gap-3 md:gap-0 bg-secondary/5 md:bg-transparent min-h-0">
+          
+          {/* AI Video Container (Split-half on Mobile, Full-bleeding on Web) */}
+          <div className="flex-1 md:flex-1 bg-black rounded-xl md:rounded-2xl relative overflow-hidden border border-border/50 h-[80px] sm:h-[100px] md:h-auto md:mb-4">
             <div className="absolute inset-0 flex items-center justify-center">
               <div className={cn(
-                "w-32 h-32 rounded-full gradient-bg flex items-center justify-center transition-all duration-300 shadow-xl",
-                isAISpeaking && "animate-pulse scale-110 shadow-primary/20"
+                "w-12 h-12 sm:w-16 sm:h-16 md:w-32 md:h-32 rounded-full gradient-bg flex items-center justify-center transition-all duration-300 shadow-xl",
+                isAISpeaking && "animate-pulse scale-105 md:scale-110 shadow-primary/20"
               )}>
-                <Bot className="w-16 h-16 text-white" />
+                <Bot className="w-6 h-6 sm:w-8 sm:h-8 md:w-16 md:h-16 text-white" />
               </div>
             </div>
-            {isAISpeaking && (
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-1.5 bg-primary/20 rounded-full">
-                <Volume2 className="w-4 h-4 text-primary animate-pulse" />
-                <span className="text-xs text-primary font-medium">AI Speaking...</span>
-              </div>
-            )}
-            <div className="absolute top-4 left-4 px-3 py-1 bg-background/80 backdrop-blur-sm rounded-full text-xs font-medium">
+            
+            {/* Status Overlays */}
+            <div className="absolute top-2 left-2 px-2 py-0.5 bg-background/80 backdrop-blur-sm rounded-full text-[8px] sm:text-[10px] md:text-xs font-bold uppercase tracking-tight z-10 border border-border/50">
               AI Interviewer
             </div>
-          </div>
-
-          {/* User Video */}
-          <div className="h-48 bg-secondary/20 rounded-2xl relative overflow-hidden border border-border/50">
-            {isVideoOn ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5">
-                <User className="w-20 h-20 text-muted-foreground/30" />
+            
+            {isAISpeaking ? (
+              <div className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-primary/20 backdrop-blur-sm border border-primary/30 rounded-full z-10 max-w-[80%]">
+                <Volume2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-primary animate-pulse shrink-0" />
+                <span className="text-[7px] sm:text-[9px] md:text-xs text-primary font-bold uppercase tracking-tighter truncate animate-pulse">Speaking</span>
               </div>
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-secondary/30">
-                <VideoOff className="w-12 h-12 text-muted-foreground/30" />
-              </div>
-            )}
-            <div className="absolute top-3 left-3 px-3 py-1 bg-background/80 backdrop-blur-sm rounded-full text-xs font-medium">
-              You
-            </div>
-            {!isMicOn && (
-              <div className="absolute top-3 right-3 p-1.5 bg-destructive/20 rounded-full">
-                <MicOff className="w-4 h-4 text-destructive" />
-              </div>
-            )}
-            {isListening && (
-              <div className="absolute top-3 right-3 flex items-center gap-2 px-3 py-1 bg-green-500/20 backdrop-blur-sm rounded-full text-xs font-medium text-green-500 animate-pulse">
-                <Mic className="w-3 h-3" /> Listening...
-              </div>
+                <div className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-secondary/20 backdrop-blur-sm border border-border/30 rounded-full z-10 opacity-60">
+                  <Bot className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-muted-foreground shrink-0" />
+                  <span className="text-[7px] sm:text-[9px] md:text-xs text-muted-foreground font-bold uppercase tracking-tighter">Listening</span>
+                </div>
             )}
           </div>
 
-          {/* Controls */}
-          <div className="flex items-center justify-center gap-4 mt-4">
+          {/* User Video Container (Split-half on Mobile) */}
+          <div className="flex-1 md:w-full md:h-48 md:flex-none shrink-0 relative rounded-xl md:rounded-2xl overflow-hidden shadow-sm border border-border/50 bg-black md:bg-secondary/20 h-[80px] sm:h-[100px]">
+            <FaceDetectionVideo 
+              isVideoOn={isVideoOn} 
+              isMicOn={isMicOn} 
+              isListening={isListening} 
+              hasStarted={hasStarted} 
+              isAnalyzing={isAnalyzing} 
+              className="absolute inset-0 w-full h-full border-none"
+            />
+            {/* Overlay label for mobile */}
+            <div className="absolute top-2 left-2 px-2 py-0.5 bg-background/80 backdrop-blur-sm rounded-full text-[8px] sm:text-[10px] md:hidden font-bold uppercase z-10 border border-border/50">
+              You
+            </div>
+          </div>
+
+          {/* Controls - Compact horizontal column on Mobile right side? Actually let's keep them in the row */}
+          <div className="flex flex-col md:flex-row items-center justify-center gap-1.5 sm:gap-2 md:gap-4 md:mt-4 shrink-0">
             <button
               onClick={() => setIsMicOn(!isMicOn)}
               className={cn(
-                "w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-sm",
+                "w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all shadow-sm shrink-0",
                 isMicOn 
                   ? "bg-secondary/20 text-foreground hover:bg-secondary/30" 
                   : "bg-destructive/20 text-destructive"
               )}
+              title={isMicOn ? "Mute Mic" : "Unmute Mic"}
             >
-              {isMicOn ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
+              {isMicOn ? <Mic className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" /> : <MicOff className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />}
             </button>
             <button
               onClick={() => setIsVideoOn(!isVideoOn)}
               className={cn(
-                "w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-sm",
+                "w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all shadow-sm shrink-0",
                 isVideoOn 
                   ? "bg-secondary/20 text-foreground hover:bg-secondary/30" 
                   : "bg-destructive/20 text-destructive"
               )}
+              title={isVideoOn ? "Turn Off Video" : "Turn On Video"}
             >
-              {isVideoOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
+              {isVideoOn ? <Video className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" /> : <VideoOff className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />}
             </button>
           </div>
         </div>
 
         {/* Chat Section */}
-        <div className="flex-1 flex flex-col bg-secondary/5">
+        <div className="flex-1 flex flex-col bg-secondary/5 min-h-0 overflow-hidden">
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {messages.map((msg, index) => (
@@ -511,6 +567,8 @@ export const AIInterview = () => {
                 </div>
               </div>
             )}
+            {/* Scroll anchor */}
+            <div ref={chatBottomRef} />
           </div>
 
           {/* Input */}
@@ -518,12 +576,17 @@ export const AIInterview = () => {
             <div className="flex items-end gap-4 max-w-4xl mx-auto">
               <div className="flex-1 relative">
                 <textarea
+                  ref={answerRef}
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Type your answer here..."
+                  placeholder={isAISpeaking ? "⏳ AI is speaking, please wait..." : isListening ? "🎤 Listening — speak now..." : "Type your answer or speak..."}
                   rows={2}
-                  className="w-full px-4 py-3 bg-secondary/10 border border-border/50 rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+                  disabled={isAISpeaking || isAnalyzing}
+                  className={cn(
+                    "w-full px-4 py-3 bg-secondary/10 border border-border/50 rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none",
+                    (isAISpeaking || isAnalyzing) && "opacity-50 cursor-not-allowed bg-secondary/5"
+                  )}
                 />
               </div>
               <button
