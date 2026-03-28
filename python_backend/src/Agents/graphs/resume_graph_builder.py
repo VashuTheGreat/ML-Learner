@@ -14,8 +14,8 @@ graph.add_edge("resume_maker", END)
 graph = graph.compile()
 
 
-with open("resume_graph.png","wb") as f:
-    f.write(graph.get_graph().draw_mermaid_png())
+# with open("resume_graph.png","wb") as f:
+#     f.write(graph.get_graph().draw_mermaid_png())
 
 # ------------------- Main -------------------
 async def create_resume_schema(userDetails: str):
