@@ -31,4 +31,6 @@ dependencies = [
     "nltk>=3.9.4",
     "transformers>=5.3.0",
     "tqdm>=4.67.3",
+    "mlflow>=3.10.1",
+    "dagshub>=0.6.9",
 ]

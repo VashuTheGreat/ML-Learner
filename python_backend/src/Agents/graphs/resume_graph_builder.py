@@ -2,7 +2,7 @@ import sys
 import logging
 from langgraph.graph import START, END, StateGraph
 from exception import MyException
-
+import sys
 # ------------------- Schemas -------------------
 from src.Agents.models.Resume_model import ResumeState
 # ------------------- LLM -------------------
@@ -13,9 +13,12 @@ graph.add_edge(START, "resume_maker")
 graph.add_edge("resume_maker", END)
 graph = graph.compile()
 
-
-with open("resume_graph.png","wb") as f:
-    f.write(graph.get_graph().draw_mermaid_png())
+try:
+    with open("resume_graph.png","wb") as f:
+        f.write(graph.get_graph().draw_mermaid_png())
+except Exception as e:
+    raise MyException(e,sys)
+        
 
 # ------------------- Main -------------------
 async def create_resume_schema(userDetails: str):
