@@ -162,8 +162,9 @@ export const DashBoard = () => {
         const schema = await pythonApi.createSchema(updatedUser.aboutUser || text);
         console.log("Generated schema:", schema);
         
-        if (schema && schema.userDetails) {
-          const updatedUser2 = await userApi.updateUserJson(schema.userDetails);
+        if (schema) {
+          const dataToSend = schema.userDetails ? schema.userDetails : schema;
+          const updatedUser2 = await userApi.updateUserJson(dataToSend);
           
           if (updatedUser2) {
             setUser(updatedUser2);

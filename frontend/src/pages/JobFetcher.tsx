@@ -75,17 +75,22 @@ const JobFetcher: React.FC = () => {
         {/* ── Search bar ─────────────────────────────── */}
         <div className="max-w-2xl mx-auto mb-12">
           <div className="flex gap-2 p-1.5 glass-card rounded-2xl border border-border/50 shadow-lg">
-            <div className="flex-1 flex items-center gap-3 px-4">
+            <div className="flex-1 flex items-center gap-3 px-4 relative">
               <Search className="w-5 h-5 text-primary/60 shrink-0" />
-              <input
+              <select
                 id="job-title-input"
-                type="text"
                 value={jobTitle}
                 onChange={e => setJobTitle(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && !loading && handleFetch()}
-                placeholder="e.g. Machine Learning Intern, Data Scientist..."
-                className="flex-1 bg-transparent text-sm font-medium placeholder:text-muted-foreground/60 focus:outline-none py-2"
-              />
+                className="flex-1 bg-transparent text-sm font-medium text-foreground focus:outline-none py-2 cursor-pointer appearance-none pr-8 w-full"
+              >
+                <option value="" disabled>Select a role...</option>
+                <option value="Machine Learning Intern" className="bg-background text-foreground">Machine Learning Intern</option>
+                <option value="Data Science Intern" className="bg-background text-foreground">Data Science Intern</option>
+                <option value="AIML Intern" className="bg-background text-foreground">AIML Intern</option>
+                <option value="Backend Intern" className="bg-background text-foreground">Backend Intern</option>
+                <option value="Frontend Intern" className="bg-background text-foreground">Frontend Intern</option>
+              </select>
+              <ChevronDown className="w-4 h-4 text-muted-foreground absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
             <button
               id="fetch-jobs-btn"
