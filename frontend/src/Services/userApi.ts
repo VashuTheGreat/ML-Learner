@@ -88,9 +88,9 @@ class UserApi {
     }
 
     async updateUserJson(tempData: any) {
-        // tempData should be a JSON string as per backend controller
+        // tempData should be a JSON object as per backend controller
         const response = await api.post('/user/updateUserJson', {
-            temp_data: typeof tempData === 'string' ? tempData : JSON.stringify(tempData)
+            temp_data: tempData
         });
         return response.data.data;
     }
