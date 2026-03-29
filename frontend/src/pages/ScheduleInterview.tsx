@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import interviewApi from "@/services/interviewApi";
+import interviewApi from "@/Services/interviewApi";
 
 const ScheduleInterview = () => {
   const navigate = useNavigate();

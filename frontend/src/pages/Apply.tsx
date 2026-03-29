@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import pythonApi from '@/services/pythonApi';
+import pythonApi from '@/Services/pythonApi';
 
 import { Briefcase, Calendar, MapPin, Loader2, Tag, Clock, Building2, ShieldCheck, ChevronDown, Bot } from 'lucide-react';
-import interviewApi from '@/services/interviewApi';
+import interviewApi from '@/Services/interviewApi';
 import { useToast } from "@/components/ui/use-toast";
 const COMPANY_LOGOS: { [key: string]: string } = {
     "Google": "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png",

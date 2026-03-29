@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, redirect } from 'react-router-dom';
 import { Download, ArrowLeft, Code, Table, X } from 'lucide-react';
-import templateApi from '@/services/templateApi';
-import userApi from '@/services/userApi';
+import templateApi from '@/Services/templateApi';
+import userApi from '@/Services/userApi';
 import html2pdf from 'html2pdf.js';
 import { useToast } from "@/components/ui/use-toast";
 

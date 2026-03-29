@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Code2, AlertCircle, Loader2 } from "lucide-react";
-import userApi from "@/services/userApi";
+import userApi from "@/Services/userApi";
 import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import pythonApi from '@/services/pythonApi';
+import pythonApi from '@/Services/pythonApi';
 import {
   Search, Briefcase, Building2, ExternalLink, ClipboardList,
   Loader2, AlertCircle, Linkedin, RefreshCw, ChevronDown, ChevronUp, ImageOff
@@ -13,6 +13,7 @@ interface Job {
   'Apply Link': string;
   Description: string;
   img_link: string;
+  score?: number;
 }
 
 const JobFetcher: React.FC = () => {
@@ -23,6 +24,7 @@ const JobFetcher: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const [searched, setSearched] = useState(false);
+  const [recommendToMe, setRecommendToMe] = useState(false);
 
   const handleFetch = async () => {
     if (!jobTitle.trim()) {
@@ -37,7 +39,33 @@ const JobFetcher: React.FC = () => {
     try {
       const data = await pythonApi.fetchJobs(jobTitle.trim());
       // data can be an array or { jobs: Job[] }
-      const parsed: Job[] = Array.isArray(data) ? data : (data?.jobs ?? []);
+      let parsed: Job[] = Array.isArray(data) ? data : (data?.jobs ?? []);
+
+      if (recommendToMe && parsed.length > 0) {
+        toast({ title: 'Analyzing Jobs...', description: 'Predicting best matches for you.'});
+        const userStr = localStorage.getItem('user');
+        const userData = userStr ? JSON.parse(userStr) : {};
+        const userDetails = userData.aboutUser || JSON.stringify(userData);
+
+        if (userDetails && userDetails.trim() !== '{}') {
+          const predictions = await Promise.all(
+            parsed.map(async (job) => {
+              try {
+                const scoreData = await pythonApi.similarJobPredictor(job.Description, userDetails);
+                const score = typeof scoreData === 'number' ? scoreData : typeof scoreData?.data === 'number' ? scoreData.data : 0;
+                return { ...job, score };
+              } catch (e) {
+                return { ...job, score: 0 };
+              }
+            })
+          );
+          predictions.sort((a, b) => (b.score || 0) - (a.score || 0));
+          parsed = predictions;
+        } else {
+          toast({ title: 'Profile Data Missing', description: 'Could not find sufficient user details in local storage for recommendation.', variant: 'destructive' });
+        }
+      }
+
       setJobs(parsed);
       if (parsed.length === 0) {
         setError('No jobs found. The scraper may still be logging in — try again in a moment.');
@@ -73,9 +101,9 @@ const JobFetcher: React.FC = () => {
         </div>
 
         {/* ── Search bar ─────────────────────────────── */}
-        <div className="max-w-2xl mx-auto mb-12">
-          <div className="flex gap-2 p-1.5 glass-card rounded-2xl border border-border/50 shadow-lg">
-            <div className="flex-1 flex items-center gap-3 px-4 relative">
+        <div className="max-w-3xl mx-auto mb-12">
+          <div className="flex flex-col md:flex-row gap-2 p-1.5 glass-card rounded-2xl border border-border/50 shadow-lg justify-start md:items-center">
+            <div className="flex-1 flex items-center gap-3 px-4 relative w-full md:w-auto h-12 md:h-auto">
               <Search className="w-5 h-5 text-primary/60 shrink-0" />
               <select
                 id="job-title-input"
@@ -92,6 +120,22 @@ const JobFetcher: React.FC = () => {
               </select>
               <ChevronDown className="w-4 h-4 text-muted-foreground absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
+
+            <div className="hidden md:block w-px h-8 bg-border/50" />
+
+            <div className="relative px-4 w-full md:w-48 h-12 md:h-auto flex items-center border-t border-border/50 md:border-none">
+              <select
+                id="recommend-to-me-input"
+                value={recommendToMe ? "true" : "false"}
+                onChange={e => setRecommendToMe(e.target.value === "true")}
+                className={`w-full bg-transparent text-sm focus:outline-none py-2 cursor-pointer appearance-none pr-8 h-full ${recommendToMe ? 'text-primary font-bold' : 'font-medium text-foreground'}`}
+              >
+                <option value="false" className="bg-background text-foreground">Standard Search</option>
+                <option value="true" className="bg-background text-primary font-semibold">Recommend to me</option>
+              </select>
+              <ChevronDown className="w-4 h-4 text-muted-foreground absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+
             <button
               id="fetch-jobs-btn"
               onClick={handleFetch}
@@ -184,13 +228,21 @@ const JobFetcher: React.FC = () => {
                             <Building2 className="w-6 h-6 text-primary" />
                           )}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-base font-bold leading-tight group-hover:text-primary transition-colors truncate">
-                            {job.Title !== 'N/A' ? job.Title : 'Untitled Role'}
-                          </h3>
-                          <p className="text-sm text-muted-foreground font-medium truncate">
-                            {job.Company !== 'N/A' ? job.Company : 'Unknown Company'}
-                          </p>
+                        <div className="flex-1 min-w-0 flex items-start justify-between gap-2">
+                          <div>
+                            <h3 className="text-base font-bold leading-tight group-hover:text-primary transition-colors truncate">
+                              {job.Title !== 'N/A' ? job.Title : 'Untitled Role'}
+                            </h3>
+                            <p className="text-sm text-muted-foreground font-medium truncate">
+                              {job.Company !== 'N/A' ? job.Company : 'Unknown Company'}
+                            </p>
+                          </div>
+                          {job.score !== undefined && (
+                            <div className="shrink-0 px-2.5 py-1 bg-primary/10 text-primary text-xs font-bold rounded-lg border border-primary/20 flex flex-col items-center">
+                              <span className="text-[10px] uppercase opacity-70 mb-0.5 leading-none">Score</span>
+                              <span className="leading-none">{job.score.toFixed(1)}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
 
