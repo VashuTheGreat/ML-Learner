@@ -16,8 +16,8 @@ const pythonApiInstance = axios.create({
     baseURL: PYTHON_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
-    },
-    withCredentials: true
+    }
+    // Note: withCredentials is intentionally omitted to avoid CORS preflight errors
 });
 
 

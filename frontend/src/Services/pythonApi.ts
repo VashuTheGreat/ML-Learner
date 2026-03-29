@@ -86,6 +86,13 @@ class PythonApi {
         const response = await pythonApiInstance.get('/api/health/health');
         return response.data;
     }
+
+    // ── Live Job Fetcher ──────────────────────────────────────────────────
+    /** Fetch real-time jobs from indeed / internet */
+    async fetchJobs(jobtile: string = "machine learning intern", updated: boolean = false) {
+        const response = await pythonApiInstance.post(`/api/jobFetcher/fetchJobs?jobtile=${encodeURIComponent(jobtile)}&updated=${updated}`);
+        return response.data;
+    }
 }
 
 export default new PythonApi();
