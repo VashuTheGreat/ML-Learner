@@ -4,7 +4,7 @@ import {
   Code2,
   Home, Info, BookOpen, PenTool, FlaskConical, Briefcase, Mail, LayoutDashboard,
   LogOut, ChevronLeft, ChevronRight, Sun, Moon, User as UserIcon, Palette, X,
-  Bot, FileText, Cpu
+  Bot, FileText, Linkedin
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import userApi from "@/services/userApi";
@@ -15,7 +15,7 @@ import { User } from "@/types";
 const mapPathToIcon: Record<string, any> = {
   "/": Home, "/about": Info, "/courses": BookOpen, "/practice": PenTool,
   "/playground": FlaskConical, "/apply": Briefcase, "/contact": Mail, "/dashboard": LayoutDashboard,
-  "/schedule-interview": Bot, "/templates": FileText, "/ml-trainer": Cpu
+  "/schedule-interview": Bot, "/templates": FileText, "/job-fetcher": Linkedin
 };
 
 const navLinks = [
@@ -24,7 +24,7 @@ const navLinks = [
   { name: "Courses", path: "/courses" },
   { name: "Practice", path: "/practice" },
   { name: "ML Playground", path: "/playground" },
-  { name: "ML Trainer", path: "/ml-trainer" },
+  { name: "Job Fetcher", path: "/job-fetcher" },
   { name: "AI Interview", path: "/schedule-interview" },
   { name: "Resume Builder", path: "/templates" },
   { name: "Apply", path: "/apply" },

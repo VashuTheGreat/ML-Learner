@@ -27,6 +27,7 @@ import Practice from "./pages/Practice";
 import Solve from "./pages/Solve";
 import MLTrainer from "./pages/MLTrainer";
 import Playground from "./pages/Playground";
+import JobFetcher from "./pages/JobFetcher"; 
 import { AppLayout } from "./components/layout/AppLayout";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { GuestRoute } from "./components/auth/GuestRoute";
@@ -74,6 +75,7 @@ const App = () => (
               <Route path="/solve/:slug" element={<Solve/>} />
               <Route path="/ml-trainer" element={<MLTrainer/>} />
               <Route path="/playground" element={<Playground/>} />
+              <Route path="/job-fetcher" element={<JobFetcher/>} />
             </Route>
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
