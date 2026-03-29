@@ -7,6 +7,8 @@ sys.path.append(os.getcwd())
 
 from logger import *
 
+from dotenv import load_dotenv
+load_dotenv()
 
 import asyncio
 from src.Predictors.pipelines.similarPrediction_pipeline import SimilarJobPipeline
