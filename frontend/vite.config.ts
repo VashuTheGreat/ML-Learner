@@ -11,18 +11,6 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
-    proxy: {
-      '/node-api': {
-        target: process.env.VITE_NODE_TARGET || 'http://13.49.65.231:3000',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/node-api/, '/api')
-      },
-      '/py-api': {
-        target: process.env.VITE_PY_TARGET || 'http://13.49.65.231:9000',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/py-api/, '')
-      }
-    }
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {

@@ -97,7 +97,7 @@ export const Sidebar = () => {
         >
           {isCollapsed
             ? <ChevronRight className="h-3.5 w-3.5 text-sidebar-foreground" />
-            : <ChevronLeft  className="h-3.5 w-3.5 text-sidebar-foreground" />
+            : <ChevronLeft className="h-3.5 w-3.5 text-sidebar-foreground" />
           }
         </button>
 

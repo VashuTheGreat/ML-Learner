@@ -24,7 +24,7 @@ const pythonApiInstance = axios.create({
 
 class QuestionApi {
     /** Coding Schema Methods */
-    
+
     async createCodingSchema() {
         const response = await nodeApiInstance.get('/codingSchema/createCodingSchema', {
             withCredentials: true
@@ -54,8 +54,8 @@ class QuestionApi {
         return response.data;
     }
 
-    async fetchAvailableQuestionsCategories(){
-        const response=await nodeApiInstance.get("/question/question_categories");
+    async fetchAvailableQuestionsCategories() {
+        const response = await nodeApiInstance.get("/question/question_categories");
         return response.data
     }
 
