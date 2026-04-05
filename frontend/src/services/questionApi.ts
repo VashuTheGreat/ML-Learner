@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const NODE_BASE_URL = import.meta.env.VITE_NODE_BASE_URL || 'http://localhost:3000/api';
-const PYTHON_BASE_URL = import.meta.env.VITE_PYTHON_BASE_URL || 'http://localhost:8000';
+const NODE_BASE_URL = import.meta.env.VITE_NODE_BACKEND_URL ?? 'http://localhost:3000/api';
+const PYTHON_BASE_URL = import.meta.env.VITE_PYTHON_BACKEND_URL ?? 'http://localhost:8000';
 
 import { Question, CodingSchema, UpdateCodingSchemaBody } from '@/types';
 
@@ -24,7 +24,7 @@ const pythonApiInstance = axios.create({
 
 class QuestionApi {
     /** Coding Schema Methods */
-    
+
     async createCodingSchema() {
         const response = await nodeApiInstance.get('/codingSchema/createCodingSchema', {
             withCredentials: true
@@ -54,8 +54,8 @@ class QuestionApi {
         return response.data;
     }
 
-    async fetchAvailableQuestionsCategories(){
-        const response=await nodeApiInstance.get("/question/question_categories");
+    async fetchAvailableQuestionsCategories() {
+        const response = await nodeApiInstance.get("/question/question_categories");
         return response.data
     }
 
