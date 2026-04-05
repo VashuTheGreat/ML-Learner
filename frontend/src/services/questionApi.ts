@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const NODE_BASE_URL = 'http://localhost:3000/api';
-const PYTHON_BASE_URL = 'http://localhost:8000';
+const NODE_BASE_URL = import.meta.env.VITE_NODE_BACKEND_URL ?? 'http://localhost:3000/api';
+const PYTHON_BASE_URL = import.meta.env.VITE_PYTHON_BACKEND_URL ?? 'http://localhost:8000';
 
 import { Question, CodingSchema, UpdateCodingSchemaBody } from '@/types';
 
