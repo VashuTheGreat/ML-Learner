@@ -119,8 +119,8 @@ export const Sidebar = () => {
             onClick={() => setIsMobileOpen(false)}
             className="flex items-center gap-3 overflow-hidden min-w-0"
           >
-            <div className="w-9 h-9 min-w-[36px] rounded-xl gradient-bg flex items-center justify-center shadow-md flex-shrink-0">
-              <Code2 className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 min-w-[36px] flex items-center justify-center flex-shrink-0">
+              <img src="/logo.svg" alt="ML Learner logo" className="w-full h-full object-contain" />
             </div>
             <span
               className={cn(

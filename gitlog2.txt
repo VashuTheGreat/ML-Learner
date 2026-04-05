@@ -1,0 +1,20 @@
+﻿commit efb601870f2768a1b6bc311a95e7ac3edd96f267
+Author: sarthakkaushik927 <sarthakkaushik927@gmail.com>
+Date:   Sun Apr 5 14:57:26 2026 +0530
+
+    Use env vars for backend URLs, add logo, .env.example
+
+A	frontend/.env.example
+D	frontend/src/Services/api.ts
+D	frontend/src/Services/interviewApi.ts
+D	frontend/src/Services/mlTrainerApi.ts
+D	frontend/src/Services/performanceApi.ts
+D	frontend/src/Services/pythonApi.ts
+D	frontend/src/Services/questionApi.ts
+D	frontend/src/Services/templateApi.ts
+D	frontend/src/Services/userApi.ts
+M	frontend/src/components/common/FaceDetectionVideo.tsx
+M	frontend/src/services/api.ts
+M	frontend/src/services/mlTrainerApi.ts
+M	frontend/src/services/pythonApi.ts
+M	frontend/src/services/questionApi.ts
