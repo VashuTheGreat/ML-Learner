@@ -12,7 +12,7 @@ interface FaceDetectionVideoProps {
 
 type FaceStatus = 'ok' | 'none' | 'multiple' | null;
 
-const WS_URL = `${import.meta.env.VITE_PYTHON_WS_URL ?? 'ws://localhost:8000'}/api/face/findFace`;
+const WS_URL = `${import.meta.env.VITE_PYTHON_WS_URL || 'ws://localhost:8000'}/api/face/findFace`;
 
 export const FaceDetectionVideo: React.FC<FaceDetectionVideoProps> = ({
   isVideoOn,
