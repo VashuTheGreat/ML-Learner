@@ -23,11 +23,11 @@ import {
   RefreshCw
 } from "lucide-react";
 
-import userApi from "@/Services/userApi";
-import templateApi from "@/Services/templateApi";
-import pythonApi from "@/Services/pythonApi";
-import interviewApi from "@/Services/interviewApi";
-import questionApi from "@/Services/questionApi";
+import userApi from "@/services/userApi";
+import templateApi from "@/services/templateApi";
+import pythonApi from "@/services/pythonApi";
+import interviewApi from "@/services/interviewApi";
+import questionApi from "@/services/questionApi";
 import { useToast } from "@/components/ui/use-toast";
 import { User, CodingSchema } from "@/types";
 

@@ -5,9 +5,9 @@ import {
   Clock, Bot, User, Volume2, Trophy, ShieldCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import pythonApi from '@/Services/pythonApi';
-import performanceApi from '@/Services/performanceApi';
-import interviewApi from '@/Services/interviewApi';
+import pythonApi from '@/services/pythonApi';
+import performanceApi from '@/services/performanceApi';
+import interviewApi from '@/services/interviewApi';
 import { FaceDetectionVideo } from '@/components/common/FaceDetectionVideo';
 
 export const AIInterview = () => {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import questionApi, { type Question } from '../Services/questionApi';
+import questionApi, { type Question } from '../services/questionApi';
 import {
   Play, RotateCcw, CheckCircle2, XCircle, Loader2, ChevronLeft,
   BookOpen, Code2, Lightbulb, Check, Maximize2, Minimize2,

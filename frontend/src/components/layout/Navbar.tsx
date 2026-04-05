@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Code2, User as UserIcon, LogOut, LayoutDashboard, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import userApi from "@/Services/userApi";
+import userApi from "@/services/userApi";
 
 interface User {
   _id: string;

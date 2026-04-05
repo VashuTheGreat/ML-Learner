@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const PYTHON_BASE_URL = import.meta.env.VITE_PYTHON_BACKEND_URL || 'http://localhost:8000';
+
 const pythonApiInstance = axios.create({
-    baseURL: import.meta.env.VITE_PYTHON_BACKEND_URL ?? 'http://localhost:8000',
+    baseURL: PYTHON_BASE_URL,
     headers: { 'Content-Type': 'application/json' },
 });
 

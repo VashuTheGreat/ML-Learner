@@ -9,7 +9,7 @@ import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
   ResponsiveContainer, Tooltip
 } from 'recharts';
-import performanceApi from '@/Services/performanceApi';
+import performanceApi from '@/services/performanceApi';
 
 import { cn } from "@/lib/utils";
 

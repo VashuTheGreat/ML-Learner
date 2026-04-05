@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Layout, Search, Filter, ArrowRight, Loader2, Upload, X, FileJson, FileCode } from 'lucide-react';
-import templateApi from '@/Services/templateApi';
+import templateApi from '@/services/templateApi';
 
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
