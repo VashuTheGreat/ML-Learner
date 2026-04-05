@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import pythonApi from '@/Services/pythonApi';
+import pythonApi from '@/services/pythonApi';
 import {
   Search, Briefcase, Building2, ExternalLink, ClipboardList,
   Loader2, AlertCircle, Linkedin, RefreshCw, ChevronDown, ChevronUp, ImageOff

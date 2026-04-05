@@ -4,7 +4,7 @@ import mlTrainerApi, {
   TrainPayload,
   TrainResult,
   DatasetParamMeta,
-} from "@/Services/mlTrainerApi";
+} from "@/services/mlTrainerApi";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

@@ -3,9 +3,9 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { CheckCircle, ArrowRight, Home, RotateCcw, Trophy, Loader2, BarChart2 } from "lucide-react";
 import heroPerson from "@/assets/hero-person.png";
 
-import pythonApi from "@/Services/pythonApi";
-import performanceApi from "@/Services/performanceApi";
-import interviewApi from "@/Services/interviewApi";
+import pythonApi from "@/services/pythonApi";
+import performanceApi from "@/services/performanceApi";
+import interviewApi from "@/services/interviewApi";
 
 const ThanksParticipating = () => {
   const navigate = useNavigate();

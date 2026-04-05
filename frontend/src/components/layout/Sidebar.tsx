@@ -7,7 +7,7 @@ import {
   Bot, FileText, Linkedin
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import userApi from "@/Services/userApi";
+import userApi from "@/services/userApi";
 import { useSidebar } from "./AppLayout";
 import { useTheme, THEMES, ThemeId } from "@/contexts/ThemeContext";
 import { User } from "@/types";

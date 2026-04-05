@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import pythonApi from '@/Services/pythonApi'
-import templateApi from '@/Services/templateApi'
-import userApi from '@/Services/userApi'
+import pythonApi from '@/services/pythonApi'
+import templateApi from '@/services/templateApi'
+import userApi from '@/services/userApi'
 import { useToast } from "@/components/ui/use-toast"
 
 interface Template {

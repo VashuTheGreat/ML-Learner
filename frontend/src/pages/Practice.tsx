@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import questionApi from '../Services/questionApi';
+import questionApi from '../services/questionApi';
 import { BookOpen, Code, ChevronRight, Filter, Star, Search, CheckCircle2 } from 'lucide-react';
 
 import Footer from '@/components/layout/Footer';
