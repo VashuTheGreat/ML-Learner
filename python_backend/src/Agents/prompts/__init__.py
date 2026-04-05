@@ -87,3 +87,81 @@ interview_performance_prompt="""
 You are given with user chat history with an 
 intervier ai , generate performance
 """
+
+
+
+
+# ------------------ FormFiller ---------------------------
+FORMFILLER_LLM_PROMPT = PromptTemplate.from_template(
+"""
+You are an intelligent AI form-filling assistant.
+
+You are given two inputs:
+
+1. Form Fields:
+A list of objects where each field contains:
+- id
+- name
+- placeholder
+- type
+- label_text
+
+2. User Details:
+Structured or unstructured data extracted from the user's resume.
+
+-------------------------------------
+
+Your Task:
+- For EACH field in the given list, generate the most accurate value using the user details.
+- Use "label_text", "name", and "placeholder" to understand what the field is asking.
+- Map the correct information from the resume to the corresponding field.
+
+-------------------------------------
+
+Rules:
+- Maintain EXACT SAME ORDER as the input fields.
+- Generate EXACTLY one value for each field.
+- If exact data is available → use it.
+- If not available → intelligently infer a reasonable value.
+- If nothing can be inferred → return an empty string "".
+- Do NOT hallucinate unrealistic data.
+
+-------------------------------------
+
+Strict Output Requirements:
+- Output MUST be valid JSON.
+- Output MUST follow this exact Pydantic structure:
+
+{{
+  "output": [
+    {{ "value": "..." }},
+    {{ "value": "..." }}
+  ]
+}}
+
+- Do NOT include field names, ids, explanations, or extra text.
+- ONLY return the JSON.
+
+-------------------------------------
+
+Field Understanding Examples:
+- "Full Name" → user's full name
+- "Email" → email address
+- "Phone" → phone number
+- "Address" → full address (construct if needed)
+
+-------------------------------------
+
+INPUT:
+
+Form Fields:
+{inputFormFields}
+
+User Details:
+{userdetails}
+
+-------------------------------------
+
+Now generate the output.
+"""
+)

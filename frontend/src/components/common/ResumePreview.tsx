@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import templateApi from "@/services/templateApi";
+import templateApi from "@/Services/templateApi";
 
 export const ResumePreview = ({ resumeId }: { resumeId: string }) => {
   const [htmlContent, setHtmlContent] = useState<string | null>(null);

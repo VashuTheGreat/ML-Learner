@@ -6,6 +6,11 @@ __pycache__/
 env/
 venv/
 
+
+
+        python_backend/notebook/resume-score-details.zip
+        python_backend/notebook/resume-score-details/
+
 # Environment variables
 .env
 .env.local

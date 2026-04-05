@@ -515,19 +515,26 @@ export const updateUserData=expressRepre(
 
     },
     asyncHandler(async (req,res)=>{
-        const {temp_data}=req.body;
-        const user_id=req.user?._id
+        let {temp_data}=req.body;
+        const user_id=req.user?._id;
         if (!temp_data){
-            throw new ApiError(400, "temp_data is required")
+            throw new ApiError(400, "temp_data is required");
         }
-        console.log(temp_data)
-        const user=await User.findByIdAndUpdate(user_id,{temp_data:temp_data},{new:true})
+        
+        if (typeof temp_data === 'string') {
+            try {
+                temp_data = JSON.parse(temp_data);
+            } catch (error) {
+                // If it fails to parse, it will just stay as a string, which is fine
+            }
+        }
+        
+        console.log(temp_data);
+        const user=await User.findByIdAndUpdate(user_id,{temp_data:temp_data},{new:true}).select("-password -refreshToken");
         if (!user){
-            throw new ApiError(404, "User not found")
+            throw new ApiError(404, "User not found");
         }
-        return res.status(200).json(new ApiResponse(200,user))
-
-
+        return res.status(200).json(new ApiResponse(200,user));
     })
 
 )

@@ -90,8 +90,49 @@ class JobFetcher:
                     job.click()
                     time.sleep(4)
 
-                    # ✅ JOB LINK (From browser URL after click)
-                    job_link = self.driver.current_url.split('?')[0]
+                    # ✅ JOB LINK (Simulating Share -> Copy link)
+                    job_link = "N/A"
+                    try:
+                        logger.info("Attempting to get job link via 'Share' -> 'Copy link'")
+                        # Use precise selectors based on user's inspection
+                        share_btn = self.wait.until(EC.presence_of_element_located(
+                            (By.CSS_SELECTOR, ".job-details-jobs-unified-top-card__top-buttons .social-share__dropdown-trigger, .jobs-unified-top-card__top-buttons .social-share__dropdown-trigger")
+                        ))
+                        self.driver.execute_script("arguments[0].click();", share_btn)
+                        time.sleep(1)
+                        
+                        copy_link_btn = self.wait.until(EC.presence_of_element_located(
+                            (By.CSS_SELECTOR, ".social-share__item--copy-link")
+                        ))
+                        self.driver.execute_script("arguments[0].click();", copy_link_btn)
+                        time.sleep(1)
+                        
+                        # Extract from OS clipboard using a temporary textarea
+                        self.driver.execute_script("""
+                            var input = document.createElement('textarea');
+                            input.id = 'dummy-clipboard-123';
+                            document.body.appendChild(input);
+                            input.focus();
+                        """)
+                        dummy_input = self.driver.find_element(By.ID, 'dummy-clipboard-123')
+                        dummy_input.send_keys(Keys.CONTROL, 'v')
+                        job_link = dummy_input.get_attribute('value')
+                        self.driver.execute_script("document.getElementById('dummy-clipboard-123').remove();")
+                        
+                        if not job_link or "linkedin.com" not in job_link:
+                            raise Exception("Clipboard extraction was empty or invalid")
+                        logger.info(f"Successfully got job link from share button: {job_link}")
+                    except Exception as e:
+                        logger.warning(f"Failed to copy link via share button: {e}. Falling back to URL parsing.")
+                        import urllib.parse
+                        parsed_url = urllib.parse.urlparse(self.driver.current_url)
+                        query_params = urllib.parse.parse_qs(parsed_url.query)
+                        if 'currentJobId' in query_params:
+                            job_id = query_params['currentJobId'][0]
+                            job_link = f"https://www.linkedin.com/jobs/view/{job_id}/"
+                            logger.info(f"Successfully got job link from URL parsing: {job_link}")
+                        else:
+                            job_link = self.driver.current_url.split('?')[0]
 
                     # ✅ TITLE (Specific to the job detail pane)
                     try:

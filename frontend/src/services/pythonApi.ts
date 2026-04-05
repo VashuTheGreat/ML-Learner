@@ -93,6 +93,12 @@ class PythonApi {
         const response = await pythonApiInstance.post(`/api/jobFetcher/fetchJobs?jobtile=${encodeURIComponent(jobtile)}&updated=${updated}`);
         return response.data;
     }
+
+    async similarJobPredictor(jobDiscription:string,userDetails:string){
+        const response = await pythonApiInstance.post(`/api/similarJobPredictor/similarJobPredictor?jobDiscription=${encodeURIComponent(jobDiscription)}&userDetails=${encodeURIComponent(userDetails)}`);
+        console.log("Similar Job Predictor",response.data);
+        return response.data;
+    }
 }
 
 export default new PythonApi();

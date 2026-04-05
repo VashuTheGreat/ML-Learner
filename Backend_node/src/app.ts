@@ -54,7 +54,7 @@ const limiter = rateLimit({
 } satisfies Limiter);  
 
 
-app.use(limiter)
+// app.use(limiter)
 
 app.use(Vexpress.urlencoded({extended:true,limit:"16kb"}))// extended true bole to or obj ke under obj de pate h and ye url me jo data hota h usko deta h
 app.use(Vexpress.json({limit:"16kb"})) // asa no ho ki kitne bhi json bhej de

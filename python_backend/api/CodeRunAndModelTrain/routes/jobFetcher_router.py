@@ -9,11 +9,10 @@ router=fastapi.APIRouter()
 async def jobFetcher(jobtile: str="machine learning intern",updated:bool=False):
     try:
         job_fetcher_pipeline=JobFetcherPipeline()
+        jobtile=jobtile.lower()
         res=await job_fetcher_pipeline.initiate(jobtile=jobtile,updated=updated)
         data=pd.read_csv(res.saved_jobs_file_path)
-        # Handle NaN values which are not JSON compliant
         data = data.where(pd.notnull(data), None)
-        print(data)
         return data.to_dict(orient="records")
     except Exception as e:
         raise MyException(e, sys)
