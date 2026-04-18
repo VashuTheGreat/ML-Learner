@@ -54,7 +54,7 @@ echo "Starting Redis..."\n\
 redis-server --daemonize yes\n\
 \n\
 echo "Starting Nginx..."\n\
-nginx\n\
+nginx -g "daemon off;" &\n\
 \n\
 echo "Starting Node Backend..."\n\
 cd /app/Backend_node && npm run dev &\n\
@@ -62,7 +62,7 @@ cd /app/Backend_node && npm run dev &\n\
 echo "Starting Python Backend..."\n\
 cd /app/python_backend && python main.py &\n\
 \n\
-echo "All servers started! Waiting for them to finish..."\n\
+echo "All servers started! Waiting for them to crash or finish..."\n\
 wait -n\n\
 ' > /app/start.sh && chmod +x /app/start.sh
 
