@@ -12,7 +12,15 @@ interface FaceDetectionVideoProps {
 
 type FaceStatus = 'ok' | 'none' | 'multiple' | null;
 
-const WS_URL = `${import.meta.env.VITE_PYTHON_BASE_URL?.replace('http', 'ws') || 'ws://localhost:8000'}/api/face/findFace`;
+const getWsUrl = () => {
+  const base = import.meta.env.VITE_PYTHON_BASE_URL || 'http://localhost:8000';
+  if (base.startsWith('http')) {
+    return `${base.replace('http', 'ws')}/api/face/findFace`;
+  }
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${protocol}//${window.location.host}${base}/api/face/findFace`;
+};
+const WS_URL = getWsUrl();
 
 export const FaceDetectionVideo: React.FC<FaceDetectionVideoProps> = ({
   isVideoOn,
