@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
-# Install Node.js, Redis, Nginx, and required system dependencies for Python packages (opencv, etc)
-RUN apt-get update && apt-get install -y curl bash libgl1 libglib2.0-0 redis-server nginx && \
+# Install Node.js, Redis, Nginx, Chromium (for Selenium), and required system dependencies
+RUN apt-get update && apt-get install -y curl bash libgl1 libglib2.0-0 redis-server nginx chromium chromium-driver && \
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs && \
     apt-get clean && rm -rf /var/lib/apt/lists/*

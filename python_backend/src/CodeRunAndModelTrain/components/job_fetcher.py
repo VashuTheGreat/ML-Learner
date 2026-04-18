@@ -23,7 +23,11 @@ logger = logging.getLogger(__name__)
 class JobFetcher:
     def __init__(self, job_fetcher_config: JobFetcherConfig):
         self.job_fetcher_config = job_fetcher_config
-        self.driver = webdriver.Chrome()
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        self.driver = webdriver.Chrome(options=chrome_options)
         self.wait = WebDriverWait(self.driver, self.job_fetcher_config.web_driver_wait)
         logger.info(f"Initialized JobFetcher with URL: {self.job_fetcher_config.target_url}")
         self.driver.get(self.job_fetcher_config.target_url)
