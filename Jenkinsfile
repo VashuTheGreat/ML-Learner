@@ -76,6 +76,7 @@ mv "$TEMP_README" README.md
 set -e
 export PATH=$HOME/.local/bin:$PATH
 hf repos create "$HF_USERNAME/$SPACE_NAME" --type space --space-sdk docker || true
+sleep 5
 '''
             }
         }
@@ -86,6 +87,7 @@ hf repos create "$HF_USERNAME/$SPACE_NAME" --type space --space-sdk docker || tr
                 sh '''#!/bin/bash
 set -e
 export PATH=$HOME/.local/bin:$PATH
+export HF_DEBUG=1
 hf upload "$HF_USERNAME/$SPACE_NAME" . --repo-type=space
 '''
             }
