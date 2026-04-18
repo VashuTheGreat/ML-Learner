@@ -1,4 +1,6 @@
-import "dotenv/config";
+import * as dotenv from "dotenv";
+import path from "path";
+dotenv.config({ path: path.join(process.cwd(), '../.env') });
 import { Request, Response } from "express";
 import logger from "./logger/create.logger.js";
 
