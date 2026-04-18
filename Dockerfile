@@ -31,6 +31,9 @@ COPY . .
 
 # 1b. Build Frontend
 WORKDIR /app/frontend
+# Inject base URLs for Vite build process since .env is ignored in docker
+ENV VITE_NODE_BASE_URL="/node_api/api"
+ENV VITE_PYTHON_BASE_URL="/python_api"
 # Produce the optimized static files for Nginx to serve
 RUN npm run build
 
