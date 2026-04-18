@@ -8,22 +8,34 @@ RUN apt-get update && apt-get install -y curl bash libgl1 libglib2.0-0 redis-ser
 
 WORKDIR /app
 
-# Copy the entire codebase
+# 1. Setup Frontend Dependencies
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm install
+
+# 2. Setup Node Backend Dependencies
+WORKDIR /app/Backend_node
+COPY Backend_node/package*.json ./
+RUN npm install
+
+# 3. Setup Python Backend Dependencies
+WORKDIR /app/python_backend
+COPY python_backend/pyproject.toml python_backend/README.md python_backend/uv.lock* ./
+RUN pip install --no-cache-dir uv
+RUN uv pip compile pyproject.toml -o requirements.txt && \
+    uv pip install --system -r requirements.txt
+
+# --- COPY THE REST OF THE CODE ---
+WORKDIR /app
 COPY . .
 
-# 1. Setup Frontend
+# 1b. Build Frontend
 WORKDIR /app/frontend
-RUN npm install
 # Produce the optimized static files for Nginx to serve
 RUN npm run build
 
-# 2. Setup Node Backend
-WORKDIR /app/Backend_node
-RUN npm install
-
-# 3. Setup Python Backend
+# 3b. Install Python Package
 WORKDIR /app/python_backend
-RUN pip install --no-cache-dir uv
 # Using uv to install dependencies from pyproject.toml
 RUN uv pip install --system -e .
 
