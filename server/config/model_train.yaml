@@ -1,0 +1,284 @@
+classification_models:
+  LogisticRegression:
+    class: LogisticRegression
+    default_params:
+      penalty: l2
+      C: 1.0
+      solver: lbfgs
+      max_iter: 100
+      multi_class: auto
+      random_state: None
+
+  KNeighborsClassifier:
+    class: KNeighborsClassifier
+    default_params:
+      n_neighbors: 5
+      weights: uniform
+      algorithm: auto
+      p: 2
+      n_jobs: None
+
+  SVC:
+    class: SVC
+    default_params:
+      C: 1.0
+      kernel: rbf
+      gamma: scale
+      degree: 3
+      probability: False
+      random_state: None
+
+  LinearSVC:
+    class: LinearSVC
+    default_params:
+      C: 1.0
+      loss: squared_hinge
+      penalty: l2
+      dual: True
+      max_iter: 1000
+      random_state: None
+
+  DecisionTreeClassifier:
+    class: DecisionTreeClassifier
+    default_params:
+      criterion: gini
+      max_depth: None
+      min_samples_split: 2
+      min_samples_leaf: 1
+      random_state: None
+
+  RandomForestClassifier:
+    class: RandomForestClassifier
+    default_params:
+      n_estimators: 100
+      criterion: gini
+      max_depth: None
+      min_samples_split: 2
+      min_samples_leaf: 1
+      bootstrap: True
+      random_state: None
+      n_jobs: None
+
+  GradientBoostingClassifier:
+    class: GradientBoostingClassifier
+    default_params:
+      loss: log_loss # or 'deviance' in older versions
+      learning_rate: 0.1
+      n_estimators: 100
+      subsample: 1.0
+      max_depth: 3
+      random_state: None
+
+  AdaBoostClassifier:
+    class: AdaBoostClassifier
+    default_params:
+      n_estimators: 50
+      learning_rate: 1.0
+      algorithm: SAMME.R
+      random_state: None
+
+  ExtraTreesClassifier:
+    class: ExtraTreesClassifier
+    default_params:
+      n_estimators: 100
+      criterion: gini
+      max_depth: None
+      min_samples_split: 2
+      min_samples_leaf: 1
+      bootstrap: False
+      random_state: None
+      n_jobs: None
+
+  GaussianNB:
+    class: GaussianNB
+    default_params:
+
+  MultinomialNB:
+    class: MultinomialNB
+    default_params:
+      alpha: 1.0
+      fit_prior: True
+
+  BernoulliNB:
+    class: BernoulliNB
+    default_params:
+      alpha: 1.0
+      fit_prior: True
+
+  MLPClassifier:
+    class: MLPClassifier
+    default_params:
+      hidden_layer_sizes: (100)
+      activation: relu
+      solver: adam
+      alpha: 0.0001
+      learning_rate: constant
+      max_iter: 200
+      random_state: None
+
+  SGDClassifier:
+    class: SGDClassifier
+    default_params:
+      loss: hinge # linear SVM by default
+      penalty: l2
+      alpha: 0.0001
+      learning_rate: optimal
+      max_iter: 1000
+      random_state: None
+
+  Perceptron:
+    class: Perceptron
+    default_params:
+      penalty: None
+      alpha: 0.0001
+      max_iter: 1000
+      random_state: None
+
+  PassiveAggressiveClassifier:
+    class: PassiveAggressiveClassifier
+    default_params:
+      C: 1.0
+      max_iter: 1000
+      random_state: None
+
+  RidgeClassifier:
+    class: RidgeClassifier
+    default_params:
+      alpha: 1.0
+      fit_intercept: True
+      solver: auto
+      random_state: None
+
+# ================ Regression ===============
+
+regression_models:
+  LinearRegression:
+    class: LinearRegression
+    default_params:
+      fit_intercept: True
+      copy_X: True
+      n_jobs: None
+
+  Ridge:
+    class: Ridge
+    default_params:
+      alpha: 1.0
+      fit_intercept: True
+      solver: auto
+      random_state: None
+
+  Lasso:
+    class: Lasso
+    default_params:
+      alpha: 1.0
+      fit_intercept: True
+      max_iter: 1000
+      random_state: None
+
+  ElasticNet:
+    class: ElasticNet
+    default_params:
+      alpha: 1.0
+      l1_ratio: 0.5
+      fit_intercept: True
+      max_iter: 1000
+      random_state: None
+
+  KNeighborsRegressor:
+    class: KNeighborsRegressor
+    default_params:
+      n_neighbors: 5
+      weights: uniform
+      algorithm: auto
+      p: 2
+      n_jobs: None
+
+  SVR:
+    class: SVR
+    default_params:
+      kernel: rbf
+      C: 1.0
+      epsilon: 0.1
+      gamma: scale
+      degree: 3
+
+  LinearSVR:
+    class: LinearSVR
+    default_params:
+      epsilon: 0.0
+      C: 1.0
+      loss: epsilon_insensitive
+      max_iter: 1000
+      random_state: None
+
+  DecisionTreeRegressor:
+    class: DecisionTreeRegressor
+    default_params:
+      criterion: squared_error
+      max_depth: None
+      min_samples_split: 2
+      min_samples_leaf: 1
+      random_state: None
+
+  RandomForestRegressor:
+    class: RandomForestRegressor
+    default_params:
+      n_estimators: 100
+      criterion: squared_error
+      max_depth: None
+      min_samples_split: 2
+      min_samples_leaf: 1
+      bootstrap: True
+      random_state: None
+      n_jobs: None
+
+  ExtraTreesRegressor:
+    class: ExtraTreesRegressor
+    default_params:
+      n_estimators: 100
+      criterion: squared_error
+      max_depth: None
+      min_samples_split: 2
+      min_samples_leaf: 1
+      bootstrap: False
+      random_state: None
+      n_jobs: None
+
+  GradientBoostingRegressor:
+    class: GradientBoostingRegressor
+    default_params:
+      loss: squared_error
+      learning_rate: 0.1
+      n_estimators: 100
+      subsample: 1.0
+      max_depth: 3
+      random_state: None
+
+  AdaBoostRegressor:
+    class: AdaBoostRegressor
+    default_params:
+      n_estimators: 50
+      learning_rate: 1.0
+      loss: linear
+      random_state: None
+
+  MLPRegressor:
+    class: MLPRegressor
+    default_params:
+      hidden_layer_sizes: (100)
+      activation: relu
+      solver: adam
+      alpha: 0.0001
+      learning_rate: constant
+      max_iter: 200
+      random_state: None
+
+  SGDRegressor:
+    class: SGDRegressor
+    default_params:
+      loss: squared_error
+      penalty: l2
+      alpha: 0.0001
+      learning_rate: invscaling
+      max_iter: 1000
+      random_state: None
