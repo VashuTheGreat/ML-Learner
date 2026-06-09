@@ -14,6 +14,6 @@ class AiInterviewChat:
         try:
             res = await chat_interviewer(thread_id=thread_id, time_remain=time_remain, topic=topic, user_input=user_input)
             logging.info("AI response received")
-            return {"ai_response": res['messages'][-1].content}
+            return res
         except Exception as e:
             raise MyException(e, sys)

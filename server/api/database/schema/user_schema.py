@@ -30,11 +30,6 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    resumes = relationship("Template", secondary=user_resumes)
-    coding_profile = relationship("Coding", back_populates="user", uselist=False)
-    interviews = relationship("Interview", back_populates="user")
-    performances = relationship("Performance", back_populates="user")
-
     def set_password(self, password):
         self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 

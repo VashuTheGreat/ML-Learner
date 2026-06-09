@@ -6,10 +6,8 @@ from contextlib import asynccontextmanager
 
 from api.routes.user_router import router as UserRouter
 from api.routes.coding_routes import router as CodingRouter
-from api.routes.interview_router import router as InterviewRouter
-from api.routes.performance_router import router as PerformanceRouter
-from api.routes.thread_router import router as DeleteThreadRouter
-from api.routes.health_router import router as HealthRouter
+from api.routes.question_routes import router as QuestionRouter
+from api.routes.common_routes import router as CommonRouter
 from api.routes.modelTraining_router import router as ModelTrainRouter
 from api.routes.modelTrainConfig_router import router as ModelTrainConfigRouter
 from api.routes.faceFind_routes import router as FaceDetetorRouter
@@ -18,6 +16,8 @@ from api.routes.FormFiller_router import router as FormFillerRouter
 from api.routes.similarJobPredictor_router import router as SimilarJobPredictorRouter
 from api.routes.jobmodelDownloader_router import router as JobModelDownloaderRouter
 from api.routes.templates_routes import router as TemplateRouter
+from api.routes.interview_routes import router as InterviewRouter
+
 from src.graphs.interview_graph_builder import close_checkpointer
 from api.database import Base, engine
 
@@ -59,13 +59,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+app.include_router(CommonRouter,prefix="")
 app.include_router(UserRouter, prefix="/api/v1/user")
 app.include_router(TemplateRouter, prefix="/api/v1/template")
+app.include_router(QuestionRouter, prefix="/api/v1/question")
 app.include_router(CodingRouter, prefix="/api/v1/coding")
 app.include_router(InterviewRouter, prefix="/api/v1/interview")
-app.include_router(PerformanceRouter, prefix="/api/v1/performance")
-app.include_router(DeleteThreadRouter, prefix="/api/v1/thread")
-app.include_router(HealthRouter, prefix="/api/v1/health")
 app.include_router(ModelTrainRouter, prefix="/api/v1/modelTraining")
 app.include_router(ModelTrainConfigRouter, prefix="/api/v1/modelTrainingConfig")
 app.include_router(FaceDetetorRouter, prefix="/api/v1/face")

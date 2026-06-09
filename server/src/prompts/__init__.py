@@ -19,8 +19,42 @@ dummyInterview_prompts=PromptTemplate.from_template("""
 
 
 
-generateInterviewPerformance_prompts=PromptTemplate.from_template("You are given the user chat history with an interviewer AI. Generate performance.")
+generateInterviewPerformance_prompts = PromptTemplate.from_template("""
+You are an expert interview evaluator.
 
+You will be given the complete conversation history between a candidate and an AI interviewer.
+
+Analyze the candidate's performance and generate a structured evaluation based only on the conversation.
+
+
+
+
+
+Evaluate the candidate on:
+- Technical Knowledge
+- Communication Skills
+- Problem Solving Ability
+- Confidence
+- Clarity of Explanation
+- Overall Performance
+
+For each category:
+- Assign a score between 1 and 10.
+- Provide a short justification.
+
+Also provide:
+- Strengths
+- Areas for Improvement
+- Final Feedback
+- Hiring Recommendation (Strong Hire, Hire, Neutral, No Hire)
+
+Be objective and use only information present in the conversation.
+
+Return the response according to the provided schema.
+
+
+conversation History:
+""")
 
 
 
