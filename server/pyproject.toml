@@ -39,6 +39,7 @@ dependencies = [
     "pyjwt>=2.13.0",
     "pydantic[email]>=2.12.5",
     "cloudinary>=1.44.2",
+    "langchain-groq>=1.1.2",
 ]
 
 [tool.uv.workspace]

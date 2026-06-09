@@ -10,8 +10,7 @@ RELOAD = True
 RELOAD_EXCLUDES = ["temp/*"]
 
 # LLM Configuration
-LLM_MODEL_ID = "us.meta.llama3-3-70b-instruct-v1:0"
-LLM_REGION = "us-east-1"
+LLM_MODEL_ID = "llama-3.3-70b-versatile"
 
 # Storage Configuration
 ARTIFACT_DIR = "artifact"

@@ -1,37 +1,50 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict
-class Project(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
-    tech_stack: List[str] = Field(default_factory=list)
+from pydantic import BaseModel, EmailStr
+from typing import List, Optional, Literal
 
-class Education(BaseModel):
-    degree: Optional[str] = None
-    institute: Optional[str] = None
-    year: Optional[str] = None
+
+class Links(BaseModel):
+    social_links: List[str] = []
+
 
 class Experience(BaseModel):
-    role: Optional[str] = None
-    company: Optional[str] = None
-    duration: Optional[str] = None
-    description: Optional[str] = None
+    role: str
+    company: str
+    summary: str
+
+
+class Education(BaseModel):
+    degree: str
+    college: str
+    university: str
+    start: Optional[str] = None
+    end: Optional[str] = None
+
+
+class Project(BaseModel):
+    title: str
+    bullet_points: List[str]
+    links: List[str] = []
+
 
 class ResumeSchema(BaseModel):
-    name: Optional[str] = None
-    title: Optional[str] = None
-    email: Optional[str] = None
-    phone: Optional[str] = None
-    location: Optional[str] = None
-    summary: Optional[str] = None
-    skills: List[str] = Field(default_factory=list)
-    soft_skills: List[str] = Field(default_factory=list)
-    languages: List[str] = Field(default_factory=list)
-    education: List[Education] = Field(default_factory=list)
-    experience: List[Experience] = Field(default_factory=list)
-    projects: List[Project] = Field(default_factory=list)
-    certifications: List[str] = Field(default_factory=list)
-    achievements: List[str] = Field(default_factory=list)
-    someImportantUrls: Dict[str, str] = Field(default_factory=dict)
+    name: str
+    email: EmailStr
+    phone: str
+    location: str
+
+    summary: str
+
+    links: Links
+
+    skills: List[str]
+
+    experience: List[Experience]
+
+    education: List[Education]
+
+    projects: List[Project]
+
+    apparentSeniority: Literal["Junior", "Mid", "Senior"]
 
 class ResumeState(BaseModel):
     userDetails: str

@@ -19,7 +19,7 @@ from src.pipelines.ResumeSummary_pipeline import ResumeSummaryPipeline
 from api.models.user_model import CreateUser, UpdateUser,LoginUser
 from src.utils.cloudinary import upload_avatar_to_cloudinary, delete_avatar_from_cloudinary
 import logging
-router = APIRouter()
+router = APIRouter(tags=['User'])
 
 from config.app_config import app_config
 

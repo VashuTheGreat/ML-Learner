@@ -17,7 +17,7 @@ from api.routes.jobFetcher_router import router as JobFetcherRouter
 from api.routes.FormFiller_router import router as FormFillerRouter
 from api.routes.similarJobPredictor_router import router as SimilarJobPredictorRouter
 from api.routes.jobmodelDownloader_router import router as JobModelDownloaderRouter
-
+from api.routes.templates_routes import router as TemplateRouter
 from src.graphs.interview_graph_builder import close_checkpointer
 from api.database import Base, engine
 
@@ -60,6 +60,7 @@ app.add_middleware(
 )
 
 app.include_router(UserRouter, prefix="/api/v1/user")
+app.include_router(TemplateRouter, prefix="/api/v1/template")
 app.include_router(CodingRouter, prefix="/api/v1/coding")
 app.include_router(InterviewRouter, prefix="/api/v1/interview")
 app.include_router(PerformanceRouter, prefix="/api/v1/performance")

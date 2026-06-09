@@ -78,3 +78,6 @@ dist/
 *zip
 python_backend/notebook/resume-score-details/
 python_backend/notebook/*.zip
+
+
+gemini.md

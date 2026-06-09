@@ -1,114 +1,262 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File, Form
-from sqlalchemy.orm import Session
-from api.database import Template, get_db
-from api.utils.api_response import ApiResponse
-from api.utils.api_error import ApiError
-from api.utils.jinja_helper import render_html
-from api.middlewares.verifyuser_middleware import verify_jwt
+from typing import List, Any
 import json
 import logging
+import os
+
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+from langchain_core.documents import Document
+from langchain_community.document_loaders import PyPDFLoader
+from pypdf import PdfReader
+
+from api.database import Template, get_db
+from api.middlewares.verifyuser_middleware import verify_jwt
+from api.middlewares.multer_middleware import multer_middleware
+from src.models.Resume_model import ResumeState
+from api.models.template_model import UpdateTemplateBody
+from src.pipelines.ResumeSchemaGeneration_pipeline import ResumeSchemaGenerationPipeline
 
 router = APIRouter()
-logger = logging.getLogger(__name__)
 
-@router.post("/templates")
-async def create_template(
-    title: str = Form(...),
-    temp_data: str = Form(None),
-    template: UploadFile = File(...),
-    temp_data_file: UploadFile = File(None),
-    db: Session = Depends(get_db)
+
+
+
+
+# ============================= Helpers =============================
+async def load_pdf_docs(pdf_path: str) -> List[Document]:
+    loader = PyPDFLoader(pdf_path)
+    langchain_docs = loader.load()
+
+    reader = PdfReader(pdf_path)
+
+    for page_num, doc in enumerate(langchain_docs):
+        page_obj = reader.pages[page_num]
+        extracted_links = []
+
+        if "/Annots" in page_obj:
+            annotations = page_obj["/Annots"]
+            for annot in annotations:
+                obj = annot.get_object()
+                if obj.get("/Subtype") == "/Link" and "/A" in obj:
+                    action = obj["/A"].get_object()
+                    if "/URI" in action:
+                        extracted_links.append({
+                            "name": obj.get("/Contents", "Anchor Link"),
+                            "url": action["/URI"]
+                        })
+
+        if extracted_links:
+            doc.page_content = doc.page_content + " links " + json.dumps(extracted_links)
+
+    return langchain_docs
+
+
+async def load_doc_to_string(docs: List[Document]) -> str:
+    content = ""
+    for doc in docs:
+        content += f" {doc.page_content}"
+    return content
+
+
+# ============================= Resume Template =============================
+@router.post("/resume", dependencies=[Depends(verify_jwt)])
+async def create_resume_template(
+    request: Request,
+    resume_file_path: str = Depends(multer_middleware),
+    db: Session = Depends(get_db),
 ):
-    template_content = (await template.read()).decode("utf-8")
-    
-    parsed_temp_data = None
-    if temp_data_file:
-        try:
-            content = (await temp_data_file.read()).decode("utf-8")
-            parsed_temp_data = json.loads(content)
-        except json.JSONDecodeError:
-            raise ApiError(400, "Invalid JSON in temp_data file")
-    elif temp_data:
-        try:
-            parsed_temp_data = json.loads(temp_data)
-        except json.JSONDecodeError:
-            raise ApiError(400, "Invalid JSON in temp_data body")
-            
-    if not parsed_temp_data:
-        raise ApiError(400, "Please provide temp_data as a file or in the request body.")
+    user_id = request.state.user.id
+    logging.info("POST /templates/resume — entered")
 
-    template_data = Template(
-        template=template_content,
-        temp_data=parsed_temp_data,
-        title=title
-    )
-    db.add(template_data)
+    try:
+        docs = await load_pdf_docs(resume_file_path)
+        logging.info(f"PDF loaded — {len(docs)} page(s)")
+
+        content = await load_doc_to_string(docs)
+        logging.debug(f"Extracted text length: {len(content)} chars")
+
+        user_state = ResumeState(userDetails=content)
+
+        pipeline = ResumeSchemaGenerationPipeline()
+        schema = await pipeline.initiate(user_state)
+        logging.info("ResumeSchemaGenerationPipeline completed")
+
+        if schema is None:
+            logging.error("Pipeline returned None schema")
+            raise HTTPException(
+                status_code=500,
+                detail={"success": False, "message": "Schema generation failed", "data": None},
+            )
+
+        parsed = schema.get("ai_generated_schema") if isinstance(schema, dict) else schema
+        logging.debug(f"Parsed schema type: {type(parsed)}")
+
+        if parsed is None:
+            logging.error("Pipeline parsed schema is None")
+            raise HTTPException(
+                status_code=500,
+                detail={"success": False, "message": "Schema parsing failed", "data": None},
+            )
+
+        schema_dict = parsed.model_dump() if hasattr(parsed, "model_dump") else parsed
+
+
+        new_template = Template(
+            user_id=user_id,
+            t_type="resume",
+            content=schema_dict,
+        )
+        db.add(new_template)
+        db.commit()
+        db.refresh(new_template)
+        logging.info(f"Template saved — id={new_template.id}")
+
+        return JSONResponse(
+            status_code=201,
+            content={
+                "success": True,
+                "message": "Resume template created successfully",
+                "data": {"id": new_template.id, "schema": schema_dict},
+            },
+        )
+
+    finally:
+        if os.path.exists(resume_file_path):
+            os.remove(resume_file_path)
+            logging.info(f"Temp file removed: {resume_file_path}")
+        else:
+            logging.warning(f"Temp file not found at cleanup: {resume_file_path}")
+
+
+# ====================== Resume Template Update ===================================
+@router.put("/resume", dependencies=[Depends(verify_jwt)])
+async def update_resume_template(
+    request: Request,
+    body: UpdateTemplateBody,
+    db: Session = Depends(get_db),
+):
+    user_id = request.state.user.id
+    logging.info(f"PUT /templates/resume — entered")
+
+    template = db.query(Template).filter(
+        Template.user_id == user_id,
+        Template.t_type == "resume",
+    ).first()
+
+    if not template:
+        logging.warning(f"Resume template id= not found for user_id={user_id}")
+        raise HTTPException(
+            status_code=404,
+            detail={"success": False, "message": "Template not found", "data": None},
+        )
+
+    template.content = body.content
     db.commit()
-    db.refresh(template_data)
+    db.refresh(template)
+    logging.info(f"Template updated — id={template.id}")
 
-    return ApiResponse(200, template_data, "Template uploaded successfully")
+    return JSONResponse(
+        status_code=200,
+        content={
+            "success": True,
+            "message": "Resume template updated successfully",
+            "data": {"id": template.id, "content": template.content},
+        },
+    )
 
-@router.get("/get_template/{id}")
-async def get_template(id: int, db: Session = Depends(get_db)):
-    logger.info(f"Fetching template by ID: {id}")
-    template_data = db.query(Template).filter(Template.id == id).first()
-    
-    if not template_data:
-        raise ApiError(404, "Template not found")
-        
-    return ApiResponse(200, template_data, "Template fetched successfully")
 
-@router.get("/getAlltemplates")
-async def get_all_templates(db: Session = Depends(get_db)):
-    logger.info("getAllTemplates called")
-    template_data = db.query(Template).all()
-    
-    if not template_data:
-        return ApiResponse(200, [], "Templates fetched successfully (empty)")
-        
-    final_response = []
-    for template in template_data:
-        try:
-            rendered = render_html(template.template, template.temp_data)
-            # Convert to dict since we want to add to_render
-            t_dict = {
-                "id": template.id,
-                "title": template.title,
-                "template": template.template,
-                "temp_data": template.temp_data,
-                "to_render": rendered
-            }
-            final_response.append(t_dict)
-        except Exception as e:
-            logger.error(f"Error rendering template {template.title}: {e}")
-            
-    return ApiResponse(200, final_response, "Templates fetched successfully")
+# ====================== Resume Template Get ===================================
+@router.get("/resume", dependencies=[Depends(verify_jwt)])
+async def get_resume_template(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    user_id = request.state.user.id
+    logging.info("GET /templates/resume — entered")
 
-@router.post("/getTemplateByData")
-async def get_template_by_data(request: Request, db: Session = Depends(get_db), user=Depends(verify_jwt)):
-    body = await request.json()
-    id = body.get("template_id")
-    temp_data = body.get("temp_data")
-    
-    if not id:
-        raise ApiError(400, "Invalid template id")
-        
-    template_data = db.query(Template).filter(Template.id == id).first()
-    if not template_data:
-        raise ApiError(404, "Template not found")
-        
-    if not temp_data:
-        raise ApiError(400, "temp data is undefined")
-        
-    parsed_temp_data = temp_data
-    if isinstance(temp_data, str):
-        try:
-            parsed_temp_data = json.loads(temp_data)
-        except json.JSONDecodeError:
-            raise ApiError(400, "Invalid JSON in temp_data body")
-            
-    # In Node.js: parsedTempData={...parsedTempData,avatar:userAvatar}
-    # For now we skip avatar as we don't have it yet.
-    
-    rendered = render_html(template_data.template, parsed_temp_data)
-    return ApiResponse(200, {"to_render": rendered}, "Template fetched successfully")
+    template = db.query(Template).filter(
+        Template.user_id == user_id,
+        Template.t_type == "resume",
+    ).first()
+
+    if not template:
+        logging.warning(f"No resume template found for user_id={user_id}")
+        raise HTTPException(
+            status_code=404,
+            detail={"success": False, "message": "Resume template not found", "data": None},
+        )
+
+    logging.info(f"Resume template fetched — id={template.id}")
+    return JSONResponse(
+        status_code=200,
+        content={
+            "success": True,
+            "message": "Resume template fetched successfully",
+            "data": {"id": template.id, "content": template.content},
+        },
+    )
+
+
+# ============================= Coding Template create and update =============================
+@router.post("/coding", dependencies=[Depends(verify_jwt)])
+async def create_coding_template(
+    request: Request,
+    body: UpdateTemplateBody,
+    db: Session = Depends(get_db),
+):
+
+    user_id = request.state.user.id
+    logging.info("POST /templates/coding — entered")
+
+    new_template = Template(
+        user_id=user_id,
+        t_type="coding",
+        content=body.content,
+    )
+    db.add(new_template)
+    db.commit()
+    db.refresh(new_template)
+    logging.info(f"Coding template saved — id={new_template.id}")
+
+    return JSONResponse(
+        status_code=201,
+        content={
+            "success": True,
+            "message": "Coding template created successfully",
+            "data": {"id": new_template.id, "content": new_template.content},
+        },
+    )
+
+
+# ====================== Coding Template Get ===================================
+@router.get("/coding", dependencies=[Depends(verify_jwt)])
+async def get_coding_template(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    user_id = request.state.user.id
+    logging.info("GET /templates/coding — entered")
+
+    template = db.query(Template).filter(
+        Template.user_id == user_id,
+        Template.t_type == "coding",
+    ).first()
+
+    if not template:
+        logging.warning(f"No coding template found for user_id={user_id}")
+        raise HTTPException(
+            status_code=404,
+            detail={"success": False, "message": "Coding template not found", "data": None},
+        )
+
+    logging.info(f"Coding template fetched — id={template.id}")
+    return JSONResponse(
+        status_code=200,
+        content={
+            "success": True,
+            "message": "Coding template fetched successfully",
+            "data": {"id": template.id, "content": template.content},
+        },
+    )
