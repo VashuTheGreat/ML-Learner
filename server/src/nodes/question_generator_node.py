@@ -1,11 +1,11 @@
 
-from utils.asyncHandler import asyncHandler
-from prompts import QuestionGeneraterPrompt
-from llm.llm_loader import llm
+from src.utils.asyncHandler import asyncHandler
+from src.prompts import QuestionGeneraterPrompt
+from src.llm.llm_loader import llm
 
-from tools.taivily_search_tool import Taivily_search
+from src.tools.taivily_search_tool import Taivily_search
 
-from models.interview_model import ChatState
+from src.models.interview_model import ChatState
 from langsmith import traceable
 
 taivily_search=Taivily_search()._tavily_search()

@@ -1,33 +1,36 @@
-from fastapi import Request
+from fastapi import Request, HTTPException, Depends
 import jwt
 import os
-from api.database import User, SessionLocal
-from api.utils.api_error import ApiError
+from sqlalchemy.orm import Session
+from api.database import User, get_db
+from config.app_config import app_config
 
-async def verify_jwt(request: Request):
+from typing import Optional
+async def verify_jwt(request: Request, db: Session = Depends(get_db)) -> Optional[bool]:
     token = request.cookies.get("accessToken") or request.headers.get("Authorization")
     if token and token.startswith("Bearer "):
         token = token.replace("Bearer ", "")
 
     if not token:
-        raise ApiError(401, "Unauthorized request")
+        print("[DEBUG] No token found in request cookies or headers")
+        raise HTTPException(status_code=401, detail={"success": False, "message": "Unauthorized request", "data": None})
 
     try:
-        decoded_token = jwt.decode(token, os.getenv("ACCESS_TOKEN_SECRET", "secret"), algorithms=["HS256"])
+        decoded_token = jwt.decode(token, app_config.secret_key, algorithms=[app_config.algorithm])
         user_id = decoded_token.get("id")
         
-        db = SessionLocal()
         user = db.query(User).filter(User.id == user_id).first()
-        db.close()
 
         if not user:
-            raise ApiError(401, "Invalid Access Token")
+            print(f"[DEBUG] Token is valid, but User not found in DB for user_id: {user_id}")
+            raise HTTPException(status_code=401, detail={"success": False, "message": "Invalid Access Token", "data": None})
 
-        request.state.user_id = user.id
         request.state.user = user
         return True
 
-    except jwt.ExpiredSignatureError:
-        raise ApiError(401, "Token has expired")
-    except jwt.InvalidTokenError:
-        raise ApiError(401, "Invalid token")
+    except jwt.ExpiredSignatureError as e:
+        print(f"[DEBUG] ExpiredSignatureError: {e}")
+        raise HTTPException(status_code=401, detail={"success": False, "message": "Token has expired", "data": None})
+    except jwt.InvalidTokenError as e:
+        print(f"[DEBUG] InvalidTokenError: {e}")
+        raise HTTPException(status_code=401, detail={"success": False, "message": "Invalid token", "data": None})

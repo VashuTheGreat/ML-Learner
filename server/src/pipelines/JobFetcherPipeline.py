@@ -1,7 +1,7 @@
-from components.job_fetcher import JobFetcher
-from src.CodeRunAndModelTrain.utils.Abstract import Pipeline
-from src.CodeRunAndModelTrain.entity.config_entity import JobFetcherConfig
-from utils.asyncHandler import asyncHandler
+from src.components.job_fetcher import JobFetcher
+from src.utils.Abstract import Pipeline
+from src.entity.config_entity import JobFetcherConfig
+from src.utils.asyncHandler import asyncHandler
 import os
 import logging
 

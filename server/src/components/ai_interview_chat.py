@@ -2,7 +2,7 @@ import sys
 import logging
 from exception import MyException
 
-from graphs.interview_graph_builder import chat_interviewer
+from src.graphs.interview_graph_builder import chat_interviewer
 class AiInterviewChat:
     def __init__(self):
         pass

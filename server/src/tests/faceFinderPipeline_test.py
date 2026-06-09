@@ -9,7 +9,7 @@ from logger import *
 
 
 import asyncio
-from pipelines.faceFinder_pipeline import FaceFinderPipeline
+from src.pipelines.faceFinder_pipeline import FaceFinderPipeline
 
 from PIL import Image
 

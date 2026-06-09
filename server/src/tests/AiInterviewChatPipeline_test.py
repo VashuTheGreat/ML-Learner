@@ -11,7 +11,7 @@ from logger import *
 
 import logging
 import asyncio
-from pipelines.AiInterviewChat_pipeline import ChatInterviewerPipeline
+from src.pipelines.AiInterviewChat_pipeline import ChatInterviewerPipeline
 
 async def main():
     chat_interviewer_pipeline=ChatInterviewerPipeline()

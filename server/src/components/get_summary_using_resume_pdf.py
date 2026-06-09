@@ -2,11 +2,11 @@ import os
 import sys
 import logging
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
-from llm.llm_loader import llm as summerizer_llm
-from prompts import resumeSummary_prompts as ResumeSummaryPrompt
+from src.llm.llm_loader import llm as summerizer_llm
+from src.prompts import resumeSummary_prompts as ResumeSummaryPrompt
 from exception import MyException
-from utils.rag_utils import document_loader
-from entity.artifact_entity import ResumeSummaryArtifact
+from src.utils.rag_utils import document_loader
+from src.entity.artifact_entity import ResumeSummaryArtifact
 
 # ------------- Documents loader --------------
 

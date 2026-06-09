@@ -1,10 +1,10 @@
 
 
-from components.modelTrain import TrainController
+from src.components.modelTrain import TrainController
 
-from models.model_train_models import Train as TrainSchema
-from utils.asyncHandler import asyncHandler
-from src.CodeRunAndModelTrain.utils.Abstract import Pipeline
+from src.models.model_train_models import Train as TrainSchema
+from src.utils.asyncHandler import asyncHandler
+from src.utils.Abstract import Pipeline
 class ModelTrainPipeline(Pipeline):
     def __init__(self):
         self.train_controller=TrainController()

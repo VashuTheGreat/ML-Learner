@@ -11,8 +11,8 @@ from logger import *
 
 import logging
 import asyncio
-from src.Agents.constants import DEFAULT_NO_OF_INTERVIEWS,DEFAULT_FIELDS,DEFAULT_COMPANIES_NAME,DEFAULT_UPDATED
-from pipelines.DummyInterviews_pipeline import DummyInterviewsPipeline
+from src.constants import DEFAULT_NO_OF_INTERVIEWS,DEFAULT_FIELDS,DEFAULT_COMPANIES_NAME,DEFAULT_UPDATED
+from src.pipelines.DummyInterviews_pipeline import DummyInterviewsPipeline
 
 async def main():
     dummy_interview_pipeline=DummyInterviewsPipeline(

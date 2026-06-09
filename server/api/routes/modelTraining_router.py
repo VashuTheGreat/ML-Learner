@@ -1,6 +1,6 @@
 import fastapi
-from pipelines.ModelTrainPipeline import ModelTrainPipeline
-from models.model_train_models import Train as TrainSchema
+from src.pipelines.ModelTrainPipeline import ModelTrainPipeline
+from src.models.model_train_models import Train as TrainSchema
 import logging
 import sys
 from exception import MyException

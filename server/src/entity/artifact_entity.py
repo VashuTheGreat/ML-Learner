@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Any
-from src.Agents.constants import *
+from src.constants import *
 @dataclass
 class DummyInterviewArtifact:
     interviews:Any # a json dict 
@@ -15,9 +15,6 @@ class ResumeSummaryArtifact:
     summary:str    
 
 
-from dataclasses import dataclass, field
-from typing import List
-from src.CodeRunAndModelTrain.constants import *
 
 @dataclass
 class JobFetcherArtifact:
@@ -26,7 +23,6 @@ class JobFetcherArtifact:
 
 
 
-from dataclasses import dataclass
 
 
 @dataclass

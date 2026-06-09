@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import DataLoader,Dataset
-from src.Predictors.constants import DEVICE
+from src.constants import DEVICE
 class ResumeDataset(Dataset):
     def __init__(self,data):
         self.sample=[prepare_input(x) for _,x in data.iterrows()]

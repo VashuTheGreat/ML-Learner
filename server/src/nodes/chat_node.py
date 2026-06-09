@@ -1,11 +1,11 @@
 
 
 
-from models.interview_model import ChatState
-from utils.asyncHandler import asyncHandler
+from src.models.interview_model import ChatState
+from src.utils.asyncHandler import asyncHandler
 from langchain_core.messages import AIMessage,SystemMessage
-from prompts import interview_prompts2
-from llm.llm_loader import llm
+from src.prompts import interview_prompts2
+from src.llm.llm_loader import llm
 from langsmith import traceable
 
 # ===================== CHAT NODE =====================

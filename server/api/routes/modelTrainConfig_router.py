@@ -2,7 +2,7 @@ import fastapi
 import logging
 import sys
 import os
-from utils.main_utils import read_yaml_file_sync
+from src.utils.main_utils import read_yaml_file_sync
 
 router = fastapi.APIRouter()
 

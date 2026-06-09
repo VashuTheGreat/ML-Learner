@@ -11,7 +11,7 @@ from logger import *
 
 import logging
 import asyncio
-from pipelines.ResumeSummary_pipeline import ResumeSummaryPipeline
+from src.pipelines.ResumeSummary_pipeline import ResumeSummaryPipeline
 
 async def main():
     resume_schema_pipeline=ResumeSummaryPipeline()

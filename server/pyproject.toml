@@ -34,5 +34,22 @@ dependencies = [
     "mlflow>=3.10.1",
     "dagshub>=0.6.9",
     "sqlalchemy>=2.0.46",
-    "alembic>=1.18.4",
+    "psycopg2-binary>=2.9.12",
+    "bcrypt>=5.0.0",
+    "pyjwt>=2.13.0",
+    "pydantic[email]>=2.12.5",
+    "cloudinary>=1.44.2",
+]
+
+[tool.uv.workspace]
+members = [
+    ".",
+]
+
+[tool.uv.sources]
+interview-cracker = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "interview-cracker",
 ]

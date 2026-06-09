@@ -1,5 +1,5 @@
 import fastapi
-from pipelines.similarPrediction_pipeline import SimilarJobPipeline
+from src.pipelines.similarPrediction_pipeline import SimilarJobPipeline
 import numpy as np
 router=fastapi.APIRouter()
 

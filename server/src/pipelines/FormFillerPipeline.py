@@ -1,7 +1,7 @@
 from exception import MyException
-from utils.Abstract import Pipeline
-from components.FormFiller import FormFiller
-from models.FormFiller_model import FormFillerModel
+from src.utils.Abstract import Pipeline
+from src.components.FormFiller import FormFiller
+from src.models.FormFiller_model import FormFillerModel
 import logging
 import sys
 

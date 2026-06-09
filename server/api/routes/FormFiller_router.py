@@ -4,7 +4,7 @@ import json
 import sys
 
 from exception import MyException
-from pipelines.FormFillerPipeline import FormFillerPipeline
+from src.pipelines.FormFillerPipeline import FormFillerPipeline
 
 router = fastapi.APIRouter()
 

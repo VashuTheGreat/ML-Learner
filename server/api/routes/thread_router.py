@@ -1,5 +1,5 @@
 import fastapi
-from graphs.interview_graph_builder import deleteThread
+from src.graphs.interview_graph_builder import deleteThread
 import logging
 import sys
 from exception import MyException

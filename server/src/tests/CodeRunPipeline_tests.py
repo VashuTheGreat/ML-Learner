@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from logger import *
-from pipelines.CodeRunPipeline import CodeRunPipeline
-from models.code_run_models import Submission
+from src.pipelines.CodeRunPipeline import CodeRunPipeline
+from src.models.code_run_models import Submission
 
 async def main():
     pipeline = CodeRunPipeline()

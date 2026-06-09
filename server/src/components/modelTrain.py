@@ -13,9 +13,9 @@ from sklearn.metrics import (
     confusion_matrix, classification_report
 )
 from sklearn.decomposition import PCA
-from models.model_train_models import Train as TrainSchema
+from src.models.model_train_models import Train as TrainSchema
 from exception import MyException
-from utils.main_utils import read_yaml_file_sync
+from src.utils.main_utils import read_yaml_file_sync
 from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet, SGDRegressor
 from sklearn.neighbors import KNeighborsRegressor, KNeighborsClassifier
 from sklearn.svm import SVR, LinearSVR, SVC, LinearSVC, NuSVC
@@ -29,7 +29,7 @@ from sklearn.linear_model import LogisticRegression, SGDClassifier, Perceptron, 
 from sklearn.naive_bayes import GaussianNB, BernoulliNB, MultinomialNB
 
 
-from src.CodeRunAndModelTrain.constants import MODEL_TRAIN_CONFIG
+from src.constants import MODEL_TRAIN_CONFIG
 import os
 class TrainController:
     def __init__(self):

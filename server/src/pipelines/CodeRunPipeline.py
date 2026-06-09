@@ -1,7 +1,7 @@
-from components.code_runner import CodeRunner
-from models.code_run_models import Submission
-from src.CodeRunAndModelTrain.utils.Abstract import Pipeline
-from utils.asyncHandler import asyncHandler
+from src.components.code_runner import CodeRunner
+from src.models.code_run_models import Submission
+from src.utils.Abstract import Pipeline
+from src.utils.asyncHandler import asyncHandler
 import logging
 import sys
 

@@ -1,7 +1,7 @@
 import fastapi
 from exception import MyException
 import sys
-from pipelines.model_download_pipeline import ModelDownloadPipeline
+from src.pipelines.model_download_pipeline import ModelDownloadPipeline
 router = fastapi.APIRouter()
 
 

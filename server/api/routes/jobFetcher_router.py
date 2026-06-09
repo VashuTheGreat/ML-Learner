@@ -1,5 +1,5 @@
 import fastapi
-from pipelines.JobFetcherPipeline import JobFetcherPipeline
+from src.pipelines.JobFetcherPipeline import JobFetcherPipeline
 from exception import MyException
 import pandas as pd
 import sys

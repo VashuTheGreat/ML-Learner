@@ -6,6 +6,7 @@ import bcrypt
 import jwt
 import os
 from datetime import datetime, timedelta
+from config.app_config import app_config
 
 user_resumes = Table(
     "user_resumes",
@@ -46,13 +47,13 @@ class User(Base):
             "email": self.email,
             "username": self.username,
             "fullName": self.fullName,
-            "exp": datetime.utcnow() + timedelta(days=1) # Example expiry
+            "exp": datetime.utcnow() + timedelta(minutes=app_config.access_token_expire_minutes)
         }
-        return jwt.encode(payload, os.getenv("ACCESS_TOKEN_SECRET", "secret"), algorithm="HS256")
+        return jwt.encode(payload, app_config.secret_key, algorithm=app_config.algorithm)
 
     def generate_refresh_token(self):
         payload = {
             "id": self.id,
-            "exp": datetime.utcnow() + timedelta(days=10) # Example expiry
+            "exp": datetime.utcnow() + timedelta(days=app_config.refresh_token_expire_days) # 10 days expiry
         }
-        return jwt.encode(payload, os.getenv("REFRESH_TOKEN_SECRET", "secret"), algorithm="HS256")
+        return jwt.encode(payload, app_config.secret_key, algorithm=app_config.algorithm)

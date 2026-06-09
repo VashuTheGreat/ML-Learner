@@ -1,7 +1,7 @@
-from utils.asyncHandler import asyncHandler
+from src.utils.asyncHandler import asyncHandler
 
-from graphs.resume_graph_builder import create_resume_schema
-from models.Resume_model import ResumeSchema
+from src.graphs.resume_graph_builder import create_resume_schema
+from src.models.Resume_model import ResumeSchema
 import logging
 class ResumeSchemaGenerator:
     def __init__(self):

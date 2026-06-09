@@ -1,7 +1,7 @@
 
-from utils.asyncHandler import asyncHandler
-from src.Predictors.utils.Abstract import Pipeline
-from components.similarJobPrediction import SimilarJobPrediction
+from src.utils.asyncHandler import asyncHandler
+from src.utils.Abstract import Pipeline
+from src.components.similarJobPrediction import SimilarJobPrediction
 class SimilarJobPipeline(Pipeline):
     def __init__(self):
         self.similar_job_predictor=SimilarJobPrediction()

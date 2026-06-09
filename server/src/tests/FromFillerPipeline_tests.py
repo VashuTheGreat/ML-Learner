@@ -9,7 +9,7 @@ load_dotenv()
 from logger import *
 import logging
 import asyncio
-from pipelines.FormFillerPipeline import FormFillerPipeline
+from src.pipelines.FormFillerPipeline import FormFillerPipeline
 
 
 async def main():

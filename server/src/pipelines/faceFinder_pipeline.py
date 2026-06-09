@@ -1,7 +1,7 @@
 
-from utils.asyncHandler import asyncHandler
-from src.Predictors.utils.Abstract import Pipeline
-from components.face_finder import FaceFinder
+from src.utils.asyncHandler import asyncHandler
+from src.utils.Abstract import Pipeline
+from src.components.face_finder import FaceFinder
 class FaceFinderPipeline(Pipeline):
     def __init__(self):
         self.face_finder=FaceFinder()

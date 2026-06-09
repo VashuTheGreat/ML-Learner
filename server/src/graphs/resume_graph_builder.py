@@ -4,9 +4,9 @@ from langgraph.graph import START, END, StateGraph
 from exception import MyException
 import sys
 # ------------------- Schemas -------------------
-from models.Resume_model import ResumeState
+from src.models.Resume_model import ResumeState
 # ------------------- LLM -------------------
-from nodes.resume_builder import resume_maker
+from src.nodes.resume_builder import resume_maker
 graph = StateGraph(state_schema=ResumeState)
 graph.add_node("resume_maker", resume_maker)
 graph.add_edge(START, "resume_maker")

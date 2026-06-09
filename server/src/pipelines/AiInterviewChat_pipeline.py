@@ -1,7 +1,7 @@
 
 from exception import MyException
-from utils.Abstract import Pipeline
-from components.ai_interview_chat import AiInterviewChat
+from src.utils.Abstract import Pipeline
+from src.components.ai_interview_chat import AiInterviewChat
 import logging
 import sys
 class ChatInterviewerPipeline(Pipeline):

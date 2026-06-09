@@ -3,7 +3,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from PIL import Image
 import io
 
-from pipelines.faceFinder_pipeline import FaceFinderPipeline
+from src.pipelines.faceFinder_pipeline import FaceFinderPipeline
 
 router = fastapi.APIRouter()
 

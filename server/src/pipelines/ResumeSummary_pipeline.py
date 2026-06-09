@@ -1,14 +1,13 @@
 
 import os
 import sys
-sys.path.append(os.getcwd())
-from utils.Abstract import Pipeline
+from src.utils.Abstract import Pipeline
 import logging
 
 
-from utils.asyncHandler import asyncHandler
+from src.utils.asyncHandler import asyncHandler
 
-from components.get_summary_using_resume_pdf import ResumeSummary
+from src.components.get_summary_using_resume_pdf import ResumeSummary
 
 
 class ResumeSummaryPipeline(Pipeline):

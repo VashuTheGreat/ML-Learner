@@ -5,7 +5,7 @@ from exception import MyException
 import sys
 import uuid
 import numpy as np
-from utils.main_utils import write_file, delete_file
+from src.utils.main_utils import write_file, delete_file
 
 # Optional torch import — only available if installed
 try:
@@ -104,4 +104,4 @@ class CodeRunner:
                 if os.path.exists(file_path):
                     await delete_file(file_path)
         except Exception as e:
-            raise MyException(e, sys)
+            raise MyException(e, sys)

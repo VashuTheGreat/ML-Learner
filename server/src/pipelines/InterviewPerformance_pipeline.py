@@ -1,9 +1,9 @@
 
 
 from exception import MyException
-from utils.Abstract import Pipeline
-from components.generate_interview_performance import InterviewPerformance
-from entity.config_entity import InterviewPerformanceConfig
+from src.utils.Abstract import Pipeline
+from src.components.generate_interview_performance import InterviewPerformance
+from src.entity.config_entity import InterviewPerformanceConfig
 import logging
 import sys
 class InterviewPerformancePipeline(Pipeline):

@@ -1,6 +1,6 @@
 
 from typing import Any
-from utils.asyncHandler import asyncHandler
+from src.utils.asyncHandler import asyncHandler
 import logging
 class JobPrediction:
     def __init__(self):

@@ -1,6 +1,6 @@
 import logging
 import sys
-from utils.asyncHandler import asyncHandler
+from src.utils.asyncHandler import asyncHandler
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -8,9 +8,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from src.CodeRunAndModelTrain.constants import LINKED_IN_USER_NAME, LINKED_IN_USER_PASSWORD
-from src.CodeRunAndModelTrain.entity.config_entity import JobFetcherConfig
-from src.CodeRunAndModelTrain.entity.artifact_entity import JobFetcherArtifact
+from src.constants import LINKED_IN_USER_NAME, LINKED_IN_USER_PASSWORD
+from src.entity.config_entity import JobFetcherConfig
+from src.entity.artifact_entity import JobFetcherArtifact
 from exception import MyException
 
 import pickle

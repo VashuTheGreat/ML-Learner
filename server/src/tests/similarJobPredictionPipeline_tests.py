@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import asyncio
-from pipelines.similarPrediction_pipeline import SimilarJobPipeline
+from src.pipelines.similarPrediction_pipeline import SimilarJobPipeline
 
 from PIL import Image
 

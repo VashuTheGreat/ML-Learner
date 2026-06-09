@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List
-from src.Agents.constants import *
+from src.constants import *
 
 @dataclass
 class DummyInterviewConfig:
@@ -19,7 +19,7 @@ class InterviewPerformanceConfig:
 
 from dataclasses import dataclass, field
 from typing import List
-from src.CodeRunAndModelTrain.constants import *
+from src.constants import *
 
 @dataclass
 class JobFetcherConfig:
@@ -40,7 +40,7 @@ class JobFetcherConfig:
 
 
 from dataclasses import dataclass
-from src.Predictors.constants import *
+from src.constants import *
 @dataclass
 class JobSimilarityModelConfig:
     model_uri: str=MLFLOW_MODEL_URI

@@ -1,126 +1,213 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, UploadFile, File
+from traceback import print_tb
+from fastapi import responses
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, UploadFile, File, Body
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from api.database import User, get_db
-from api.utils.api_response import ApiResponse
-from api.utils.api_error import ApiError
+from fastapi.responses import JSONResponse
 from api.middlewares.verifyuser_middleware import verify_jwt
 import logging
 import json
 import re
-
+import os
+import sys
+import uuid
+from exception import MyException
+from src.models.userSchema_model import userDetails as UserDetailsModel
+from src.pipelines.ResumeSchemaGeneration_pipeline import ResumeSchemaGenerationPipeline
+from src.pipelines.ResumeSummary_pipeline import ResumeSummaryPipeline
+from api.models.user_model import CreateUser, UpdateUser,LoginUser
+from src.utils.cloudinary import upload_avatar_to_cloudinary, delete_avatar_from_cloudinary
+import logging
 router = APIRouter()
-logger = logging.getLogger(__name__)
 
-TOKEN_OPTION = {"httponly": True, "secure": True, "samesite": "none"}
+from config.app_config import app_config
 
-def validate_email(email):
-    return re.match(r"[^@]+@[^@]+\.[^@]+", email)
+is_secure = app_config.app_env != "development"
+TOKEN_OPTION = {
+    "httponly": True,
+    "secure": is_secure,
+    "samesite": "lax" if app_config.app_env == "development" else "none"
+}
 
+
+# ====================== Registering a new User ==========================================
 @router.post("/create")
-async def create_user(request: Request, response: Response, db: Session = Depends(get_db)):
-    body = await request.json()
-    fullName = body.get("fullName")
-    email = body.get("email")
-    password = body.get("password")
-    username = body.get("username")
-
-    if not all([fullName, email, password, username]):
-        raise ApiError(400, "All fields (fullName, email, password, username) are required")
-
-    if not validate_email(email):
-        raise ApiError(400, "Invalid email")
-
-    if len(password) < 6:
-        raise ApiError(400, "password must be at least 6 characters long")
-
-    existing_user = db.query(User).filter(or_(User.email == email, User.username == username)).first()
+async def create_user(user: CreateUser, db: Session = Depends(get_db)):
+    logging.info(f"Attempting to register new user: email={user.email}, username={user.username}")
+    existing_user = db.query(User).filter(or_(User.email == user.email, User.username == user.username)).first()
     if existing_user:
-        if existing_user.email == email:
-            raise ApiError(400, "email already taken")
-        raise ApiError(400, "username already taken")
+        if existing_user.email == user.email:
+            logging.warning(f"Registration failed: email {user.email} is already taken")
+            raise HTTPException(status_code=400, detail="email already taken")
+        logging.warning(f"Registration failed: username {user.username} is already taken")
+        raise HTTPException(status_code=400, detail="username already taken")
 
-    user = User(fullName=fullName, email=email, username=username)
-    user.set_password(password)
+    db_user = User(fullName=user.fullName, email=user.email, username=user.username)
+    db_user.set_password(user.password)
     
-    access_token = user.generate_access_token()
-    refresh_token = user.generate_refresh_token()
-    user.refreshToken = refresh_token
+    access_token = db_user.generate_access_token()
+    refresh_token = db_user.generate_refresh_token()
+    db_user.refreshToken = refresh_token
     
-    db.add(user)
+    db.add(db_user)
     db.commit()
-    db.refresh(user)
+    db.refresh(db_user)
 
+    logging.info(f"User registered successfully: id={db_user.id}, username={db_user.username}")
+
+    response_data = {
+        "success": True,
+        "message": "User created successfully",
+        "data": {
+            "id": db_user.id,
+            "fullName": db_user.fullName,
+            "email": db_user.email,
+            "username": db_user.username,
+            "avatar": db_user.avatar,
+            "refreshToken":refresh_token
+        },
+    }
+    response = JSONResponse(status_code=200, content=response_data)
     response.set_cookie(key="accessToken", value=access_token, **TOKEN_OPTION)
     response.set_cookie(key="refreshToken", value=refresh_token, **TOKEN_OPTION)
 
-    # Prepare response data (exclude password and refresh token)
-    user_data = {
-        "id": user.id,
-        "fullName": user.fullName,
-        "email": user.email,
-        "username": user.username,
-        "avatar": user.avatar
-    }
+    return response
+    
 
-    return ApiResponse(200, user_data, "User created successfully")
 
+# ====================== Logging in an existing User ==========================================
 @router.post("/login")
-async def login(request: Request, response: Response, db: Session = Depends(get_db)):
-    body = await request.json()
-    email_or_username = body.get("email")
-    password = body.get("password")
+async def login(user: LoginUser, db: Session = Depends(get_db)):
+    logging.info(f"Attempting login for user: email={user.email}")
+    db_user = db.query(User).filter(or_(User.email == user.email)).first()
 
-    if not email_or_username or not password:
-        raise ApiError(400, "Email/username and password are required")
+    if not db_user or not db_user.check_password(user.password):
+        logging.warning(f"Login failed for email={user.email}: Invalid credentials")
+        raise HTTPException(status_code=401, detail={"success": False, "message": "Invalid credentials", "data": None})
 
-    user = db.query(User).filter(or_(User.email == email_or_username, User.username == email_or_username)).first()
-    if not user or not user.check_password(password):
-        raise ApiError(401, "Invalid credentials")
-
-    access_token = user.generate_access_token()
-    refresh_token = user.generate_refresh_token()
-    user.refreshToken = refresh_token
+    access_token = db_user.generate_access_token()
+    refresh_token = db_user.generate_refresh_token()
+    db_user.refreshToken = refresh_token
     db.commit()
 
+    logging.info(f"User logged in successfully: id={db_user.id}, username={db_user.username}")
+
+    user_data = {
+        "id": db_user.id,
+        "fullName": db_user.fullName,
+        "email": db_user.email,
+        "username": db_user.username,
+        "avatar": db_user.avatar,
+        "refreshToken": refresh_token
+    }
+
+    response = JSONResponse(status_code=200, content={"success": True, "message": "User logged in successfully", "data": user_data})
     response.set_cookie(key="accessToken", value=access_token, **TOKEN_OPTION)
     response.set_cookie(key="refreshToken", value=refresh_token, **TOKEN_OPTION)
 
-    user_data = {
-        "id": user.id,
-        "fullName": user.fullName,
-        "email": user.email,
-        "username": user.username,
-        "avatar": user.avatar
-    }
+    return response
 
-    return ApiResponse(200, user_data, "User logged in successfully")
 
-@router.get("/logout")
-async def logout(request: Request, response: Response, db: Session = Depends(get_db), user=Depends(verify_jwt)):
-    user_id = getattr(request.state, "user_id", None)
-    if not user_id:
-        raise ApiError(401, "Unauthorized")
 
-    db_user = db.query(User).filter(User.id == user_id).first()
+# ================================ Logout User =================================
+
+@router.get("/logout",dependencies=[Depends(verify_jwt)])
+async def logout(request:Request,db: Session = Depends(get_db)):
+    user = request.state.user
+    if not user:
+        logging.warning("Logout attempted without valid session/user state")
+        raise HTTPException(401, "Unauthorized")
+
+    logging.info(f"Logging out user: id={user.id}, username={user.username}")
+    db_user = db.query(User).filter(User.id == user.id).first()
+
     if db_user:
         db_user.refreshToken = None
         db.commit()
 
+    logging.info(f"User logged out successfully from DB: id={user.id}")
+
+    response=JSONResponse(status_code=200, content={"success": True, "message": "User logged out successfully", "data":None})
     response.delete_cookie("accessToken")
     response.delete_cookie("refreshToken")
     
-    return ApiResponse(200, None, "User logged out successfully")
+    return response
 
-@router.get("/getUser")
-async def get_user(request: Request, db: Session = Depends(get_db), user=Depends(verify_jwt)):
-    user_id = getattr(request.state, "user_id", None)
-    if not user_id:
-        raise ApiError(401, "Unauthorized")
 
-    db_user = db.query(User).filter(User.id == user_id).first()
+
+
+# ========================= return user data ====================================
+@router.get("/itself")
+async def get_itself(request:Request,user=Depends(verify_jwt)):
+    user=request.state.user
+    logging.info(f"Fetching self profile data for user: id={user.id}")
+    user_data = {
+        "id": user.id,
+        "fullName": user.fullName,
+        "email": user.email,
+        "username": user.username,
+        "avatar": user.avatar,
+        "aboutUser": user.aboutUser,
+        "temp_data": user.temp_data
+    }
+
+    return JSONResponse(status_code=200,content={"success": True, "message": "User fetched successfully", "data":user_data})
+
+
+
+
+
+@router.put("/update", dependencies=[Depends(verify_jwt)])
+async def update_user_data(request: Request, updated_user: UpdateUser, db: Session = Depends(get_db)):
+    user = getattr(request.state, "user", None)
+    if not user:
+        logging.warning("Update attempted without user state")
+        raise HTTPException(status_code=401, detail={"success": False, "message": "Unauthorized", "data": None})
+
+    logging.info(f"Attempting to update profile for user: id={user.id}")
+    db_user = db.query(User).filter(User.id == user.id).first()
     if not db_user:
-        raise ApiError(404, "User not found")
+        logging.error(f"User model not found in database for id: {user.id}")
+        raise HTTPException(status_code=404, detail={"success": False, "message": "User not found", "data": None})
+    
+    if updated_user.fullName:
+        logging.debug(f"Updating fullName from '{db_user.fullName}' to '{updated_user.fullName}' for user id={user.id}")
+        db_user.fullName = updated_user.fullName
+        
+    if updated_user.username:
+        logging.debug(f"Checking uniqueness for new username: '{updated_user.username}'")
+        existing_user = db.query(User).filter(User.username == updated_user.username).first()
+        if existing_user:
+            logging.warning(f"Update failed: username '{updated_user.username}' is already taken")
+            raise HTTPException(status_code=400, detail={"success": False, "message": "username already exists", "data": None})
+        logging.debug(f"Updating username from '{db_user.username}' to '{updated_user.username}' for user id={user.id}")
+        db_user.username = updated_user.username
+
+    db.commit()
+    db.refresh(db_user)     
+    logging.info(f"User updated successfully: id={db_user.id}")
+    
+    user_data = {
+        "id": db_user.id,
+        "fullName": db_user.fullName,
+        "email": db_user.email,
+        "username": db_user.username,
+        "avatar": db_user.avatar,
+        "aboutUser": db_user.aboutUser,
+    }
+    return JSONResponse(status_code=200, content={"success": True, "message": "User updated successfully", "data": user_data})
+
+
+
+# ======================= get User by Id ==========================
+@router.get("/{id}")
+async def get_user_by_id(id: int, db: Session = Depends(get_db)):
+    logging.info(f"Fetching user profile by id: {id}")
+    db_user = db.query(User).filter(User.id == id).first()
+    if not db_user:
+        logging.warning(f"User profile fetch failed: id={id} not found")
+        raise HTTPException(status_code=404, detail={"success": False, "message": "User not found", "data": None})
 
     user_data = {
         "id": db_user.id,
@@ -129,95 +216,81 @@ async def get_user(request: Request, db: Session = Depends(get_db), user=Depends
         "username": db_user.username,
         "avatar": db_user.avatar,
         "aboutUser": db_user.aboutUser,
-        "temp_data": db_user.temp_data
     }
 
-    return ApiResponse(200, user_data, "User fetched successfully")
+    return JSONResponse(status_code=200, content={"success": True, "message": "User fetched successfully", "data": user_data})
 
-@router.post("/updateUserJson")
-async def update_user_data(request: Request, db: Session = Depends(get_db), user=Depends(verify_jwt)):
-    user_id = getattr(request.state, "user_id", None)
-    if not user_id:
-        raise ApiError(401, "Unauthorized")
 
-    body = await request.json()
-    temp_data = body.get("temp_data")
+
+# ======================= Upload User Avatar ==========================
+@router.put("/avatar", dependencies=[Depends(verify_jwt)])
+async def upload_avatar(request: Request, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    user = getattr(request.state, "user", None)
+    if not user:
+        logging.warning("Avatar upload attempted without user state")
+        raise HTTPException(status_code=401, detail={"success": False, "message": "Unauthorized", "data": None})
     
-    if temp_data is None:
-        raise ApiError(400, "temp_data is required")
-
-    db_user = db.query(User).filter(User.id == user_id).first()
-    if not db_user:
-        raise ApiError(404, "User not found")
-
-    if isinstance(temp_data, str):
-        try:
-            temp_data = json.loads(temp_data)
-        except:
-            pass
-            
-    db_user.temp_data = temp_data
-    db.commit()
-    db.refresh(db_user)
-
-    return ApiResponse(200, {"id": db_user.id, "temp_data": db_user.temp_data})
-
-@router.get("/getUserById/{id}")
-async def get_user_by_id(id: int, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.id == id).first()
-    if not db_user:
-        raise ApiError(404, "User not found")
-
-    user_data = {
-        "id": db_user.id,
-        "fullName": db_user.fullName,
-        "email": db_user.email,
-        "username": db_user.username,
-        "avatar": db_user.avatar
-    }
-
-    return ApiResponse(200, user_data, "User fetched successfully")
-
-
-
-
-
-
-
-
-
-
-
-
-# ======================== Agentic USER ================================
-
-@router.post("/generate_schema")
-async def generate_schema(
-    details: UserDetailsModel = Body(...)
-):
-    logging.info("Entering generate_schema route (async)")
+    # If user already has an avatar, delete it from Cloudinary first
+    if user.avatar:
+        logging.info(f"User already has an avatar, attempting to delete old avatar: {user.avatar}")
+        await delete_avatar_from_cloudinary(user.avatar)
+        
     try:
-        pipeline = ResumeSchemaGenerationPipeline()
-        schema = await pipeline.initiate(userDetails=details)
-        return schema
+        logging.info(f"Uploading new avatar for user: id={user.id}")
+        # Upload new avatar using the async utility
+        avatar_url = await upload_avatar_to_cloudinary(file)
+        
+        # Update user record directly (since user is already a DB model instance)
+        user.avatar = avatar_url
+        db.commit()
+        db.refresh(user)
+        
+        user_data = {
+            "id": user.id,
+            "fullName": user.fullName,
+            "email": user.email,
+            "username": user.username,
+            "avatar": user.avatar,
+            "aboutUser": user.aboutUser,
+        }
+        return JSONResponse(status_code=200, content={"success": True, "message": "Avatar uploaded successfully", "data": user_data})
     except Exception as e:
-        raise MyException(e, sys)
+        logging.error(f"Failed to upload avatar: {e}")
+        raise HTTPException(status_code=500, detail={"success": False, "message": f"Failed to upload avatar: {str(e)}", "data": None})
 
-@router.post("/aboutUserByResume")
-async def aboutUserByResume(file: UploadFile):
-    logging.info("Entering aboutUserByResume route (async)")
+
+# ======================= Delete User Avatar ==========================
+@router.delete("/avatar", dependencies=[Depends(verify_jwt)])
+async def delete_avatar(request: Request, db: Session = Depends(get_db)):
+    user = getattr(request.state, "user", None)
+    if not user:
+        logging.warning("Avatar deletion attempted without user state")
+        raise HTTPException(status_code=401, detail={"success": False, "message": "Unauthorized", "data": None})
+    
+    if not user.avatar:
+        logging.warning(f"Avatar deletion failed: user id={user.id} has no avatar set")
+        raise HTTPException(status_code=400, detail={"success": False, "message": "No avatar to delete", "data": None})
+        
     try:
-        os.makedirs("api/public",exist_ok=True)
-        id=uuid.uuid4()
-        file_path=f"api/public/{id}.pdf"
-        with open(file_path,"wb") as f:
-            f.write(file.file.read())
-
-        pipeline = ResumeSummaryPipeline()
-        res = await pipeline.initiate(file_path=file_path)
-        return res
+        logging.info(f"Deleting avatar for user: id={user.id}, url={user.avatar}")
+        # Delete avatar from Cloudinary
+        await delete_avatar_from_cloudinary(user.avatar)
+        
+        # Set database field to None
+        user.avatar = None
+        db.commit()
+        db.refresh(user)
+        
+        user_data = {
+            "id": user.id,
+            "fullName": user.fullName,
+            "email": user.email,
+            "username": user.username,
+            "avatar": user.avatar,
+            "aboutUser": user.aboutUser,
+        }
+        return JSONResponse(status_code=200, content={"success": True, "message": "Avatar deleted successfully", "data": user_data})
     except Exception as e:
-        raise MyException(e, sys)
-    finally:
-        if "file_path" in locals() and os.path.exists(file_path):
-            os.remove(file_path)
+        logging.error(f"Failed to delete avatar: {e}")
+        raise HTTPException(status_code=500, detail={"success": False, "message": f"Failed to delete avatar: {str(e)}", "data": None})
+

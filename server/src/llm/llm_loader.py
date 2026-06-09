@@ -1,5 +1,5 @@
 from langchain_aws import ChatBedrockConverse
-from src.Agents.constants import LLM_MODEL_ID, LLM_REGION
+from src.constants import LLM_MODEL_ID, LLM_REGION
 
 import logging
 llm = ChatBedrockConverse(

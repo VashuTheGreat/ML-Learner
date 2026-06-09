@@ -14,7 +14,7 @@ from logger import *
 
 import logging
 import asyncio
-from pipelines.InterviewPerformance_pipeline import InterviewPerformancePipeline
+from src.pipelines.InterviewPerformance_pipeline import InterviewPerformancePipeline
 
 async def main():
     interview_performance_pipeline=InterviewPerformancePipeline()

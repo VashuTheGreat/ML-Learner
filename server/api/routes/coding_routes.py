@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from api.database import Coding, get_db
-from api.utils.api_response import ApiResponse
-from api.utils.api_error import ApiError
 from api.middlewares.verifyuser_middleware import verify_jwt
 from typing import Optional
 import logging
+from src.pipelines.CodeRunPipeline import CodeRunPipeline
+from src.models.code_run_models import Submission
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -90,8 +90,6 @@ async def update_coding_schema(request: Request, db: Session = Depends(get_db), 
 
 
 # =========================== Run Code =========================================
-from pipelines.CodeRunPipeline import CodeRunPipeline
-from models.code_run_models import Submission
 
 @router.post("/submit")
 async def submit_code(sub: Submission):

@@ -11,8 +11,8 @@ from logger import *
 
 import logging
 import asyncio
-from pipelines.ModelTrainPipeline import ModelTrainPipeline
-from models.model_train_models import Train as TrainSchema
+from src.pipelines.ModelTrainPipeline import ModelTrainPipeline
+from src.models.model_train_models import Train as TrainSchema
 
 async def main():
     model_trainer_pipeline=ModelTrainPipeline()

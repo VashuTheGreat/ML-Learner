@@ -1,10 +1,10 @@
 
 
 from exception import MyException
-from utils.Abstract import Pipeline
-from models.userSchema_model import userDetails
-from utils.asyncHandler import asyncHandler
-from components.resume_schema_generator import ResumeSchemaGenerator
+from src.utils.Abstract import Pipeline
+from src.models.userSchema_model import userDetails
+from src.utils.asyncHandler import asyncHandler
+from src.components.resume_schema_generator import ResumeSchemaGenerator
 
 import logging
 import sys

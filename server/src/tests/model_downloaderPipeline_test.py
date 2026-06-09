@@ -7,7 +7,7 @@ sys.path.append(os.getcwd())
 from dotenv import load_dotenv
 load_dotenv()
 
-from pipelines.model_download_pipeline import ModelDownloadPipeline
+from src.pipelines.model_download_pipeline import ModelDownloadPipeline
 from logger import *
 import asyncio
 

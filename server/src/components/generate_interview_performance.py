@@ -16,14 +16,14 @@ from langchain_core.messages import BaseMessage
 from langchain_community.tools import DuckDuckGoSearchResults
 from langchain_core.prompts import PromptTemplate
 from pydantic import Field
-from graphs.interview_graph_builder import load_conversation
-from prompts import generateInterviewPerformance_prompts as GenerateInterviewPerformancePrompt
-from llm.llm_loader import llm
-from models.Performance_model import Performance
-from prompts import interview_performance_prompt
-from utils.asyncHandler import asyncHandler
-from entity.artifact_entity import InterviewPerformanceArtifact
-from entity.config_entity import InterviewPerformanceConfig
+from src.graphs.interview_graph_builder import load_conversation
+from src.prompts import generateInterviewPerformance_prompts as GenerateInterviewPerformancePrompt
+from src.llm.llm_loader import llm
+from src.models.Performance_model import Performance
+from src.prompts import interview_performance_prompt
+from src.utils.asyncHandler import asyncHandler
+from src.entity.artifact_entity import InterviewPerformanceArtifact
+from src.entity.config_entity import InterviewPerformanceConfig
 # ===================== SQLITE CHECKPOINTER =====================
 # conn = sqlite3.connect("db.sqlite", check_same_thread=False)
 # checkpointer = AsyncSqliteSaver(conn)

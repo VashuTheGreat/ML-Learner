@@ -1,6 +1,6 @@
 
-from utils.asyncHandler import asyncHandler
-from data_acess.model_loader import Model
+from src.utils.asyncHandler import asyncHandler
+from src.data_acess.model_loader import Model
 from typing import List
 class SimilarJobPrediction:
     def __init__(self):

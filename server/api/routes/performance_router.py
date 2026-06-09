@@ -1,5 +1,5 @@
 import fastapi
-from pipelines.InterviewPerformance_pipeline import InterviewPerformancePipeline
+from src.pipelines.InterviewPerformance_pipeline import InterviewPerformancePipeline
 import logging
 import sys
 from exception import MyException

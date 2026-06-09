@@ -1,14 +1,14 @@
-import os
-from config.app_config import getAppConfig
-appconfig=getAppConfig()
-import os
-os.environ['LANGCHAIN_PROJECT']="ML_Learner"
-os.environ["MLFLOW_TRACKING_USERNAME"] = "vanshsharma7832"
 
+import os
+import sys
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+import logger
 from api.app import app
-from logger import *
-
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

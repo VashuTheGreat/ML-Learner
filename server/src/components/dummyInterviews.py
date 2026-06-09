@@ -6,13 +6,13 @@ from datetime import datetime, timezone, timedelta
 from typing import List
 from langchain_aws import ChatBedrockConverse
 import json
-from prompts import dummyInterview_prompts as interview_generater_Prompt
-from llm.llm_loader import llm
-from models.dummyInterview_model import InterviewResponse
+from src.prompts import dummyInterview_prompts as interview_generater_Prompt
+from src.llm.llm_loader import llm
+from src.models.dummyInterview_model import InterviewResponse
 from exception import MyException
-from utils.asyncHandler import asyncHandler
-from entity.config_entity import DummyInterviewConfig
-from entity.artifact_entity import DummyInterviewArtifact
+from src.utils.asyncHandler import asyncHandler
+from src.entity.config_entity import DummyInterviewConfig
+from src.entity.artifact_entity import DummyInterviewArtifact
 llm = llm
 
 llm_structured = llm.with_structured_output(InterviewResponse)

@@ -1,11 +1,11 @@
 
 
-from models.Resume_model import ResumeState,ResumeSchema
+from src.models.Resume_model import ResumeState,ResumeSchema
 import logging
-from llm.llm_loader import llm
-from prompts import resumeGeneration_prompts as ResumeGenerationPrompt
+from src.llm.llm_loader import llm
+from src.prompts import resumeGeneration_prompts as ResumeGenerationPrompt
 
-from utils.asyncHandler import asyncHandler
+from src.utils.asyncHandler import asyncHandler
 from langsmith import traceable
 
 @asyncHandler

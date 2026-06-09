@@ -89,3 +89,5 @@ MLFLOW_TRACKING_PASSWORD=os.getenv("MLFLOW_TRACKING_PASSWORD")
 MLFLOW_MODEL_URI= "models:/JobSimilarity/2"
 MLFLOW_DOWNLOADED_MODEL_PATH:str=os.path.join("artifact","JobSimilarityModel","JobSimilarity.pth")
 DEVICE=torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+PUBLIC_TEMP_DIR = os.path.join("public", "temp")

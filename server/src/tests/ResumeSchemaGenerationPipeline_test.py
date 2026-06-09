@@ -11,7 +11,7 @@ from logger import *
 
 import logging
 import asyncio
-from pipelines.ResumeSchemaGeneration_pipeline import ResumeSchemaGenerationPipeline
+from src.pipelines.ResumeSchemaGeneration_pipeline import ResumeSchemaGenerationPipeline
 
 async def main():
     resume_schema_generation_pipeline=ResumeSchemaGenerationPipeline()

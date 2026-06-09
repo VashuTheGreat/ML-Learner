@@ -1,9 +1,9 @@
 
 
 from exception import MyException
-from utils.Abstract import Pipeline
-from entity.config_entity import DummyInterviewConfig
-from components.dummyInterviews import DummyInterview
+from src.utils.Abstract import Pipeline
+from src.entity.config_entity import DummyInterviewConfig
+from src.components.dummyInterviews import DummyInterview
 import logging
 import sys
 

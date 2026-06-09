@@ -11,8 +11,8 @@ from logger import *
 
 import logging
 import asyncio
-from pipelines.JobFetcherPipeline import JobFetcherPipeline
-from models.model_train_models import Train as TrainSchema
+from src.pipelines.JobFetcherPipeline import JobFetcherPipeline
+from src.models.model_train_models import Train as TrainSchema
 
 async def main():
     job_fetcher_pipeline=JobFetcherPipeline()

@@ -1,9 +1,9 @@
 import os
 import mlflow
 import torch
-from src.Predictors.entity.config_entity import JobSimilarityModelConfig
+from src.entity.config_entity import JobSimilarityModelConfig
 import logging
-from utils.asyncHandler import asyncHandler
+from src.utils.asyncHandler import asyncHandler
 
 class ModelDownloader:
     def __init__(self, config: JobSimilarityModelConfig):

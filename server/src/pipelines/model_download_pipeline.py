@@ -1,7 +1,7 @@
 
-from src.Predictors.entity.config_entity import JobSimilarityModelConfig
-from components.model_downloader import ModelDownloader
-from src.Predictors.utils.Abstract import Pipeline
+from src.entity.config_entity import JobSimilarityModelConfig
+from src.components.model_downloader import ModelDownloader
+from src.utils.Abstract import Pipeline
 from logger import logging
 
 class ModelDownloadPipeline(Pipeline):

@@ -1,9 +1,9 @@
 import fastapi
 from typing import List
 from fastapi import Query
-from pipelines.DummyInterviews_pipeline import DummyInterviewsPipeline
-from pipelines.AiInterviewChat_pipeline import ChatInterviewerPipeline
-from src.Agents.constants import DEFAULT_INTERVIEW_FIELDS, DEFAULT_COMPANIES
+from src.pipelines.DummyInterviews_pipeline import DummyInterviewsPipeline
+from src.pipelines.AiInterviewChat_pipeline import ChatInterviewerPipeline
+from src.constants import DEFAULT_INTERVIEW_FIELDS, DEFAULT_COMPANIES
 import logging
 import sys
 from exception import MyException

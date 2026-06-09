@@ -1,7 +1,7 @@
 from PIL import Image
 import numpy as np
 import mediapipe as mp
-from utils.asyncHandler import asyncHandler
+from src.utils.asyncHandler import asyncHandler
 import logging
 import cv2
 

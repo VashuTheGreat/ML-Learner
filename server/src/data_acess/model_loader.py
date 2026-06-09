@@ -1,13 +1,13 @@
-from utils.asyncHandler import asyncHandler
+from src.utils.asyncHandler import asyncHandler
 
 import mlflow.pytorch
 import torch
 from logger import logging
-from src.Predictors.constants import DEVICE
-from models.similarJobPredictor_model import ResumeScore
-from utils.similarJobPrediction_utils import prepare_input,preprocess_text,tokenize
-from src.Predictors.entity.config_entity import JobSimilarityModelConfig
-from pipelines.model_download_pipeline import ModelDownloadPipeline
+from src.constants import DEVICE
+from src.models.similarJobPredictor_model import ResumeScore
+from src.utils.similarJobPrediction_utils import prepare_input,preprocess_text,tokenize
+from src.entity.config_entity import JobSimilarityModelConfig
+from src.pipelines.model_download_pipeline import ModelDownloadPipeline
 import os
 import pandas as pd
 class Model:
