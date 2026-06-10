@@ -8,3 +8,11 @@ class UpdateCodingSchema(BaseModel):
     easy: Optional[int] = None
     medium: Optional[int] = None
     hard: Optional[int] = None
+
+
+
+
+class RunCode(BaseModel):
+    language:str
+    code:str
+    question_id:int

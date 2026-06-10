@@ -18,7 +18,7 @@ async def main():
     job_fetcher_pipeline=JobFetcherPipeline()
 
     res=await job_fetcher_pipeline.initiate(
-        jobtile="machine learning intern",updated=False
+        jobtile="machine learning intern",updated=True
     )
     logging.info(res)
 

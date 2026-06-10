@@ -58,7 +58,7 @@ DEFAULT_COMPANIES_NAME=['Google',"Amazon","Microsoft","Apple","Meta","Netflix"]
 import os
 # ---------------- config ----------------------------------------------
 
-MODEL_TRAIN_CONFIG="src/CodeRunAndModelTrain/config/model_train.yaml"
+MODEL_TRAIN_CONFIG = os.path.join("config", "model_train.yaml")
 
 
 
@@ -71,6 +71,7 @@ DEFAULT_SAVE_COOKIE_PATH=os.path.join("artifact","cookies","cookies.pkl")
 
 LINKED_IN_USER_NAME=os.getenv("LINKED_IN_USER_EMAIL")
 LINKED_IN_USER_PASSWORD=os.getenv("LINKED_IN_USER_PASSWORD")
+RAPIDAPI_KEY=os.getenv("RAPIDAPI_KEY")
 
 
 SAVED_JOBS_FILE_PATH=os.path.join("artifact","jobs","jobs.csv")

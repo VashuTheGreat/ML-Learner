@@ -111,7 +111,6 @@ async def login(user: LoginUser, db: Session = Depends(get_db)):
 
 
 # ================================ Logout User =================================
-
 @router.get("/logout",dependencies=[Depends(verify_jwt)])
 async def logout(request:Request,db: Session = Depends(get_db)):
     user = request.state.user

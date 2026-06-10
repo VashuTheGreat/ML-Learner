@@ -9,12 +9,8 @@ from api.routes.coding_routes import router as CodingRouter
 from api.routes.question_routes import router as QuestionRouter
 from api.routes.common_routes import router as CommonRouter
 from api.routes.modelTraining_router import router as ModelTrainRouter
-from api.routes.modelTrainConfig_router import router as ModelTrainConfigRouter
 from api.routes.faceFind_routes import router as FaceDetetorRouter
-from api.routes.jobFetcher_router import router as JobFetcherRouter
-from api.routes.FormFiller_router import router as FormFillerRouter
-from api.routes.similarJobPredictor_router import router as SimilarJobPredictorRouter
-from api.routes.jobmodelDownloader_router import router as JobModelDownloaderRouter
+from api.routes.job_routes import router as JobFetcherRouter
 from api.routes.templates_routes import router as TemplateRouter
 from api.routes.interview_routes import router as InterviewRouter
 
@@ -67,12 +63,8 @@ app.include_router(QuestionRouter, prefix="/api/v1/question")
 app.include_router(CodingRouter, prefix="/api/v1/coding")
 app.include_router(InterviewRouter, prefix="/api/v1/interview")
 app.include_router(ModelTrainRouter, prefix="/api/v1/modelTraining")
-app.include_router(ModelTrainConfigRouter, prefix="/api/v1/modelTrainingConfig")
 app.include_router(FaceDetetorRouter, prefix="/api/v1/face")
-app.include_router(JobFetcherRouter, prefix="/api/v1/jobFetcher")
-app.include_router(FormFillerRouter, prefix="/api/v1/form")
-app.include_router(SimilarJobPredictorRouter, prefix="/api/v1/similarJobPredictor")
-app.include_router(JobModelDownloaderRouter, prefix="/api/v1/download_model")
+app.include_router(JobFetcherRouter, prefix="/api/v1/job")
 
 @app.get("/")
 async def root():
