@@ -155,19 +155,31 @@ export const DashBoard = () => {
     try {
       // 1. Gather pending/scheduled interviews from local storage
       const localInterviews: any[] = [];
+      const keysToRemove: string[] = [];
+      const currentTime = Date.now();
+
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith('pending_interview_')) {
           try {
             const val = JSON.parse(localStorage.getItem(key) || '{}');
             if (val && val._id) {
-              localInterviews.push(val);
+              const interviewTime = val.time ? new Date(val.time).getTime() : 0;
+              // If the interview is older than 1 hour, remove it as it was likely failed or abandoned
+              if (interviewTime && (currentTime - interviewTime > 60 * 60 * 1000)) {
+                keysToRemove.push(key);
+              } else {
+                localInterviews.push(val);
+              }
             }
           } catch (e) {
             // ignore
           }
         }
       }
+
+      // Remove the stale items
+      keysToRemove.forEach(key => localStorage.removeItem(key));
 
       // 2. Fetch completed interviews from backend database
       const backendInterviews = await interviewApi.getUserAppliedInterviews();

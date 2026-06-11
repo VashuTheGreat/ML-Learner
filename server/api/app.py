@@ -14,7 +14,7 @@ from api.routes.job_routes import router as JobFetcherRouter
 from api.routes.templates_routes import router as TemplateRouter
 from api.routes.interview_routes import router as InterviewRouter
 from api.routes.stream_routes import router as StreamRouter
-
+from api.routes.multi_rag_routes import router as MultiRagRouter
 from src.graphs.interview_graph_builder import close_checkpointer
 from db import Base, engine
 
@@ -121,6 +121,8 @@ app.include_router(ModelTrainRouter, prefix="/api/v1/modelTraining")
 app.include_router(FaceDetetorRouter, prefix="/api/v1/face")
 app.include_router(JobFetcherRouter, prefix="/api/v1/job")
 app.include_router(StreamRouter, prefix="/api/v1/stream")
+
+app.include_router(MultiRagRouter, prefix="/api/v1/multi_rag")
 
 @app.get("/")
 async def root():

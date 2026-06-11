@@ -15,7 +15,8 @@ import { User } from "@/types";
 const mapPathToIcon: Record<string, any> = {
   "/": Home, "/about": Info, "/courses": BookOpen, "/practice": PenTool,
   "/playground": FlaskConical, "/contact": Mail, "/dashboard": LayoutDashboard,
-  "/schedule-interview": Bot, "/job-fetcher": Linkedin, "/check_ats_score": Sparkles
+  "/schedule-interview": Bot, "/job-fetcher": Linkedin, "/check_ats_score": Sparkles,
+  "/multirag": FileText
 };
 
 const navLinks = [
@@ -26,6 +27,7 @@ const navLinks = [
   { name: "ML Playground", path: "/playground" },
   { name: "Job Fetcher", path: "/job-fetcher" },
   { name: "ATS Analyzer", path: "/check_ats_score" },
+  { name: "Multi-RAG Studio", path: "/multirag" },
   { name: "AI Interview", path: "/schedule-interview" },
   { name: "Contact", path: "/contact" },
 ];

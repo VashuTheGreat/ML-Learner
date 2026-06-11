@@ -28,6 +28,8 @@ import MLTrainer from "./pages/MLTrainer";
 import Playground from "./pages/Playground";
 import JobFetcher from "./pages/JobFetcher"; 
 import CheckAtsScore from "./pages/CheckAtsScore";
+import MultiRagUpload from "./pages/MultiRagUpload";
+import MultiRagChat from "./pages/MultiRagChat";
 import { AppLayout } from "./components/layout/AppLayout";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { GuestRoute } from "./components/auth/GuestRoute";
@@ -76,6 +78,8 @@ const App = () => (
               <Route path="/playground" element={<Playground/>} />
               <Route path="/job-fetcher" element={<JobFetcher/>} />
               <Route path="/check_ats_score" element={<CheckAtsScore />} />
+              <Route path="/multirag" element={<MultiRagUpload />} />
+              <Route path="/multirag/chat" element={<MultiRagChat />} />
             </Route>
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
