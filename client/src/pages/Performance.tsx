@@ -7,7 +7,8 @@ import {
 } from "lucide-react";
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
-  ResponsiveContainer, Tooltip
+  ResponsiveContainer, Tooltip,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
 import performanceApi from '@/services/performanceApi';
 
@@ -19,6 +20,7 @@ const Performance = () => {
   const [performance, setPerformance] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [chartType, setChartType] = useState<'radar' | 'bar'>('radar');
 
   useEffect(() => {
     const fetchPerformance = async () => {
@@ -181,34 +183,103 @@ const Performance = () => {
 
               {/* Visualization Section */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Radar Chart */}
+                {/* Radar/Bar Chart Visualization */}
                 <div className="glass-card p-8 rounded-3xl flex flex-col">
-                  <h3 className="text-xl font-bold mb-8 flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-primary" />
-                    Skills Visualization
-                  </h3>
-                  <div className="flex-1 min-h-[350px] w-full">
+                  <div className="flex justify-between items-center mb-8 gap-4 flex-wrap">
+                    <h3 className="text-xl font-bold flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5 text-primary" />
+                      Skills Visualization
+                    </h3>
+                    <div className="flex items-center bg-secondary/30 p-1 rounded-xl border border-border/50">
+                      <button
+                        onClick={() => setChartType('radar')}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
+                          chartType === 'radar' 
+                            ? "bg-background text-primary shadow-sm" 
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        Radar Chart
+                      </button>
+                      <button
+                        onClick={() => setChartType('bar')}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
+                          chartType === 'bar' 
+                            ? "bg-background text-primary shadow-sm" 
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        Bar Chart
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex-1 min-h-[350px] w-full flex items-center justify-center">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
-                        <PolarGrid stroke="#e2e8f0" />
-                        <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 12, fontWeight: 500 }} />
-                        <PolarRadiusAxis angle={30} domain={[0, 10]} tick={{ fill: '#94a3b8' }} />
-                        <Radar
-                          name="Skills"
-                          dataKey="A"
-                          stroke="#8b5cf6"
-                          fill="#8b5cf6"
-                          fillOpacity={0.4}
-                        />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'rgba(255, 255, 255, 0.9)', 
-                            borderRadius: '12px', 
-                            border: '1px solid #e2e8f0',
-                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
-                          }} 
-                        />
-                      </RadarChart>
+                      {chartType === 'radar' ? (
+                        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
+                          <PolarGrid stroke="#e2e8f0" />
+                          <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 11, fontWeight: 500 }} />
+                          <PolarRadiusAxis angle={30} domain={[0, 10]} tick={{ fill: '#94a3b8' }} />
+                          <Radar
+                            name="Skills"
+                            dataKey="A"
+                            stroke="#8b5cf6"
+                            fill="#8b5cf6"
+                            fillOpacity={0.4}
+                          />
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+                              borderRadius: '12px', 
+                              border: '1px solid #e2e8f0',
+                              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                            }} 
+                          />
+                        </RadarChart>
+                      ) : (
+                        <BarChart
+                          data={chartData}
+                          margin={{ top: 20, right: 30, left: -20, bottom: 20 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                          <XAxis 
+                            dataKey="subject" 
+                            tick={{ fill: '#64748b', fontSize: 10, fontWeight: 500 }} 
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <YAxis 
+                            domain={[0, 10]} 
+                            tick={{ fill: '#94a3b8', fontSize: 11 }} 
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <Tooltip
+                            cursor={{ fill: 'rgba(139, 92, 246, 0.05)' }}
+                            contentStyle={{ 
+                              backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+                              borderRadius: '12px', 
+                              border: '1px solid #e2e8f0',
+                              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                            }}
+                          />
+                          <Bar 
+                            dataKey="A" 
+                            name="Score" 
+                            fill="url(#barGradient)" 
+                            radius={[8, 8, 0, 0]} 
+                            barSize={32}
+                          />
+                          <defs>
+                            <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#a78bfa" />
+                              <stop offset="100%" stopColor="#7c3aed" />
+                            </linearGradient>
+                          </defs>
+                        </BarChart>
+                      )}
                     </ResponsiveContainer>
                   </div>
                 </div>

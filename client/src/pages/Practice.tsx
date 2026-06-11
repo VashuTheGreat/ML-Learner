@@ -14,7 +14,8 @@ const Practice: React.FC = () => {
     const [activeDifficulty, setActiveDifficulty] = useState("All");
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
-    const [solvedIds, setSolvedIds] = useState<string[]>([]);
+    const [solvedIds, setSolvedIds] = useState<number[]>([]);
+    const [visitedIds, setVisitedIds] = useState<number[]>([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -23,7 +24,8 @@ const Practice: React.FC = () => {
                 const res = await questionApi.getCodingSchema();
                 if (res.success && res.data) {
                     const schema = Array.isArray(res.data) ? res.data[0] : res.data;
-                    setSolvedIds(schema.all_questions_solved || []);
+                    setSolvedIds((schema.all_questions_solved || []).map(Number));
+                    setVisitedIds((schema.recently_visited || []).map(Number));
                 }
             } catch (error) {
                 console.warn("Coding schema not found");
@@ -223,10 +225,15 @@ const Practice: React.FC = () => {
                                 <div className="flex items-center justify-between md:justify-end gap-3 sm:gap-6 pt-3 md:pt-0 border-t md:border-t-0 border-border/30">
                                     <div className="flex flex-col items-start md:items-end md:mr-4">
                                         <span className="text-[9px] sm:text-xs text-muted-foreground uppercase tracking-widest font-bold mb-0.5 sm:mb-1">Status</span>
-                                        {solvedIds.includes(String(q.id)) ? (
+                                        {solvedIds.includes(Number(q.id)) ? (
                                             <span className="text-[10px] sm:text-sm font-bold text-green-500 flex items-center gap-1.5 bg-green-500/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg border border-green-500/20 whitespace-nowrap">
                                                 <CheckCircle2 size={12} className="sm:w-3.5 sm:h-3.5" />
                                                 Solved
+                                            </span>
+                                        ) : visitedIds.includes(Number(q.id)) ? (
+                                            <span className="text-[10px] sm:text-sm font-bold text-orange-500 dark:text-orange-400 flex items-center gap-1.5 bg-orange-500/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg border border-orange-500/20 whitespace-nowrap">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-orange-500 dark:bg-orange-400"></div>
+                                                Attempting
                                             </span>
                                         ) : (
                                             <span className="text-[10px] sm:text-sm font-medium text-primary flex items-center gap-1.5 bg-primary/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg border border-primary/20 whitespace-nowrap">
@@ -237,11 +244,11 @@ const Practice: React.FC = () => {
                                     </div>
                                     <button className={cn(
                                         "px-5 sm:px-8 py-2 sm:py-2.5 rounded-xl flex items-center gap-2 group/btn font-bold text-sm sm:text-base transition-all duration-300 whitespace-nowrap",
-                                        solvedIds.includes(String(q.id))
+                                        solvedIds.includes(Number(q.id))
                                             ? "bg-secondary/10 text-muted-foreground hover:bg-secondary/20 border border-border/50"
                                             : "btn-primary shadow-lg shadow-primary/20"
                                     )}>
-                                        {solvedIds.includes(String(q.id)) ? 'Review' : 'Solve'}
+                                        {solvedIds.includes(Number(q.id)) ? 'Review' : 'Solve'}
                                         <ChevronRight size={16} className="sm:w-[18px] sm:h-[18px] group-hover/btn:translate-x-1 transition-transform" />
                                     </button>
                                 </div>

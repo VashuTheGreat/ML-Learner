@@ -20,7 +20,9 @@ import {
   Trophy,
   Code2,
   Bot,
-  RefreshCw
+  RefreshCw,
+  Briefcase,
+  GraduationCap
 } from "lucide-react";
 
 import userApi from "@/services/userApi";
@@ -31,9 +33,6 @@ import questionApi from "@/services/questionApi";
 import { useToast } from "@/components/ui/use-toast";
 import { User, CodingSchema } from "@/types";
 
-
-
-import { ResumePreview } from "@/components/common/ResumePreview";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,6 +44,93 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+
+const UploadResumeModal = ({ onUploadSuccess }: { onUploadSuccess: (data: any) => void }) => {
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (selected) {
+      if (selected.type !== 'application/pdf') {
+        toast({ title: "Invalid Format", description: "Please upload a PDF file only.", variant: "destructive" });
+        return;
+      }
+      setFile(selected);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!file) return;
+    setIsUploading(true);
+    try {
+      await pythonApi.uploadResume(file);
+      const templateData = await templateApi.getResumeTemplate();
+      if (templateData && templateData.content) {
+        toast({ title: "Success", description: "Resume uploaded and parsed successfully!" });
+        onUploadSuccess(templateData.content);
+      } else {
+        throw new Error("Could not fetch parsed template schema");
+      }
+    } catch (error) {
+      console.error(error);
+      toast({ title: "Upload Failed", description: "Could not process resume. Please try again.", variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-md">
+      <div className="w-full max-w-md p-8 bg-card border border-border rounded-3xl shadow-2xl space-y-6 text-center animate-in fade-in zoom-in-95 duration-200">
+        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto text-primary">
+          <Upload className="w-8 h-8" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold">Initialize Your Profile</h2>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Please upload your professional resume in PDF format to build your command center and initialize your personalized AI interview profile.
+          </p>
+        </div>
+        <div className="border-2 border-dashed border-border rounded-2xl p-6 relative group hover:border-primary/50 transition-colors">
+          <input
+            type="file"
+            accept=".pdf"
+            onChange={handleFileChange}
+            className="absolute inset-0 opacity-0 cursor-pointer"
+            disabled={isUploading}
+          />
+          {file ? (
+            <div className="space-y-1">
+              <p className="text-sm font-bold truncate text-foreground">{file.name}</p>
+              <p className="text-xs text-muted-foreground">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Drag & drop or click to choose file</p>
+              <p className="text-xs text-muted-foreground">PDF only (Max 10MB)</p>
+            </div>
+          )}
+        </div>
+        <button
+          onClick={handleUpload}
+          disabled={!file || isUploading}
+          className="w-full btn-primary h-12 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+        >
+          {isUploading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+              Parsing Resume (takes a moment)...
+            </>
+          ) : (
+            "Upload & Parse Resume"
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export const DashBoard = () => {
   const navigate = useNavigate();
@@ -60,28 +146,82 @@ export const DashBoard = () => {
   const [isRefreshingInterviews, setIsRefreshingInterviews] = useState(false);
   const [codingSchema, setCodingSchema] = useState<CodingSchema | null>(null);
 
+  const [resumeTemplate, setResumeTemplate] = useState<any>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [isFetchingTemplate, setIsFetchingTemplate] = useState(true);
+
   const fetchInterviews = async (showSpinner = false) => {
     if (showSpinner) setIsRefreshingInterviews(true);
     try {
-      const interviews = await interviewApi.getUserAppliedInterviews();
-      if (!interviews) return;
+      // 1. Gather pending/scheduled interviews from local storage
+      const localInterviews: any[] = [];
+      const keysToRemove: string[] = [];
+      const currentTime = Date.now();
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('pending_interview_')) {
+          try {
+            const val = JSON.parse(localStorage.getItem(key) || '{}');
+            if (val && val._id) {
+              const interviewTime = val.time ? new Date(val.time).getTime() : 0;
+              // If the interview is older than 1 hour, remove it as it was likely failed or abandoned
+              if (interviewTime && (currentTime - interviewTime > 60 * 60 * 1000)) {
+                keysToRemove.push(key);
+              } else {
+                localInterviews.push(val);
+              }
+            }
+          } catch (e) {
+            // ignore
+          }
+        }
+      }
+
+      // Remove the stale items
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+
+      // 2. Fetch completed interviews from backend database
+      const backendInterviews = await interviewApi.getUserAppliedInterviews();
+      const mappedBackend = backendInterviews.map((item: any) => ({
+        _id: String(item.id),
+        id: String(item.id),
+        topic: item.topic || 'General',
+        companyName: item.companyName || 'Tech Corp',
+        job_Role: item.job_Role || item.topic || 'Technical Interview',
+        status: 'done',
+        time: item.createdAt || new Date().toISOString(),
+        performance: item.performance
+      }));
+
+      // 3. Merge both sets
+      const allInterviews = [...localInterviews, ...mappedBackend];
 
       const today = new Date().toISOString().split('T')[0];
       
-      const updatedInterviews = await Promise.all(interviews.map(async (interview: any) => {
-        const interviewDate = new Date(interview.time).toISOString().split('T')[0];
-        const isToday = interviewDate === today;
-        const isPassed = new Date(interviewDate) < new Date(today);
+      const updatedInterviews = await Promise.all(allInterviews.map(async (interview: any) => {
+        if (interview.status === 'done') return interview;
+        
+        try {
+          const interviewDate = new Date(interview.time).toISOString().split('T')[0];
+          const isToday = interviewDate === today;
+          const isPassed = new Date(interviewDate) < new Date(today);
 
-        if (isToday && interview.status === 'pending') {
-          await interviewApi.updateInterviewStatus({ id: interview._id, status: 'live' });
-          return { ...interview, status: 'live' };
-        } else if (isPassed && (interview.status === 'live' || interview.status === 'pending')) {
-          await interviewApi.updateInterviewStatus({ id: interview._id, status: 'done' });
-          return { ...interview, status: 'done' };
+          if (isToday && interview.status === 'pending') {
+            await interviewApi.updateInterviewStatus({ id: interview._id, status: 'live' });
+            return { ...interview, status: 'live' };
+          } else if (isPassed && (interview.status === 'live' || interview.status === 'pending')) {
+            await interviewApi.updateInterviewStatus({ id: interview._id, status: 'done' });
+            return { ...interview, status: 'done' };
+          }
+        } catch (e) {
+          console.error("Error formatting date for interview", interview, e);
         }
         return interview;
       }));
+
+      // 4. Sort by date (newest first)
+      updatedInterviews.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
       setAppliedInterviews(updatedInterviews);
     } catch (error) {
@@ -102,6 +242,27 @@ export const DashBoard = () => {
     }
   };
 
+  const fetchResumeTemplate = async () => {
+    setIsFetchingTemplate(true);
+    try {
+      const templateData = await templateApi.getResumeTemplate();
+      if (templateData && templateData.content) {
+        setResumeTemplate(templateData.content);
+        setShowUploadModal(false);
+        if (templateData.content.summary) {
+          setAboutInput(templateData.content.summary);
+        }
+      } else {
+        setShowUploadModal(true);
+      }
+    } catch (error) {
+      console.error("No resume template found:", error);
+      setShowUploadModal(true);
+    } finally {
+      setIsFetchingTemplate(false);
+    }
+  };
+
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
@@ -113,12 +274,15 @@ export const DashBoard = () => {
         }
         fetchInterviews();
         fetchCodingSchema();
+        fetchResumeTemplate();
       } catch (error) {
         console.error("Failed to parse user data", error);
         navigate("/login");
+        setLoading(false);
       }
     } else {
       navigate("/login");
+      setLoading(false);
     }
     setLoading(false);
   }, [navigate]);
@@ -193,12 +357,35 @@ export const DashBoard = () => {
 
   const handleSaveAbout = async () => {
     if (!aboutInput.trim()) return;
-    const currentAbout = user?.aboutUser || "";
+    const currentAbout = resumeTemplate?.summary || user?.aboutUser || "";
     if (aboutInput.trim() === currentAbout.trim()) {
       setIsEditingAbout(false);
       return;
     }
-    await saveAboutData(aboutInput, false);
+    
+    setIsSavingAbout(true);
+    try {
+      await userApi.addAboutUser({ aboutUser: aboutInput });
+      const updatedUser = await userApi.getUser();
+      if (updatedUser) {
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+      
+      if (resumeTemplate) {
+        const updatedContent = { ...resumeTemplate, summary: aboutInput };
+        await templateApi.updateResumeTemplate(updatedContent);
+        setResumeTemplate(updatedContent);
+      }
+      
+      toast({ title: "Profile Summary Updated", description: "Your profile summary has been updated successfully!" });
+      setIsEditingAbout(false);
+    } catch (e) {
+      console.error(e);
+      toast({ title: "Error", description: "Failed to update profile summary.", variant: "destructive" });
+    } finally {
+      setIsSavingAbout(false);
+    }
   };
 
 const handleUpdateUser = () => {
@@ -307,7 +494,7 @@ const handleUpdateUser = () => {
     navigate(`/viewresume/${resumeId}`);
   }
 
-  if (loading) {
+  if (loading || isFetchingTemplate) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center relative">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -317,8 +504,29 @@ const handleUpdateUser = () => {
 
   if (!user) return null;
 
+  const handleUploadSuccess = (parsedSchema: any) => {
+    setResumeTemplate(parsedSchema);
+    setShowUploadModal(false);
+    if (parsedSchema.summary || parsedSchema.aboutUser) {
+      setAboutInput(parsedSchema.summary || parsedSchema.aboutUser);
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          parsedUser.aboutUser = parsedSchema.summary || parsedSchema.aboutUser;
+          localStorage.setItem('user', JSON.stringify(parsedUser));
+          setUser(parsedUser);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen w-full text-foreground selection:bg-primary/20 p-4 md:p-8 animate-in fade-in max-w-[1600px] mx-auto relative z-10">
+      
+      {showUploadModal && <UploadResumeModal onUploadSuccess={handleUploadSuccess} />}
       
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -369,11 +577,13 @@ const handleUpdateUser = () => {
         <div className="bg-card border border-border p-4 rounded-2xl flex items-center gap-4 relative overflow-hidden group">
           <div className="absolute -right-2 top-0 w-16 h-16 bg-accent/5 rounded-full blur-xl group-hover:bg-accent/10 transition-colors"></div>
           <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
-            <FileText className="w-5 h-5" />
+            <Briefcase className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xs font-bold text-muted-foreground uppercase">Resumes</div>
-            <div className="text-xl font-bold">{user.resumes.length} Doc{user.resumes.length !== 1 && 's'}</div>
+            <div className="text-xs font-bold text-muted-foreground uppercase">Experience</div>
+            <div className="text-xl font-bold">
+              {resumeTemplate?.experience?.length || 0} Role{(resumeTemplate?.experience?.length !== 1) && 's'}
+            </div>
           </div>
         </div>
         
@@ -449,10 +659,46 @@ const handleUpdateUser = () => {
                 </label>
               </div>
               
-              <h2 className="text-xl font-bold leading-none mb-1">{user.fullName}</h2>
-              <p className="text-sm text-muted-foreground mb-6 truncate">{user.email}</p>
+              <h2 className="text-xl font-bold leading-none mb-1">{resumeTemplate?.name || user.fullName}</h2>
+              <p className="text-sm text-muted-foreground mb-2 truncate">{resumeTemplate?.email || user.email}</p>
+              {resumeTemplate?.phone && (
+                <p className="text-xs text-muted-foreground mb-1 font-mono">{resumeTemplate.phone}</p>
+              )}
+              {resumeTemplate?.location && (
+                <p className="text-xs text-muted-foreground mb-3">{resumeTemplate.location}</p>
+              )}
+              {resumeTemplate?.apparentSeniority && (
+                <div className="mb-4">
+                  <span className="inline-block px-2.5 py-1 rounded-md bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
+                    {resumeTemplate.apparentSeniority} Level
+                  </span>
+                </div>
+              )}
+
+              {/* Social Links Section */}
+              {resumeTemplate?.links?.social_links && resumeTemplate.links.social_links.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  {resumeTemplate.links.social_links.map((link: string, idx: number) => {
+                    const cleanLink = link.startsWith('http') ? link : `https://${link}`;
+                    const displayLink = link.replace(/^https?:\/\/(www\.)?/, '');
+                    
+                    return (
+                      <a 
+                        key={idx}
+                        href={cleanLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-secondary/50 hover:bg-primary/10 border border-border/40 text-[10px] font-semibold text-muted-foreground hover:text-primary transition-all max-w-[220px] truncate"
+                        title={link}
+                      >
+                        {displayLink}
+                      </a>
+                    );
+                  })}
+                </div>
+              )}
               
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3 mb-6 border-t border-border pt-4">
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-muted-foreground flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5"/> Joined</span>
                   <span className="font-medium">{formatDate(user.createdAt)}</span>
@@ -524,8 +770,8 @@ const handleUpdateUser = () => {
                  </div>
                ) : (
                  <div className="text-sm text-foreground/80 leading-relaxed p-3 bg-secondary/10 rounded-xl">
-                   {user.aboutUser ? (
-                     <span className="line-clamp-6">{user.aboutUser}</span>
+                   {resumeTemplate?.summary || user.aboutUser ? (
+                     <span className="line-clamp-6">{resumeTemplate?.summary || user.aboutUser}</span>
                    ) : (
                      <span className="italic opacity-60">
                        No summary added. Upload a resume PDF to auto-generate.
@@ -558,22 +804,57 @@ const handleUpdateUser = () => {
                 </div>
             </div>
             
-            <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Recently Active</h4>
-            {codingSchema?.recently_solved && codingSchema.recently_solved.length > 0 ? (
-              <div className="flex flex-wrap gap-1.5">
-                {codingSchema.recently_solved.slice(0, 4).map((slug, idx) => (
-                  <Link 
-                    key={idx}
-                    to={`/solve/${slug}`}
-                    className="px-2.5 py-1 rounded-md bg-muted border border-border text-[10px] font-semibold hover:border-primary/50 transition-colors truncate max-w-[100px] text-muted-foreground hover:text-foreground"
-                  >
-                    {slug.replace(/-/g, ' ')}
-                  </Link>
-                ))}
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Recently Active</h4>
+                {codingSchema?.recently_solved && codingSchema.recently_solved.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {codingSchema.recently_solved.slice(0, 4).map((slug, idx) => {
+                      const slugStr = String(slug);
+                      const displayText = isNaN(Number(slugStr)) 
+                        ? slugStr.replace(/-/g, ' ') 
+                        : `Question ${slugStr}`;
+                      return (
+                        <Link 
+                          key={idx}
+                          to={`/solve/${slugStr}`}
+                          className="px-2.5 py-1 rounded-md bg-muted border border-border text-[10px] font-semibold hover:border-primary/50 transition-colors truncate max-w-[120px] text-muted-foreground hover:text-foreground capitalize"
+                        >
+                          {displayText}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-xs text-muted-foreground italic bg-muted/30 p-2 rounded-lg text-center">No questions solved.</div>
+                )}
               </div>
-            ) : (
-              <div className="text-xs text-muted-foreground italic bg-muted/30 p-2 rounded-lg text-center">No questions solved.</div>
-            )}
+
+              <div>
+                <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Recently Visited</h4>
+                {codingSchema?.recently_visited && codingSchema.recently_visited.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {codingSchema.recently_visited.slice(0, 5).map((slug, idx) => {
+                      const slugStr = String(slug);
+                      const displayText = isNaN(Number(slugStr)) 
+                        ? slugStr.replace(/-/g, ' ') 
+                        : `Question ${slugStr}`;
+                      return (
+                        <Link 
+                          key={idx}
+                          to={`/solve/${slugStr}`}
+                          className="px-2.5 py-1 rounded-md bg-muted border border-border text-[10px] font-semibold hover:border-primary/50 transition-colors truncate max-w-[120px] text-muted-foreground hover:text-foreground capitalize"
+                        >
+                          {displayText}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-xs text-muted-foreground italic bg-muted/30 p-2 rounded-lg text-center">No questions visited.</div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -585,7 +866,7 @@ const handleUpdateUser = () => {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-primary" />
-                Upcoming Interviews
+                Interviews & Performance History
               </h2>
               <button
                 onClick={() => fetchInterviews(true)}
@@ -690,82 +971,127 @@ const handleUpdateUser = () => {
             )}
           </div>
 
-          {/* Vertical Resume Stack */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
+          {/* Active Resume Data Display */}
+          <div className="space-y-6 animate-in slide-in-from-bottom duration-300">
+            <div className="flex items-center justify-between border-b border-border pb-4">
               <h2 className="text-xl font-bold flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" />
-                Resume Stack
+                <Briefcase className="w-5 h-5 text-primary" />
+                Resume Profile
               </h2>
-              <Link to="/templates" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-md hover:bg-primary/90 transition-colors">
-                <Plus className="w-4 h-4" /> Browse Templates
-              </Link>
+              <button 
+                onClick={() => setShowUploadModal(true)} 
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-md hover:bg-primary/90 transition-colors"
+              >
+                <Upload className="w-4 h-4" /> Re-upload Resume
+              </button>
             </div>
 
-            {user.resumes.length > 0 ? (
-              <div className="flex flex-col gap-3">
-                {user.resumes.map((resume, index) => (
-                  <div 
-                    key={index} 
-                    onClick={()=>viewResume(resume)} 
-                    className="bg-card border border-border hover:border-primary/40 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 cursor-pointer group transition-all"
-                  >
-                    {/* Tiny visual preview replacing the huge iframe block on dashboard */}
-                    <div className="w-16 h-20 bg-muted rounded-lg overflow-hidden border border-border relative flex-shrink-0 group-hover:border-primary/50 transition-colors hidden sm:block">
-                       <ResumePreview resumeId={resume.id || resume} />
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-base font-bold truncate group-hover:text-primary transition-colors">Software Engineer Details</h3>
-                        <span className="px-2 py-0.5 rounded-full bg-muted text-[10px] font-bold uppercase text-muted-foreground">V{index + 1}</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {/* Experience timeline */}
+              <div className="bg-card border border-border rounded-3xl p-6 shadow-sm space-y-4">
+                <h3 className="text-base font-bold flex items-center gap-2 border-b border-border/50 pb-3">
+                  <Briefcase className="w-5 h-5 text-primary" /> Experience History
+                </h3>
+                {resumeTemplate?.experience && resumeTemplate.experience.length > 0 ? (
+                  <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                    {resumeTemplate.experience.map((exp: any, idx: number) => (
+                      <div key={idx} className="relative pl-6 border-l-2 border-primary/20 last:border-0 pb-1">
+                        <div className="absolute -left-[7px] top-1.5 w-3 h-3 rounded-full bg-primary" />
+                        <h4 className="font-bold text-sm text-foreground">{exp.role}</h4>
+                        <p className="text-xs font-semibold text-primary">{exp.company}</p>
+                        <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{exp.summary}</p>
                       </div>
-                      <p className="text-xs text-muted-foreground truncate flex items-center gap-2">
-                         <Clock className="w-3 h-3" /> Modified {formatDate(user.updatedAt)}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2 mt-4 sm:mt-0 w-full sm:w-auto justify-end sm:justify-start">
-                      <button className="px-3 py-1.5 rounded-lg bg-muted text-foreground text-xs font-semibold hover:bg-primary/10 hover:text-primary transition-colors flex items-center gap-1">
-                         View
-                      </button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <button
-                            onClick={(e) => e.stopPropagation()}
-                            className="p-1.5 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
-                            title="Delete Resume"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Resume?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete this resume? This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDeleteResume(index)}>Delete</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">No professional experience listed.</p>
+                )}
               </div>
-            ) : (
-              <div className="bg-muted/30 border border-dashed border-border rounded-3xl p-10 text-center flex flex-col items-center justify-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 text-primary">
-                  <FileText className="w-8 h-8" />
-                </div>
-                <h3 className="text-lg font-bold mb-2">No Active Resumes</h3>
-                <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6">Build a powerful, ATS-friendly resume to start practicing.</p>
-                <Link to="/templates" className="btn-primary py-2 px-6 rounded-xl text-sm shadow-xl shadow-primary/20">Get Started</Link>
+
+              {/* Education list */}
+              <div className="bg-card border border-border rounded-3xl p-6 shadow-sm space-y-4">
+                <h3 className="text-base font-bold flex items-center gap-2 border-b border-border/50 pb-3">
+                  <GraduationCap className="w-5 h-5 text-primary" /> Education History
+                </h3>
+                {resumeTemplate?.education && resumeTemplate.education.length > 0 ? (
+                  <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                    {resumeTemplate.education.map((edu: any, idx: number) => (
+                      <div key={idx} className="flex justify-between items-start gap-4">
+                        <div>
+                          <h4 className="font-bold text-sm text-foreground">{edu.degree}</h4>
+                          <p className="text-xs text-muted-foreground">{edu.college || edu.university}</p>
+                        </div>
+                        <span className="text-xs font-semibold text-muted-foreground bg-secondary/30 px-2.5 py-1 rounded-md shrink-0">
+                          {edu.start} - {edu.end || 'Present'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">No education history listed.</p>
+                )}
               </div>
-            )}
+
+              {/* Projects Spotlight (Full-width grid column) */}
+              <div className="bg-card border border-border rounded-3xl p-6 shadow-sm space-y-4 md:col-span-2">
+                <h3 className="text-base font-bold flex items-center gap-2 border-b border-border/50 pb-3">
+                  <Code2 className="w-5 h-5 text-primary" /> Projects Spotlight
+                </h3>
+                {resumeTemplate?.projects && resumeTemplate.projects.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {resumeTemplate.projects.map((proj: any, idx: number) => (
+                      <div key={idx} className="bg-secondary/10 border border-border/40 p-4 rounded-2xl flex flex-col justify-between">
+                        <div>
+                          <h4 className="font-bold text-sm text-foreground">{proj.title}</h4>
+                          <ul className="text-xs text-muted-foreground mt-2.5 list-disc list-inside space-y-1 leading-relaxed">
+                            {(proj.bullet_points || []).map((bp: string, bpIdx: number) => (
+                              <li key={bpIdx}>{bp}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        {proj.links && proj.links.length > 0 && (
+                          <div className="mt-4 flex gap-2">
+                            {proj.links.map((link: string, linkIdx: number) => (
+                              <a 
+                                key={linkIdx} 
+                                href={link.startsWith('http') ? link : `https://${link}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-[10px] font-bold text-primary hover:underline"
+                              >
+                                Project Link
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">No projects listed.</p>
+                )}
+              </div>
+
+              {/* Skills Inventory */}
+              <div className="bg-card border border-border rounded-3xl p-6 shadow-sm space-y-4 md:col-span-2">
+                <h3 className="text-base font-bold flex items-center gap-2 border-b border-border/50 pb-3">
+                  <Trophy className="w-5 h-5 text-primary" /> Technical Skills & Technologies
+                </h3>
+                {resumeTemplate?.skills && resumeTemplate.skills.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {resumeTemplate.skills.map((skill: string, idx: number) => (
+                      <span key={idx} className="px-3 py-1.5 bg-primary/10 border border-primary/20 text-primary text-xs font-semibold rounded-xl">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">No technical skills listed.</p>
+                )}
+              </div>
+
+            </div>
           </div>
           
         </div>

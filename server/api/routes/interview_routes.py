@@ -109,6 +109,9 @@ async def chat_interviewer_stream_route(
                 db.refresh(new_interview)
                 logging.info(f"Interview saved — id={new_interview.id} for user_id={user_id}")
 
+                # Yield the database interview ID so the client can redirect to the correct ID
+                yield f"data: {json.dumps({'type': 'interview_id', 'content': new_interview.id})}\n\n"
+
                 await deleteThread(thread_id=body.thread_id)
                 logging.info(f"Thread {body.thread_id} deleted after interview completion")
 
@@ -215,9 +218,10 @@ async def get_user_interviews(
         }
     }
 )
+
 async def get_interview_detail(
     request: Request,
-    interview_id: int = Path(..., description="Unique database identifier of the mock interview."),
+    interview_id: str = Path(..., description="Unique database identifier of the mock interview."),
     db: Session = Depends(get_db)
 ):
     """
@@ -225,7 +229,11 @@ async def get_interview_detail(
     """
     user_id = request.state.user.id
     
-    interview = db.query(Interview).filter(Interview.id == interview_id, Interview.user_id == user_id).first()
+    try:
+        int_id = int(interview_id)
+        interview = db.query(Interview).filter(Interview.id == int_id, Interview.user_id == user_id).first()
+    except ValueError:
+        interview = None
     
     if not interview:
         raise HTTPException(status_code=404, detail="Interview not found")
@@ -241,4 +249,8 @@ async def get_interview_detail(
         "message":"Interview fetched successfully",
         "data":data
     })
+
+
+
+
 

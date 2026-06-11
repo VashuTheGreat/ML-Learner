@@ -4,7 +4,7 @@ import {
   Code2,
   Home, Info, BookOpen, PenTool, FlaskConical, Briefcase, Mail, LayoutDashboard,
   LogOut, ChevronLeft, ChevronRight, Sun, Moon, User as UserIcon, Palette, X,
-  Bot, FileText, Linkedin
+  Bot, FileText, Linkedin, Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import userApi from "@/services/userApi";
@@ -14,8 +14,9 @@ import { User } from "@/types";
 
 const mapPathToIcon: Record<string, any> = {
   "/": Home, "/about": Info, "/courses": BookOpen, "/practice": PenTool,
-  "/playground": FlaskConical, "/apply": Briefcase, "/contact": Mail, "/dashboard": LayoutDashboard,
-  "/schedule-interview": Bot, "/templates": FileText, "/job-fetcher": Linkedin
+  "/playground": FlaskConical, "/contact": Mail, "/dashboard": LayoutDashboard,
+  "/schedule-interview": Bot, "/job-fetcher": Linkedin, "/check_ats_score": Sparkles,
+  "/multirag": FileText
 };
 
 const navLinks = [
@@ -25,9 +26,9 @@ const navLinks = [
   { name: "Practice", path: "/practice" },
   { name: "ML Playground", path: "/playground" },
   { name: "Job Fetcher", path: "/job-fetcher" },
+  { name: "ATS Analyzer", path: "/check_ats_score" },
+  { name: "Multi-RAG Studio", path: "/multirag" },
   { name: "AI Interview", path: "/schedule-interview" },
-  { name: "Resume Builder", path: "/templates" },
-  { name: "Apply", path: "/apply" },
   { name: "Contact", path: "/contact" },
 ];
 

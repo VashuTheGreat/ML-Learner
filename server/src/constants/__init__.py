@@ -68,3 +68,29 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # =============== Public Temp Dir ===============================
 PUBLIC_TEMP_DIR = os.path.join("public", "temp")
+
+
+
+
+
+# ===================== MUlti Rag ==============
+INGESTION_FOLDER_NAME = "ingestion"
+TRANSFORMATION_FOLDER_NAME="transformation"
+EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+LLM_MODEL_ID = "llama-3.3-70b-versatile"
+LLM_REGION = "us-east-1"
+MODEL_NAME = "llama-3.3-70b-versatile"
+LOGS_DIR = "logs"
+
+
+# ======================= Api ====================
+PUBLIC_FOLDER_FILE_PATH:str="public"
+ARTIFACT_DIR = "artifacts"
+
+
+# ======================= Web Search Constants ====================
+SEARCH_MAX_RESULT, SEARCH_TOPIC = 5, "general"
+
+
+DEFAULT_COOKIE_MAX_AGE_SECONDS=60*5
+

@@ -75,6 +75,52 @@ async def get_coding_schema(request: Request, db: Session = Depends(get_db)):
             content={"success": True, "message": "coding schema created automatically", "data": [jsonable_encoder(new_coding)]}
         )
 
+    # Auto-heal: de-duplicate array fields and recalculate difficulty counts
+    modified = False
+    
+    if coding.recently_solved:
+        seen = set()
+        deduped = [x for x in coding.recently_solved if not (x in seen or seen.add(x))]
+        if len(deduped) != len(coding.recently_solved):
+            coding.recently_solved = deduped
+            modified = True
+            
+    if coding.recently_visited:
+        seen = set()
+        deduped = [x for x in coding.recently_visited if not (x in seen or seen.add(x))][:5]
+        if len(deduped) != len(coding.recently_visited) or len(coding.recently_visited) > 5:
+            coding.recently_visited = deduped
+            modified = True
+            
+    if coding.all_questions_solved:
+        seen = set()
+        deduped = [x for x in coding.all_questions_solved if not (x in seen or seen.add(x))]
+        if len(deduped) != len(coding.all_questions_solved):
+            coding.all_questions_solved = deduped
+            modified = True
+
+    # Recalculate easy, medium, hard counts based on actual solved questions
+    solved_ids = coding.all_questions_solved or []
+    if solved_ids:
+        solved_questions = db.query(Question).filter(Question.id.in_(solved_ids)).all()
+        easy_count = sum(1 for q in solved_questions if q.difficulty == "easy")
+        medium_count = sum(1 for q in solved_questions if q.difficulty == "medium")
+        hard_count = sum(1 for q in solved_questions if q.difficulty == "hard")
+    else:
+        easy_count = 0
+        medium_count = 0
+        hard_count = 0
+
+    if coding.easy != easy_count or coding.medium != medium_count or coding.hard != hard_count:
+        coding.easy = easy_count
+        coding.medium = medium_count
+        coding.hard = hard_count
+        modified = True
+
+    if modified:
+        db.commit()
+        db.refresh(coding)
+
     return JSONResponse(
         status_code=200,
         content={"success": True, "message": "coding schema fetched", "data": [jsonable_encoder(coding)]}
@@ -123,9 +169,16 @@ async def update_coding_schema(request: Request, body: UpdateCodingSchema, db: S
         db.commit()
         db.refresh(coding)
 
-    if body.recently_solved is not None: coding.recently_solved = body.recently_solved
-    if body.recently_visited is not None: coding.recently_visited = body.recently_visited
-    if body.all_questions_solved is not None: coding.all_questions_solved = body.all_questions_solved
+    if body.recently_solved is not None:
+        seen = set()
+        coding.recently_solved = [x for x in body.recently_solved if not (x in seen or seen.add(x))]
+    if body.recently_visited is not None:
+        seen = set()
+        coding.recently_visited = [x for x in body.recently_visited if not (x in seen or seen.add(x))][:5]
+    if body.all_questions_solved is not None:
+        seen = set()
+        coding.all_questions_solved = [x for x in body.all_questions_solved if not (x in seen or seen.add(x))]
+        
     if body.easy is not None: coding.easy = body.easy
     if body.medium is not None: coding.medium = body.medium
     if body.hard is not None: coding.hard = body.hard
@@ -137,6 +190,7 @@ async def update_coding_schema(request: Request, body: UpdateCodingSchema, db: S
         status_code=200,
         content={"success": True, "message": "data updated successfully", "data": jsonable_encoder(coding)}
     )
+
 
 
 

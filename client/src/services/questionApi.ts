@@ -1,104 +1,119 @@
-import axios from "axios";
-
-const NODE_BASE_URL = import.meta.env.VITE_NODE_BASE_URL || 'http://localhost:3000/api';
-const PYTHON_BASE_URL = import.meta.env.VITE_PYTHON_BASE_URL || 'http://localhost:8000';
-
+import api from './api';
 import { Question, CodingSchema, UpdateCodingSchemaBody } from '@/types';
 
-const nodeApiInstance = axios.create({
-    baseURL: NODE_BASE_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
-});
-
-const pythonApiInstance = axios.create({
-    baseURL: PYTHON_BASE_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    }
-    // Note: withCredentials is intentionally omitted to avoid CORS preflight errors
-});
-
-
+const getQuestionIdFromPath = (): number => {
+    const parts = window.location.pathname.split('/');
+    const last = parts[parts.length - 1];
+    const id = parseInt(last, 10);
+    return isNaN(id) ? 1 : id;
+};
 
 class QuestionApi {
-    /** Coding Schema Methods */
+    /** Coding Schema Progress Methods */
     
     async createCodingSchema() {
-        const response = await nodeApiInstance.get('/codingSchema/createCodingSchema', {
-            withCredentials: true
-        });
+        const response = await api.get('/coding/fetch');
         return response.data;
     }
 
     async getCodingSchema() {
-        const response = await nodeApiInstance.get('/codingSchema/getCodingSchema', {
-            withCredentials: true
-        });
+        const response = await api.get('/coding/fetch');
         return response.data;
     }
 
     async updateCodingSchema(data: UpdateCodingSchemaBody) {
-        const response = await nodeApiInstance.post('/codingSchema/updateCodingSchema', data, {
-            withCredentials: true
-        });
+        const response = await api.put('/coding/update', data);
         return response.data;
     }
 
     /** Question Methods */
     async fetchQuestionById(id: string) {
         console.log(`Fetching question by ID: ${id}`);
-        const response = await nodeApiInstance.get(`/question/fetch_question/id/${id}`);
-        console.log("Response from fetchQuestionById:", response.data);
+        const response = await api.get('/question', {
+            params: { question_id: parseInt(id, 10) }
+        });
         return response.data;
     }
 
     async fetchAvailableQuestionsCategories(){
-        const response=await nodeApiInstance.get("/question/question_categories");
-        return response.data
+        const response = await api.get("/question/categories");
+        return response.data;
     }
 
     async fetchQuestionsByCategory(category: string) {
         console.log(`Fetching questions by category: ${category}`);
-        const response = await nodeApiInstance.get(`/question/fetch_question/category/${category}`);
-        console.log("Response from fetchQuestionsByCategory:", response.data);
+        const response = await api.get('/question', {
+            params: { category }
+        });
         return response.data;
     }
 
     async fetchQuestionsByDifficulty(difficulty: string) {
         console.log(`Fetching questions by difficulty: ${difficulty}`);
-        const response = await nodeApiInstance.get(`/question/fetch_question/difficulty/${difficulty}`);
-        console.log("Response from fetchQuestionsByDifficulty:", response.data);
+        const response = await api.get('/question', {
+            params: { difficulty }
+        });
         return response.data;
     }
 
-    async submitCode(code: string, testCases: any[], functionName: string) {
-        console.log(`Submitting code for function: ${functionName}`);
-        // code is expected to be base64 encoded by the caller or here
-        // Using a more robust way to handle non-ASCII characters
-        const base64Code = btoa(unescape(encodeURIComponent(code)));
-        const response = await pythonApiInstance.post('/api/coding/submit', {
-            code: base64Code,
-            test_cases: testCases,
-            function_name: functionName
+    async runCode(code: string, questionId: number) {
+        console.log(`Running code for question ID: ${questionId}`);
+        const response = await api.post('/coding/run_code', {
+            language: 'python',
+            code: code,
+            question_id: questionId
         });
-        console.log("Response from submitCode:", response.data);
+
+        const rawData = response.data.data;
+        if (rawData && Array.isArray(rawData.results)) {
+            const mappedResults = rawData.results.map((r: any) => ({
+                pass: r.passed,
+                expected_output: r.expected,
+                actual_output: r.got !== undefined ? r.got : (r.error || ''),
+                expected_res: r.expected,
+                test_res: r.got,
+                stderr: r.error || ''
+            }));
+            return {
+                success: response.data.success,
+                data: mappedResults
+            };
+        }
+        return response.data;
+    }
+
+    async submitCode(code: string, questionId: number) {
+        console.log(`Submitting code for question ID: ${questionId}`);
+        const response = await api.post('/coding/submit_code', {
+            language: 'python',
+            code: code,
+            question_id: questionId
+        });
+
+        const rawData = response.data.data;
+        if (rawData && Array.isArray(rawData.results)) {
+            const mappedResults = rawData.results.map((r: any) => ({
+                pass: r.passed,
+                expected_output: r.expected,
+                actual_output: r.got !== undefined ? r.got : (r.error || ''),
+                expected_res: r.expected,
+                test_res: r.got,
+                stderr: r.error || ''
+            }));
+            return {
+                success: response.data.success,
+                data: mappedResults
+            };
+        }
         return response.data;
     }
 
     async fetchAllQuestions() {
-        console.log("Fetching all questions (trying /all or default category)");
-        try {
-            const response = await nodeApiInstance.get('/question/fetch_question/all');
-            console.log("url to hit is ", nodeApiInstance.getUri());
-            console.log("Response from fetchAllQuestions (/all):", response.data);
-            return response.data;
-        } catch (error) {
-            console.warn("Fetch /all failed, falling back to 'linear algebra' category");
-            return this.fetchQuestionsByCategory('linear algebra');
-        }
+        console.log("Fetching all questions");
+        const response = await api.get('/question');
+        return response.data;
     }
 }
 
 export default new QuestionApi();
+export { type Question };

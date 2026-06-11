@@ -15,10 +15,10 @@ type FaceStatus = 'ok' | 'none' | 'multiple' | null;
 const getWsUrl = () => {
   const base = import.meta.env.VITE_PYTHON_BASE_URL || 'http://localhost:8000';
   if (base.startsWith('http')) {
-    return `${base.replace('http', 'ws')}/api/face/findFace`;
+    return `${base.replace('http', 'ws')}/api/v1/face/findFace`;
   }
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  return `${protocol}//${window.location.host}${base}/api/face/findFace`;
+  return `${protocol}//${window.location.host}${base}/api/v1/face/findFace`;
 };
 const WS_URL = getWsUrl();
 

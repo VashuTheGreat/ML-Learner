@@ -8,27 +8,73 @@ class InterviewApi {
         time: string;
         status: string;
     }) {
-        const response = await api.post('/interview/sheduleInterview', data);
-        return response.data.data;
+        const id = crypto.randomUUID();
+        const payload = {
+            ...data,
+            _id: id,
+            id: id // Include both id styles for compatibility
+        };
+        // Store in localStorage for retrieval during the interview setup
+        localStorage.setItem(`pending_interview_${id}`, JSON.stringify(payload));
+        return payload;
     }
 
     async updateInterviewStatus(data: { id: string; status: string }) {
-        const response = await api.put('/interview/updateInterviewStatus', data);
-        return response.data.data;
+        const localKey = `pending_interview_${data.id}`;
+        const localData = localStorage.getItem(localKey);
+        if (localData) {
+            const payload = JSON.parse(localData);
+            payload.status = data.status;
+            localStorage.setItem(localKey, JSON.stringify(payload));
+        }
+        return { success: true };
     }
 
     async getUserAppliedInterviews() {
-        const response = await api.get('/interview/fetch_interviews');
-        return response.data.data;
+        try {
+            const response = await api.get('/interview/interviews');
+            return response.data.data || [];
+        } catch (err) {
+            console.error("Failed to fetch user interviews from backend:", err);
+            return [];
+        }
     }
+
     async getInterviewById(id: string) {
-        const response = await api.get(`/interview/getInterviewById`, { params: { id } });
-        return response.data.data;
+        // First check local storage for pending/scheduled sessions
+        const localData = localStorage.getItem(`pending_interview_${id}`);
+        if (localData) {
+            return JSON.parse(localData);
+        }
+        
+        // Database interview IDs are auto-incrementing integers.
+        // If the ID is a string/UUID, do not call the backend route.
+        if (!/^\d+$/.test(id)) {
+            return null;
+        }
+
+        try {
+            const response = await api.get(`/interview/interviews/${id}`);
+            return response.data.data;
+        } catch (err) {
+            console.error(`Failed to fetch interview ${id} from backend:`, err);
+            return null;
+        }
     }
 
     async deleteInterview(id: string) {
-        const response = await api.delete(`/interview/deleteInterview/${id}`);
-        return response.data.data;
+        localStorage.removeItem(`pending_interview_${id}`);
+        return { success: true };
+    }
+
+    async getInterviewOptions() {
+        try {
+            const response = await api.get('/interview_options');
+            return response.data.data;
+        } catch (err) {
+            console.error("Failed to fetch interview options:", err);
+            return null;
+        }
     }
 }
 

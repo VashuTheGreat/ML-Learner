@@ -1,25 +1,35 @@
 import api from './api';
+import templateApi from './templateApi';
 
 class UserApi {
+    private formatUser(user: any) {
+        if (!user) return user;
+        // Inject a resumes mock array to align with dashboard requirements
+        if (!user.resumes) {
+            user.resumes = user.temp_data ? [{ id: 'resume' }] : [];
+        }
+        return user;
+    }
+
     async create({ fullname, email, password, username }: { fullname: string, email: string, password: string, username: string }) {
         const response = await api.post('/user/create', {
-            fullName: fullname, // Backend expects fullName
+            fullName: fullname,
             email,
             password,
             username
         });
-        const user = response.data.data;
+        const user = this.formatUser(response.data.data);
         console.log("User Created", user);
         localStorage.setItem("user", JSON.stringify(user));
         return user;
     }
 
-    async update({ fullname, password }: { fullname?: string, password?: string }) {
-        const response = await api.post('/user/update', {
+    async update({ fullname, username }: { fullname?: string, username?: string }) {
+        const response = await api.put('/user/update', {
             fullName: fullname,
-            password
+            username
         });
-        const user = response.data.data;
+        const user = this.formatUser(response.data.data);
         localStorage.setItem("user", JSON.stringify(user));
         return user;
     }
@@ -29,7 +39,7 @@ class UserApi {
             email,
             password
         });
-        const user = response.data.data;
+        const user = this.formatUser(response.data.data);
         localStorage.setItem("user", JSON.stringify(user));
         return user;
     }
@@ -43,63 +53,89 @@ class UserApi {
 
     async uploadAvatar(file: File) {
         const formData = new FormData();
-        formData.append('avatar', file);
-        const response = await api.post('/user/uploadAvatar', formData, {
+        formData.append('file', file); // Backend expects field name 'file'
+        const response = await api.put('/user/avatar', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
         });
-        console.log(response.data);
-        return response.data.data;
+        const user = this.formatUser(response.data.data);
+        const localUserStr = localStorage.getItem("user");
+        if (localUserStr) {
+            const localUser = JSON.parse(localUserStr);
+            localUser.avatar = user.avatar;
+            localStorage.setItem("user", JSON.stringify(this.formatUser(localUser)));
+        }
+        return user;
     }
 
     async deleteAvatar() {
-        const response = await api.delete('/user/deleteAvatar');
-        console.log(response.data);
-        return response.data.data;
+        const response = await api.delete('/user/avatar');
+        const user = this.formatUser(response.data.data);
+        const localUserStr = localStorage.getItem("user");
+        if (localUserStr) {
+            const localUser = JSON.parse(localUserStr);
+            localUser.avatar = null;
+            localStorage.setItem("user", JSON.stringify(this.formatUser(localUser)));
+        }
+        return user;
     }
 
     async addResume(resumeId: string) {
-        // Backend expects resume_id in query params: /addResume?resume_id=...
-        const response = await api.post(`/user/addResume?resume_id=${resumeId}`);
-        return response.data.data;
+        // Obsolete in FastAPI server; simply retrieve and return the user.
+        return this.getUser();
     }
 
     async addAboutUser({ aboutUser }: { aboutUser: string }) {
-        const response = await api.post('/user/addAboutUser', {
-            aboutUser
-        });
-        return response.data.data;
+        // Mock save the string to user object in local storage and memory
+        const localUserStr = localStorage.getItem("user");
+        if (localUserStr) {
+            const localUser = JSON.parse(localUserStr);
+            localUser.aboutUser = aboutUser;
+            localStorage.setItem("user", JSON.stringify(this.formatUser(localUser)));
+            return localUser;
+        }
+        return { aboutUser };
     }
 
     async deleteResume(idx: number) {
-        const response = await api.put(`/user/deleteResume/${idx}`);
-        return response.data.data;
+        // Obsolete; template is managed separately on database.
+        return this.getUser();
     }
 
     async getUserById(id: string) {
-        const response = await api.get(`/user/getUserById/${id}`);
-        return response.data.data;
+        const response = await api.get(`/user/${id}`);
+        return this.formatUser(response.data.data);
     }
 
     async getUser() {
-        const response = await api.get('/user/getUser');
-        return response.data.data;
+        const response = await api.get('/user/itself');
+        const user = this.formatUser(response.data.data);
+        localStorage.setItem("user", JSON.stringify(user));
+        return user;
     }
 
     async updateUserJson(tempData: any) {
-        // tempData should be a JSON object as per backend controller
-        const response = await api.post('/user/updateUserJson', {
-            temp_data: tempData
-        });
-        return response.data.data;
+        // Update user resume template content in template table
+        try {
+            await templateApi.updateResumeTemplate(tempData);
+        } catch (err) {
+            console.error("Failed to update resume template in backend:", err);
+        }
+
+        const localUserStr = localStorage.getItem("user");
+        if (localUserStr) {
+            const localUser = JSON.parse(localUserStr);
+            localUser.temp_data = tempData;
+            localStorage.setItem("user", JSON.stringify(this.formatUser(localUser)));
+            return localUser;
+        }
+        return { temp_data: tempData };
     }
 
     async refreshToken() {
-        const response = await api.post('/user/refresh-token');
-        return response.data.data;
+        return this.getUser();
     }
-
 }
 
 export default new UserApi();

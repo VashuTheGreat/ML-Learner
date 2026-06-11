@@ -20,7 +20,6 @@ import { DashBoard } from "./pages/DashBoard";
 import { Templates } from "./pages/Templates";
 import { CreateResume } from "./pages/CreateResume";
 import { View_resume } from "./pages/ViewResume";
-import { Apply } from "./pages/Apply";
 import { AIInterview } from "./pages/AIInterview";
 import Performance from "./pages/Performance";
 import Practice from "./pages/Practice";
@@ -28,6 +27,9 @@ import Solve from "./pages/Solve";
 import MLTrainer from "./pages/MLTrainer";
 import Playground from "./pages/Playground";
 import JobFetcher from "./pages/JobFetcher"; 
+import CheckAtsScore from "./pages/CheckAtsScore";
+import MultiRagUpload from "./pages/MultiRagUpload";
+import MultiRagChat from "./pages/MultiRagChat";
 import { AppLayout } from "./components/layout/AppLayout";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { GuestRoute } from "./components/auth/GuestRoute";
@@ -67,7 +69,6 @@ const App = () => (
               <Route path="/templates" element={<Templates />} />
               <Route path="/create-resume/:slug" element={<CreateResume />} />
               <Route path="/viewresume/:slug" element={<View_resume/>} />
-              <Route path="/apply" element={<Apply/>} />
               {/* /ai-interview removed: all interviews use /interview/:slug */}
               <Route path="/interview/:slug" element={<AIInterview/>} />
               <Route path="/performance/:slug" element={<Performance/>} />
@@ -76,6 +77,9 @@ const App = () => (
               <Route path="/ml-trainer" element={<MLTrainer/>} />
               <Route path="/playground" element={<Playground/>} />
               <Route path="/job-fetcher" element={<JobFetcher/>} />
+              <Route path="/check_ats_score" element={<CheckAtsScore />} />
+              <Route path="/multirag" element={<MultiRagUpload />} />
+              <Route path="/multirag/chat" element={<MultiRagChat />} />
             </Route>
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

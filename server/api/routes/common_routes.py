@@ -86,3 +86,44 @@ async def _fit_questions(db: Session = Depends(get_db)):
         db.commit()
 
     return {"status": "ok", "message": f"Questions inserted: {inserted_count}"}
+
+
+@router.get(
+    "/interview_options",
+    summary="Get configuration options for scheduling interviews",
+    description="Returns list of supported companies, positions, and interview durations for the scheduler."
+)
+async def get_interview_options():
+    return {
+        "status": "ok",
+        "data": {
+            "companies": ["Google", "Amazon", "Apple", "Microsoft", "Netflix", "Meta"],
+            "positions": [
+                "Frontend Developer",
+                "Backend Developer",
+                "Full Stack Developer",
+                "Data Scientist",
+                "Machine Learning Engineer",
+                "AI Engineer"
+            ],
+            "durations": ["3 min", "5 min", "10 min"]
+        }
+    }
+
+
+@router.get(
+    "/multirag_options",
+    summary="Get configuration options for Multi-RAG sessions",
+    description="Returns session durations and descriptions for setting up Multi-RAG sessions."
+)
+async def get_multirag_options():
+    return {
+        "status": "ok",
+        "data": {
+            "options": [
+                {"seconds": 300, "label": "5 Minutes", "desc": "Perfect for quick testing and small files", "icon": "⏱"},
+                {"seconds": 900, "label": "15 Minutes", "desc": "Standard session for simple documents", "icon": "🕒"},
+                {"seconds": 3600, "label": "1 Hour", "desc": "Extended session for deep, multi-file research", "icon": "⏳"}
+            ]
+        }
+    }

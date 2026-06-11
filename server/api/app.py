@@ -14,7 +14,7 @@ from api.routes.job_routes import router as JobFetcherRouter
 from api.routes.templates_routes import router as TemplateRouter
 from api.routes.interview_routes import router as InterviewRouter
 from api.routes.stream_routes import router as StreamRouter
-
+from api.routes.multi_rag_routes import router as MultiRagRouter
 from src.graphs.interview_graph_builder import close_checkpointer
 from db import Base, engine
 
@@ -103,14 +103,15 @@ async def validation_exception_handler(request, exc):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*", "https://www.mlearner.tech", "www.mlearner.tech"], 
-    allow_credentials=False,
-    allow_methods=["*"], 
+    allow_origins=["http://localhost:5173","http://localhost:8081", "http://localhost:5174", "https://www.mlearner.tech", "www.mlearner.tech"],
+    allow_credentials=True,
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
 app.include_router(CommonRouter,prefix="")
+app.include_router(CommonRouter,prefix="/api/v1")
 app.include_router(UserRouter, prefix="/api/v1/user")
 app.include_router(TemplateRouter, prefix="/api/v1/template")
 app.include_router(QuestionRouter, prefix="/api/v1/question")
@@ -120,6 +121,8 @@ app.include_router(ModelTrainRouter, prefix="/api/v1/modelTraining")
 app.include_router(FaceDetetorRouter, prefix="/api/v1/face")
 app.include_router(JobFetcherRouter, prefix="/api/v1/job")
 app.include_router(StreamRouter, prefix="/api/v1/stream")
+
+app.include_router(MultiRagRouter, prefix="/api/v1/multi_rag")
 
 @app.get("/")
 async def root():

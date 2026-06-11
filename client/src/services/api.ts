@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_NODE_BASE_URL || "http://localhost:3000/api";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1";
 
 
 const api = axios.create({
@@ -10,22 +10,6 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
-
-// Optional: Add response interceptor for global error handling
-let isRefreshing = false;
-let failedQueue: any[] = [];
-
-const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-
-  failedQueue = [];
-};
 
 api.interceptors.response.use(
   (response) => response,
@@ -43,34 +27,10 @@ api.interceptors.response.use(
         (error.response?.status === 500 && error.response?.data?.message === 'jwt expired')) &&
       !originalRequest._retry
     ) {
-      if (isRefreshing) {
-        return new Promise(function (resolve, reject) {
-          failedQueue.push({ resolve, reject });
-        })
-          .then(() => {
-            return api(originalRequest);
-          })
-          .catch((err) => {
-            return Promise.reject(err);
-          });
-      }
-
       originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        await axios.get(`${BASE_URL}/user/refresh-token`, { withCredentials: true });
-
-        processQueue(null, "refreshed");
-        isRefreshing = false;
-        return api(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        isRefreshing = false;
-        localStorage.removeItem("user");
-        window.location.href = "/login";
-        return Promise.reject(refreshError);
-      }
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+      return Promise.reject(error);
     }
 
     console.error("API Error:", error.response?.data?.message || error.message);
