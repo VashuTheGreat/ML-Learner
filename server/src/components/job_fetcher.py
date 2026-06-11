@@ -23,8 +23,7 @@ class JobFetcher:
         
         self.job_fetcher_config.saved_jobs_file_path = os.path.join(dirname, jobtile + ".csv")
         
-        # Use the RAPIDAPI_KEY from environment/constants; fallback to the user's provided key if needed
-        api_key = RAPIDAPI_KEY if RAPIDAPI_KEY else "bec983ad04msh1dc8933c87c288dp181936jsn231bcbf65c37"
+        api_key = RAPIDAPI_KEY
         
         headers = {
             "x-rapidapi-key": api_key,

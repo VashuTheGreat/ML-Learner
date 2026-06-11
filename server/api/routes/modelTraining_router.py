@@ -4,19 +4,72 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 
 from api.middlewares.verifyuser_middleware import verify_jwt
-from src.models.model_train_models import Train as TrainSchema
+from api.models.model_train_model import TrainRequest          # API layer: request validation
+from src.models.model_train_models import Train as TrainSchema  # src layer: pipeline schema
 from src.pipelines.ModelTrainPipeline import ModelTrainPipeline
 from src.utils.main_utils import read_yaml_file_sync
 
-router = APIRouter(tags=["Model Training"])
+router = APIRouter(
+    tags=["Model Training"],
+    responses={
+        401: {
+            "description": "Unauthorized access token or expired session.",
+            "content": {"application/json": {"example": {"success": False, "message": "Unauthorized request", "data": None}}}
+        }
+    }
+)
 
 
-@router.post("/train", dependencies=[Depends(verify_jwt)])
-async def train_model(sub: TrainSchema):
+@router.post(
+    "/train", 
+    dependencies=[Depends(verify_jwt)],
+    summary="Train a machine learning model",
+    description="Asynchronously maps parameters, generates synthetic regression or classification dataset (or uses existing), trains the target estimator, and returns evaluation score metrics.",
+    responses={
+        200: {
+            "description": "Model trained successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "Model training completed successfully",
+                        "data": {
+                            "training_score": 0.965,
+                            "testing_score": 0.942,
+                            "dataset_details": {"n_samples": 100, "n_features": 2}
+                        }
+                    }
+                }
+            }
+        },
+        500: {
+            "description": "Training configuration error or failure in model initialization.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": False,
+                        "message": "Model training failed: fit_intercept not found",
+                        "data": None
+                    }
+                }
+            }
+        }
+    }
+)
+async def train_model(body: TrainRequest):
+    """
+    Validates and executes ML estimator training pipeline.
+    """
     logging.info("POST /train — entered")
     try:
+        pipeline_schema = TrainSchema(
+            model_name=body.model_name,
+            model_params=body.model_params,
+            type=body.type,
+            make_dataset=body.make_dataset,
+        )
         pipeline = ModelTrainPipeline()
-        result = await pipeline.initiate(schema=sub)
+        result = await pipeline.initiate(schema=pipeline_schema)
         logging.info("Model training completed successfully")
         return JSONResponse(
             status_code=200,
@@ -38,8 +91,35 @@ async def train_model(sub: TrainSchema):
         )
 
 
-@router.get("/available_attributes", dependencies=[Depends(verify_jwt)])
+@router.get(
+    "/available_attributes", 
+    dependencies=[Depends(verify_jwt)],
+    summary="Get available dataset & model configuration settings",
+    description="Retrieves a list of regression and classification models currently supported by the server, along with default dataset generation parameters configured in the YAML files.",
+    responses={
+        200: {
+            "description": "Configuration parameters successfully retrieved.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "Available attributes fetched successfully",
+                        "data": {
+                            "make_regression_params": {},
+                            "make_classification_params": {},
+                            "regression_models": ["LinearRegression", "Ridge"],
+                            "classification_models": ["LogisticRegression", "RandomForestClassifier"]
+                        }
+                    }
+                }
+            }
+        }
+    }
+)
 async def get_attributes():
+    """
+    Retrieves supported scikit-learn estimators and dataset creation properties from config.
+    """
     logging.info("GET /available_attributes — entered")
     try:
         config_path = os.path.join("config", "model_train.yaml")
@@ -92,4 +172,5 @@ async def get_attributes():
                 "data": None,
             },
         )
+
 

@@ -1,6 +1,6 @@
 import enum
 from sqlalchemy import Column, Integer, String, JSON, ForeignKey, Enum
-from ..db import Base
+from ..connection import Base
 
 
 class TemplateType(str, enum.Enum):

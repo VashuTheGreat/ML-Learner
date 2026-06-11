@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, ARRAY
 from sqlalchemy.orm import relationship
 from typing import List
-from ..db import Base
+from ..connection import Base
 
 class Coding(Base):
     __tablename__ = "coding"

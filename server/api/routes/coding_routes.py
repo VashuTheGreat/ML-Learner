@@ -4,21 +4,60 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
-from api.database import Coding, get_db
+from db import Coding, get_db
 from api.middlewares.verifyuser_middleware import verify_jwt
 from api.models.coding_models import UpdateCodingSchema
-from src.pipelines.CodeRunPipeline import CodeRunPipeline
 from api.models.coding_models import RunCode
-from api.database import Question
+from db import Question
+
 from api.helper import code_runner
 import subprocess
 import json
 import logging
 
-router = APIRouter(tags=["Coding"])
+router = APIRouter(
+    tags=["Coding Problems"],
+    responses={
+        401: {
+            "description": "Unauthorized access token or expired session.",
+            "content": {"application/json": {"example": {"success": False, "message": "Unauthorized request", "data": None}}}
+        }
+    }
+)
 
-@router.get("/fetch", dependencies=[Depends(verify_jwt)])
+@router.get(
+    "/fetch", 
+    dependencies=[Depends(verify_jwt)],
+    summary="Fetch coding progress schema",
+    description="Retrieves the authenticated user's coding metrics, statistics (easy, medium, hard counts), and lists of recently solved or visited question IDs. Automatically initializes a record if none exists.",
+    responses={
+        200: {
+            "description": "Coding progress statistics fetched successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "coding schema fetched",
+                        "data": [{
+                            "id": 1,
+                            "user_id": 10,
+                            "easy": 5,
+                            "medium": 2,
+                            "hard": 0,
+                            "recently_solved": [101, 102],
+                            "recently_visited": [101, 102, 103],
+                            "all_questions_solved": [101, 102]
+                        }]
+                    }
+                }
+            }
+        }
+    }
+)
 async def get_coding_schema(request: Request, db: Session = Depends(get_db)):
+    """
+    Get the authenticated user's coding progress database schema.
+    """
     user = getattr(request.state, "user", None)
     if not user:
         raise HTTPException(status_code=401, detail={"success": False, "message": "Unauthorized", "data": None})
@@ -41,8 +80,36 @@ async def get_coding_schema(request: Request, db: Session = Depends(get_db)):
         content={"success": True, "message": "coding schema fetched", "data": [jsonable_encoder(coding)]}
     )
 
-@router.put("/update", dependencies=[Depends(verify_jwt)])
+@router.put(
+    "/update", 
+    dependencies=[Depends(verify_jwt)],
+    summary="Update coding progress schema",
+    description="Updates the user's solved question history counters (easy, medium, hard counts) or recently solved lists manually.",
+    responses={
+        200: {
+            "description": "Coding statistics updated successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "data updated successfully",
+                        "data": {
+                            "id": 1,
+                            "user_id": 10,
+                            "easy": 6,
+                            "medium": 2,
+                            "hard": 0
+                        }
+                    }
+                }
+            }
+        }
+    }
+)
 async def update_coding_schema(request: Request, body: UpdateCodingSchema, db: Session = Depends(get_db)):
+    """
+    Updates the fields of the user's coding record.
+    """
     user = getattr(request.state, "user", None)
     if not user:
         raise HTTPException(status_code=401, detail={"success": False, "message": "Unauthorized", "data": None})
@@ -75,11 +142,65 @@ async def update_coding_schema(request: Request, body: UpdateCodingSchema, db: S
 
 
 # =========================== Run Code =========================================
-@router.post("/run_code", dependencies=[Depends(verify_jwt)])
+@router.post(
+    "/run_code", 
+    dependencies=[Depends(verify_jwt)],
+    summary="Run code against sample test cases",
+    description="Compiles and executes the user's code inside a python execution sandbox. Evaluates it against all sample test cases configured for the given question ID. Does not save coding progress in database.",
+    responses={
+        200: {
+            "description": "Code completed execution. Returns count of passed test cases and test details.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "Executed",
+                        "data": {
+                            "status": "passed",
+                            "passed": 3,
+                            "total": 3,
+                            "results": [{"input": [1, 2], "expected": 3, "actual": 3, "passed": True}]
+                        }
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Syntax or Runtime Error in user-submitted code.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": False,
+                        "message": "Runtime Error",
+                        "data": {
+                            "stderr": "NameError: name 'x' is not defined",
+                            "stdout": ""
+                        }
+                    }
+                }
+            }
+        },
+        408: {
+            "description": "Code took too long to run (Execution timeout).",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": False,
+                        "message": "Time Limit Exceeded",
+                        "data": None
+                    }
+                }
+            }
+        }
+    }
+)
 async def run_code(
     body: RunCode,
     db: Session = Depends(get_db)
 ):
+    """
+    Executes user's python code on test cases without persisting progress.
+    """
     try:
         status, passed, total, results = await code_runner(body, db)
         return JSONResponse(
@@ -129,12 +250,66 @@ async def run_code(
 
 
 # =========================== Submit Code =========================================
-@router.post("/submit_code", dependencies=[Depends(verify_jwt)])
+@router.post(
+    "/submit_code", 
+    dependencies=[Depends(verify_jwt)],
+    summary="Submit final coding solution",
+    description="Runs the user's code against all test cases. If all test cases pass, the question ID is marked as solved, and the user's counts (easy, medium, hard) are incremented in the database accordingly.",
+    responses={
+        200: {
+            "description": "Code evaluated. If fully passed, progress is updated in DB.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "Executed",
+                        "data": {
+                            "status": "passed",
+                            "passed": 5,
+                            "total": 5,
+                            "results": [{"input": [1, 2], "expected": 3, "actual": 3, "passed": True}]
+                        }
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Syntax or Runtime Error in user-submitted code.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": False,
+                        "message": "Runtime Error",
+                        "data": {
+                            "stderr": "ZeroDivisionError: division by zero",
+                            "stdout": ""
+                        }
+                    }
+                }
+            }
+        },
+        408: {
+            "description": "Execution timeout.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": False,
+                        "message": "Time Limit Exceeded",
+                        "data": None
+                    }
+                }
+            }
+        }
+    }
+)
 async def submit_code(
     request: Request,
     body: RunCode,
     db: Session = Depends(get_db)
 ):
+    """
+    Submits and evaluates code, committing question solve status to the database.
+    """
     try:
         status, passed, total, results = await code_runner(body, db)
 
@@ -218,3 +393,4 @@ async def submit_code(
                 "data": str(e)
             }
         )
+

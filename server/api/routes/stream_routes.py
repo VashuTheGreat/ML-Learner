@@ -3,14 +3,39 @@ from fastapi.responses import StreamingResponse
 import os
 import logging
 
-router = APIRouter()
-logger = logging.getLogger(__name__)
+router = APIRouter(tags=["System & Utilities"])
 
 RESOURCES_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "resources")
 
-@router.get("/video")
+@router.get(
+    "/video",
+    summary="Stream introduction video",
+    description="Streams the mock interview introduction/tutorial MP4 video file in chunks. Supports standard HTTP Range requests for buffering and seeking.",
+    responses={
+        200: {
+            "description": "Full video content successfully returned.",
+            "headers": {
+                "Content-Length": {"description": "Total size of the video in bytes", "schema": {"type": "integer"}},
+                "Accept-Ranges": {"description": "Indicates support for range queries", "schema": {"type": "string", "example": "bytes"}}
+            }
+        },
+        206: {
+            "description": "Partial content returned based on the requested byte range.",
+            "headers": {
+                "Content-Range": {"description": "The range of bytes returned", "schema": {"type": "string", "example": "bytes 0-1000000/5000000"}},
+                "Content-Length": {"description": "Size of the chunk returned in bytes", "schema": {"type": "integer"}}
+            }
+        },
+        404: {
+            "description": "Video file 'intro.mp4' is missing from the resources folder."
+        }
+    }
+)
 async def stream_video(request: Request):
-    logger.info("Entered streaming controller")
+    """
+    Stream introduction video using chunked responses and range headers.
+    """
+    logging.info("Entered streaming controller")
     file_path = os.path.join(RESOURCES_DIR, "intro.mp4")
     
     if not os.path.isfile(file_path):
@@ -28,7 +53,6 @@ async def stream_video(request: Request):
             "Accept-Ranges": "bytes"
         })
     
-    # Simple range handling
     try:
         range_value = range_header.replace("bytes=", "").split("-")
         start = int(range_value[0])
@@ -57,3 +81,4 @@ async def stream_video(request: Request):
             "Content-Length": str(content_length),
         }
     )
+

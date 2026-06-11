@@ -1,19 +1,64 @@
 import logging
 import numpy as np
 import pandas as pd
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse
 
-from api.models.job_models import  ATS_SCORE
+from api.models.job_models import ATS_SCORE
 from src.pipelines.JobFetcherPipeline import JobFetcherPipeline
 from src.pipelines.model_download_pipeline import ModelDownloadPipeline
 from src.pipelines.similarPrediction_pipeline import SimilarJobPipeline
 
-router = APIRouter(tags=["Jobs"])
+router = APIRouter(tags=["Jobs Board"])
 
 
-@router.get("")
-async def fetch_jobs(jobtile: str = "machine learning intern", updated: bool = False):
+@router.get(
+    "",
+    summary="Fetch target job opportunities",
+    description="Uses a background job search aggregator (JSearch API) to fetch recent internship or job listings matching the query title, returning them in a standardized tabular/JSON format.",
+    responses={
+        200: {
+            "description": "Jobs successfully fetched.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "Jobs fetched successfully",
+                        "data": [
+                            {
+                                "Title": "Machine Learning Intern",
+                                "Company": "Google",
+                                "Job Link": "https://careers.google.com/...",
+                                "Apply Link": "https://careers.google.com/...",
+                                "Description": "We are seeking a candidate...",
+                                "img_link": "https://logo.clearbit.com/google.com"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        500: {
+            "description": "Internal error occurred while querying API or reading database.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": False,
+                        "message": "Failed to fetch jobs: Connection error",
+                        "data": None
+                    }
+                }
+            }
+        }
+    }
+)
+async def fetch_jobs(
+    jobtile: str = Query("machine learning intern", description="The search query or job title target (e.g. 'data scientist')."), 
+    updated: bool = Query(False, description="Whether to bypass cache and trigger a fresh online search.")
+):
+    """
+    Fetches job records based on job title query, leveraging external APIs and caching.
+    """
     logging.info(f"GET / — entered with jobtile={jobtile}, updated={updated}")
     try:
         job_fetcher_pipeline = JobFetcherPipeline()
@@ -42,8 +87,11 @@ async def fetch_jobs(jobtile: str = "machine learning intern", updated: bool = F
             },
         )
 
-
+# ================= Helper Fn ==============================
 async def download_model():
+    """
+    Helper function to verify NLP model availability and download if missing.
+    """
     logging.info("GET /downloadModel — entered")
     try:
         model_downloader_pipeline = ModelDownloadPipeline()
@@ -53,8 +101,41 @@ async def download_model():
         logging.error(f"Error in download_model: {str(e)}")
 
 
-@router.post("/ats")
+@router.post(
+    "/ats",
+    summary="Compute ATS Alignment Score",
+    description="Loads a similarity embedding model and calculates the alignment score (percentage similarity) between the user's resume/profile details and a given job description.",
+    responses={
+        200: {
+            "description": "Similarity score calculated.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "Job similarity calculated successfully",
+                        "data": 0.825
+                    }
+                }
+            }
+        },
+        500: {
+            "description": "Model initialization or execution failed.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": False,
+                        "message": "Failed to predict job similarity: Model download timeout",
+                        "data": None
+                    }
+                }
+            }
+        }
+    }
+)
 async def similar_job_predictor(body: ATS_SCORE):
+    """
+    Analyzes job description and user details, executing similarity models to predict compatibility.
+    """
     logging.info("POST /ats — entered")
     try:
         await download_model()

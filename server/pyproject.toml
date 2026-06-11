@@ -40,6 +40,8 @@ dependencies = [
     "pydantic[email]>=2.12.5",
     "cloudinary>=1.44.2",
     "langchain-groq>=1.1.2",
+    "pytest>=9.0.3",
+    "pytest-asyncio>=1.4.0",
 ]
 
 [tool.uv.workspace]

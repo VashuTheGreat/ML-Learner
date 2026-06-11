@@ -5,10 +5,29 @@ import io
 
 from src.pipelines.faceFinder_pipeline import FaceFinderPipeline
 
-router = fastapi.APIRouter()
+router = fastapi.APIRouter(tags=["Face Detection"])
 
 @router.websocket("/findFace")
 async def find_face(websocket: WebSocket):
+    """
+    WebSocket endpoint for real-time face detection during interviews.
+    
+    Communication Flow:
+    1. Client initiates connection to `ws://<host>:<port>/api/v1/face/findFace`
+    2. Client streams raw image binary bytes (e.g., JPEG/PNG frames from webcam).
+    3. Server processes each frame using the FaceFinderPipeline.
+    4. Server sends back a JSON response payload for each processed frame.
+    
+    Expected JSON response structure:
+    ```json
+    {
+        "face_present": true,
+        "multiple_faces": false,
+        "is_error": false,
+        "error_message": null
+    }
+    ```
+    """
     await websocket.accept()
     pipeline = FaceFinderPipeline()
 

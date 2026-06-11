@@ -2,7 +2,7 @@
 # from sqlalchemy.orm import relationship
 # from sqlalchemy.sql import func
 # import enum
-# from ..db import Base
+# from ..connection import Base
 
 # class Verdict(enum.Enum):
 #     hire = "hire"

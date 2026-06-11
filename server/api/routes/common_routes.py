@@ -2,18 +2,52 @@ import json
 import logging
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from api.database import get_db, Question
+from db import get_db, Question
 
-router = APIRouter()
+router = APIRouter(tags=["System & Utilities"])
 
-@router.get("/health")
+@router.get(
+    "/health",
+    summary="Health check endpoint",
+    description="Returns the operational status of the server and API services. Useful for deployment probes.",
+    responses={
+        200: {
+            "description": "API is online and functioning properly.",
+            "content": {
+                "application/json": {
+                    "example": {"status": "ok", "message": "Agents API is healthy"}
+                }
+            }
+        }
+    }
+)
 async def _health():
+    """
+    Returns the current health status of the API application.
+    """
     logging.info("Health check requested")
     return {"status": "ok", "message": "Agents API is healthy"}
 
 
-@router.get("/fit_questions")
+@router.get(
+    "/fit_questions",
+    summary="Seed/fit coding problems",
+    description="Parses the `problems.json` file in the project root and populates the database with default coding questions if they do not exist.",
+    responses={
+        200: {
+            "description": "Db seeding finished successfully.",
+            "content": {
+                "application/json": {
+                    "example": {"status": "ok", "message": "Questions inserted: 5"}
+                }
+            }
+        }
+    }
+)
 async def _fit_questions(db: Session = Depends(get_db)):
+    """
+    Reads `problems.json` and inserts any missing coding questions into the database.
+    """
     logging.info("Inserting questions in the database")
     try:
         with open("problems.json", "r") as f:

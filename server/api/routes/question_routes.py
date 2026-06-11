@@ -1,23 +1,73 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from api.database import Question, get_db
+from db import Question, get_db
 from api.models.question_models import QuestionCreate
 import logging
 from api.middlewares.verifyuser_middleware import verify_jwt
 
-router = APIRouter(tags=["Question"],dependencies=[Depends(verify_jwt)])
+router = APIRouter(
+    tags=["Coding Problems"],
+    dependencies=[Depends(verify_jwt)],
+    responses={
+        401: {
+            "description": "Unauthorized access token or expired session.",
+            "content": {"application/json": {"example": {"success": False, "message": "Token has expired", "data": None}}}
+        }
+    }
+)
 
-@router.get("")
+@router.get(
+    "",
+    summary="Get coding questions",
+    description="Queries the list of available coding questions. Allows filtering by specific Question ID, Category, or Difficulty level.",
+    responses={
+        200: {
+            "description": "Questions matching query criteria successfully returned.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "Questions fetched successfully",
+                        "data": [
+                            {
+                                "id": 1,
+                                "title": "Two Sum",
+                                "difficulty": "easy",
+                                "category": "Arrays",
+                                "problem_description": "...",
+                                "starter_code": "...",
+                                "example_input": "...",
+                                "example_output": "...",
+                                "example_reasoning": "...",
+                                "learn_content": "...",
+                                "solution_code": "...",
+                                "test_cases": {},
+                                "function_name": "twoSum"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        404: {
+            "description": "Question ID requested was not found.",
+            "content": {"application/json": {"example": {"success": False, "message": "Question not found", "data": None}}}
+        }
+    }
+)
 async def get_questions(
-    question_id: Optional[int] = None,
-    category: Optional[str] = None,
-    difficulty: Optional[str] = None,
+    question_id: Optional[int] = Query(None, description="Database ID of a single coding problem to retrieve."),
+    category: Optional[str] = Query(None, description="Filter problems by category category (case-insensitive)."),
+    difficulty: Optional[str] = Query(None, description="Filter problems by difficulty (easy, medium, hard)."),
     db: Session = Depends(get_db)
 ):
+    """
+    Retrieve one or more coding questions based on filter parameters.
+    """
     query = db.query(Question)
     
     if question_id is not None:
@@ -45,8 +95,29 @@ async def get_questions(
         content={"success": True, "message": "Questions fetched successfully", "data": jsonable_encoder(questions)}
     )
 
-@router.get("/categories")
+@router.get(
+    "/categories",
+    summary="Get all available question categories",
+    description="Returns a unique list of all categories that are populated in the database questions.",
+    responses={
+        200: {
+            "description": "Unique categories fetched successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "Categories fetched successfully",
+                        "data": ["Arrays", "Strings", "Trees", "Sorting"]
+                    }
+                }
+            }
+        }
+    }
+)
 async def get_available_categories(db: Session = Depends(get_db)):
+    """
+    Retrieve distinct categories present in the current Question table.
+    """
     logging.info("Fetching available categories")
     categories = db.query(Question.category).distinct().all()
     categories_list = [c[0] for c in categories]
@@ -55,8 +126,41 @@ async def get_available_categories(db: Session = Depends(get_db)):
         content={"success": True, "message": "Categories fetched successfully", "data": categories_list}
     )
 
-@router.post("/add")
+@router.post(
+    "/add",
+    summary="Add a new coding problem",
+    description="Registers a new coding problem in the system database. Fails if the question ID is already taken.",
+    responses={
+        200: {
+            "description": "Question created successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "Question added successfully",
+                        "data": {"id": 42, "title": "New Question", "difficulty": "easy"}
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Question ID already exists in the database.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": False,
+                        "message": "Question with ID 42 already exists",
+                        "data": None
+                    }
+                }
+            }
+        }
+    }
+)
 async def add_questions(question_input: QuestionCreate, db: Session = Depends(get_db)):
+    """
+    Inserts a custom question into the database.
+    """
     logging.info(f"Adding question: {question_input.title}")
     
     if question_input.id is not None:
@@ -87,4 +191,5 @@ async def add_questions(question_input: QuestionCreate, db: Session = Depends(ge
         status_code=200,
         content={"success": True, "message": "Question added successfully", "data": jsonable_encoder(question)}
     )
+
 

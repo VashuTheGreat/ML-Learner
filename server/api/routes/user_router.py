@@ -1,25 +1,16 @@
-from traceback import print_tb
-from fastapi import responses
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, UploadFile, File, Body
+
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from api.database import User, get_db
+from db import User, get_db
 from fastapi.responses import JSONResponse
 from api.middlewares.verifyuser_middleware import verify_jwt
 import logging
-import json
-import re
-import os
-import sys
-import uuid
-from exception import MyException
-from src.models.userSchema_model import userDetails as UserDetailsModel
-from src.pipelines.ResumeSchemaGeneration_pipeline import ResumeSchemaGenerationPipeline
-from src.pipelines.ResumeSummary_pipeline import ResumeSummaryPipeline
-from api.models.user_model import CreateUser, UpdateUser,LoginUser
+from api.models.user_model import CreateUser, UpdateUser, LoginUser
 from src.utils.cloudinary import upload_avatar_to_cloudinary, delete_avatar_from_cloudinary
-import logging
-router = APIRouter(tags=['User'])
+
+
+router = APIRouter(tags=["Authentication & Users"])
 
 from config.app_config import app_config
 
@@ -32,8 +23,40 @@ TOKEN_OPTION = {
 
 
 # ====================== Registering a new User ==========================================
-@router.post("/create")
+@router.post(
+    "/create",
+    summary="Register a new user",
+    description="Creates a new user account, generates access and refresh tokens, sets them in secure HTTP-only cookies, and returns the basic user profile details.",
+    responses={
+        200: {
+            "description": "User created successfully. Auth cookies are set.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "User created successfully",
+                        "data": {
+                            "id": 1,
+                            "fullName": "John Doe",
+                            "email": "john@example.com",
+                            "username": "johndoe",
+                            "avatar": None,
+                            "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                        }
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Email or Username already taken.",
+            "content": {"application/json": {"example": "email already taken"}}
+        }
+    }
+)
 async def create_user(user: CreateUser, db: Session = Depends(get_db)):
+    """
+    Register a new user account in the system.
+    """
     logging.info(f"Attempting to register new user: email={user.email}, username={user.username}")
     existing_user = db.query(User).filter(or_(User.email == user.email, User.username == user.username)).first()
     if existing_user:
@@ -77,8 +100,48 @@ async def create_user(user: CreateUser, db: Session = Depends(get_db)):
 
 
 # ====================== Logging in an existing User ==========================================
-@router.post("/login")
+@router.post(
+    "/login",
+    summary="Login user session",
+    description="Authenticates credentials, generates JWT access and refresh tokens, sets them in secure HTTP-only cookies, and returns the user profile.",
+    responses={
+        200: {
+            "description": "User logged in successfully. Auth cookies are set.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "User logged in successfully",
+                        "data": {
+                            "id": 1,
+                            "fullName": "John Doe",
+                            "email": "john@example.com",
+                            "username": "johndoe",
+                            "avatar": None,
+                            "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                        }
+                    }
+                }
+            }
+        },
+        401: {
+            "description": "Invalid credentials provided.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": False,
+                        "message": "Invalid credentials",
+                        "data": None
+                    }
+                }
+            }
+        }
+    }
+)
 async def login(user: LoginUser, db: Session = Depends(get_db)):
+    """
+    Log in an existing user and set session cookies.
+    """
     logging.info(f"Attempting login for user: email={user.email}")
     db_user = db.query(User).filter(or_(User.email == user.email)).first()
 
@@ -111,8 +174,34 @@ async def login(user: LoginUser, db: Session = Depends(get_db)):
 
 
 # ================================ Logout User =================================
-@router.get("/logout",dependencies=[Depends(verify_jwt)])
-async def logout(request:Request,db: Session = Depends(get_db)):
+@router.get(
+    "/logout",
+    dependencies=[Depends(verify_jwt)],
+    summary="Logout user session",
+    description="Invalidates user session, clears HTTP cookies, and removes refresh token from the database.",
+    responses={
+        200: {
+            "description": "User logged out successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "User logged out successfully",
+                        "data": None
+                    }
+                }
+            }
+        },
+        401: {
+            "description": "Unauthorized session.",
+            "content": {"application/json": {"example": "Unauthorized"}}
+        }
+    }
+)
+async def logout(request: Request, db: Session = Depends(get_db)):
+    """
+    Log out user and clear cookies.
+    """
     user = request.state.user
     if not user:
         logging.warning("Logout attempted without valid session/user state")
@@ -127,7 +216,7 @@ async def logout(request:Request,db: Session = Depends(get_db)):
 
     logging.info(f"User logged out successfully from DB: id={user.id}")
 
-    response=JSONResponse(status_code=200, content={"success": True, "message": "User logged out successfully", "data":None})
+    response = JSONResponse(status_code=200, content={"success": True, "message": "User logged out successfully", "data": None})
     response.delete_cookie("accessToken")
     response.delete_cookie("refreshToken")
     
@@ -137,9 +226,39 @@ async def logout(request:Request,db: Session = Depends(get_db)):
 
 
 # ========================= return user data ====================================
-@router.get("/itself")
-async def get_itself(request:Request,user=Depends(verify_jwt)):
-    user=request.state.user
+@router.get(
+    "/itself",
+    dependencies=[Depends(verify_jwt)],
+    summary="Get current user details",
+    description="Returns detailed profile information for the currently authenticated user.",
+    responses={
+        200: {
+            "description": "User details successfully retrieved.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "User fetched successfully",
+                        "data": {
+                            "id": 1,
+                            "fullName": "John Doe",
+                            "email": "john@example.com",
+                            "username": "johndoe",
+                            "avatar": "https://res.cloudinary.com/...",
+                            "aboutUser": "Developer",
+                            "temp_data": None
+                        }
+                    }
+                }
+            }
+        }
+    }
+)
+async def get_itself(request: Request):
+    """
+    Fetch the currently logged-in user details.
+    """
+    user = request.state.user
     logging.info(f"Fetching self profile data for user: id={user.id}")
     user_data = {
         "id": user.id,
@@ -151,14 +270,47 @@ async def get_itself(request:Request,user=Depends(verify_jwt)):
         "temp_data": user.temp_data
     }
 
-    return JSONResponse(status_code=200,content={"success": True, "message": "User fetched successfully", "data":user_data})
+    return JSONResponse(status_code=200, content={"success": True, "message": "User fetched successfully", "data": user_data})
 
 
 
 
 
-@router.put("/update", dependencies=[Depends(verify_jwt)])
+@router.put(
+    "/update", 
+    dependencies=[Depends(verify_jwt)],
+    summary="Update user details",
+    description="Updates the profile username and/or full name of the authenticated user. Validates username uniqueness.",
+    responses={
+        200: {
+            "description": "Profile updated successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "User updated successfully",
+                        "data": {
+                            "id": 1,
+                            "fullName": "Jane Doe",
+                            "email": "john@example.com",
+                            "username": "janedoe",
+                            "avatar": None,
+                            "aboutUser": "Software Engineer"
+                        }
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Target username is already occupied.",
+            "content": {"application/json": {"example": "username already exists"}}
+        }
+    }
+)
 async def update_user_data(request: Request, updated_user: UpdateUser, db: Session = Depends(get_db)):
+    """
+    Update profile details for the authenticated user.
+    """
     user = getattr(request.state, "user", None)
     if not user:
         logging.warning("Update attempted without user state")
@@ -200,8 +352,40 @@ async def update_user_data(request: Request, updated_user: UpdateUser, db: Sessi
 
 
 # ======================= get User by Id ==========================
-@router.get("/{id}")
+@router.get(
+    "/{id}",
+    summary="Get user profile by ID",
+    description="Public endpoint to fetch public user details (name, username, avatar) by user database ID.",
+    responses={
+        200: {
+            "description": "User profile retrieved successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "User fetched successfully",
+                        "data": {
+                            "id": 2,
+                            "fullName": "Bob Builder",
+                            "email": "bob@example.com",
+                            "username": "bob_builder",
+                            "avatar": "https://res.cloudinary.com/...",
+                            "aboutUser": "Constructor"
+                        }
+                    }
+                }
+            }
+        },
+        404: {
+            "description": "Requested user ID not found.",
+            "content": {"application/json": {"example": "User not found"}}
+        }
+    }
+)
 async def get_user_by_id(id: int, db: Session = Depends(get_db)):
+    """
+    Fetch a user's details by their ID.
+    """
     logging.info(f"Fetching user profile by id: {id}")
     db_user = db.query(User).filter(User.id == id).first()
     if not db_user:
@@ -222,8 +406,41 @@ async def get_user_by_id(id: int, db: Session = Depends(get_db)):
 
 
 # ======================= Upload User Avatar ==========================
-@router.put("/avatar", dependencies=[Depends(verify_jwt)])
+@router.put(
+    "/avatar", 
+    dependencies=[Depends(verify_jwt)],
+    summary="Upload user avatar image",
+    description="Accepts a multipart file upload, uploads the avatar image to Cloudinary, deletes the old avatar from Cloudinary (if set), and updates the user profile record.",
+    responses={
+        200: {
+            "description": "Avatar uploaded and saved successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "Avatar uploaded successfully",
+                        "data": {
+                            "id": 1,
+                            "fullName": "Jane Doe",
+                            "email": "john@example.com",
+                            "username": "janedoe",
+                            "avatar": "https://res.cloudinary.com/...",
+                            "aboutUser": "Software Engineer"
+                        }
+                    }
+                }
+            }
+        },
+        500: {
+            "description": "Cloudinary upload failed.",
+            "content": {"application/json": {"example": "Failed to upload avatar"}}
+        }
+    }
+)
 async def upload_avatar(request: Request, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    """
+    Upload an avatar image to Cloudinary and link it to the user.
+    """
     user = getattr(request.state, "user", None)
     if not user:
         logging.warning("Avatar upload attempted without user state")
@@ -236,10 +453,10 @@ async def upload_avatar(request: Request, file: UploadFile = File(...), db: Sess
         
     try:
         logging.info(f"Uploading new avatar for user: id={user.id}")
-        # Upload new avatar using the async utility
+        # Upload new avatar
         avatar_url = await upload_avatar_to_cloudinary(file)
         
-        # Update user record directly (since user is already a DB model instance)
+        # Update user record 
         user.avatar = avatar_url
         db.commit()
         db.refresh(user)
@@ -259,8 +476,41 @@ async def upload_avatar(request: Request, file: UploadFile = File(...), db: Sess
 
 
 # ======================= Delete User Avatar ==========================
-@router.delete("/avatar", dependencies=[Depends(verify_jwt)])
+@router.delete(
+    "/avatar", 
+    dependencies=[Depends(verify_jwt)],
+    summary="Delete user avatar image",
+    description="Deletes the user's avatar image from Cloudinary storage and sets the user's avatar URL column to null in the database.",
+    responses={
+        200: {
+            "description": "Avatar removed successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "Avatar deleted successfully",
+                        "data": {
+                            "id": 1,
+                            "fullName": "Jane Doe",
+                            "email": "john@example.com",
+                            "username": "janedoe",
+                            "avatar": None,
+                            "aboutUser": "Software Engineer"
+                        }
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "User has no avatar configured.",
+            "content": {"application/json": {"example": "No avatar to delete"}}
+        }
+    }
+)
 async def delete_avatar(request: Request, db: Session = Depends(get_db)):
+    """
+    Remove user avatar image from Cloudinary and reset column in database.
+    """
     user = getattr(request.state, "user", None)
     if not user:
         logging.warning("Avatar deletion attempted without user state")
@@ -292,4 +542,5 @@ async def delete_avatar(request: Request, db: Session = Depends(get_db)):
     except Exception as e:
         logging.error(f"Failed to delete avatar: {e}")
         raise HTTPException(status_code=500, detail={"success": False, "message": f"Failed to delete avatar: {str(e)}", "data": None})
+
 

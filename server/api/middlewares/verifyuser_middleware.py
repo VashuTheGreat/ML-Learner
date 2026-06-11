@@ -2,7 +2,7 @@ from fastapi import Request, HTTPException, Depends
 import jwt
 import os
 from sqlalchemy.orm import Session
-from api.database import User, get_db
+from db import User, get_db
 from config.app_config import app_config
 
 from typing import Optional
