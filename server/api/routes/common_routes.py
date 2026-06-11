@@ -109,3 +109,21 @@ async def get_interview_options():
             "durations": ["3 min", "5 min", "10 min"]
         }
     }
+
+
+@router.get(
+    "/multirag_options",
+    summary="Get configuration options for Multi-RAG sessions",
+    description="Returns session durations and descriptions for setting up Multi-RAG sessions."
+)
+async def get_multirag_options():
+    return {
+        "status": "ok",
+        "data": {
+            "options": [
+                {"seconds": 300, "label": "5 Minutes", "desc": "Perfect for quick testing and small files", "icon": "⏱"},
+                {"seconds": 900, "label": "15 Minutes", "desc": "Standard session for simple documents", "icon": "🕒"},
+                {"seconds": 3600, "label": "1 Hour", "desc": "Extended session for deep, multi-file research", "icon": "⏳"}
+            ]
+        }
+    }

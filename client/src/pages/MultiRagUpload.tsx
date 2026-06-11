@@ -16,6 +16,33 @@ export default function MultiRagUpload() {
   const [loading, setLoading] = useState(false);
   const [sessionSeconds, setSessionSeconds] = useState(300);
   
+  interface SessionOption {
+    seconds: number;
+    label: string;
+    desc: string;
+    icon: string;
+  }
+
+  const [options, setOptions] = useState<SessionOption[]>([
+    { seconds: 300, label: "5 Minutes", desc: "Perfect for quick testing and small files", icon: "⏱" },
+    { seconds: 900, label: "15 Minutes", desc: "Standard session for simple documents", icon: "🕒" },
+    { seconds: 3600, label: "1 Hour", desc: "Extended session for deep, multi-file research", icon: "⏳" },
+  ]);
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        const res = await multiRagApi.getOptions();
+        if (res.status === "ok" && Array.isArray(res.data?.options)) {
+          setOptions(res.data.options);
+        }
+      } catch (err) {
+        console.error("Failed to fetch Multi-RAG options", err);
+      }
+    };
+    fetchOptions();
+  }, []);
+
   // File upload state
   const [queuedFiles, setQueuedFiles] = useState<QueuedFile[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -235,11 +262,7 @@ export default function MultiRagUpload() {
           </div>
 
           <div className="grid gap-4">
-            {[
-              { seconds: 300, label: "5 Minutes", desc: "Perfect for quick testing and small files", icon: "⏱" },
-              { seconds: 900, label: "15 Minutes", desc: "Standard session for simple documents", icon: "🕒" },
-              { seconds: 3600, label: "1 Hour", desc: "Extended session for deep, multi-file research", icon: "⏳" },
-            ].map((opt) => (
+            {options.map((opt) => (
               <button
                 key={opt.seconds}
                 onClick={() => handleStartSession(opt.seconds)}

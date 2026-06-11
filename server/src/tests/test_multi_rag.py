@@ -13,6 +13,7 @@ import io
 import sys
 import uuid
 import shutil
+import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -287,53 +288,96 @@ class TestChatRouter:
         print(f"[CHAT] No-auth status: {resp.status_code}")
         assert resp.status_code == 401
 
-    @patch("api.routes.multi_rag_routes.RunGraphPipeline")
-    def test_chat_with_valid_state_returns_200(self, mock_pipeline_cls, client, thread_id, auth_cookies):
-        """Chat must return 200 + ai_response when artifacts exist."""
+    @patch("api.routes.multi_rag_routes.graph")
+    def test_chat_with_valid_state_returns_200(self, mock_graph, client, thread_id, auth_cookies):
+        """Chat must return 200 + ai_response stream when artifacts exist."""
         artifact_dir = f"artifacts/{thread_id}/transformation/fake_store"
         os.makedirs(artifact_dir, exist_ok=True)
 
-        mock_instance = MagicMock()
-        mock_instance.run_graph = AsyncMock(return_value={
-            "ai_response": "This is a mocked AI response.",
-            "messages": []
-        })
-        mock_pipeline_cls.return_value = mock_instance
+        async def mock_astream_events(*args, **kwargs):
+            yield {
+                "event": "on_chat_model_stream",
+                "tags": ["chat_token"],
+                "data": {
+                    "chunk": MagicMock(content="This is a mocked AI response.")
+                }
+            }
+            yield {
+                "event": "on_chain_end",
+                "name": "LangGraph",
+                "data": {
+                    "output": {
+                        "ai_response": "This is a mocked AI response."
+                    }
+                }
+            }
+
+        mock_graph.astream_events = mock_astream_events
 
         resp = client.post(
             "/api/v1/multi_rag/chat",
             json={"message": "What is AI?"},
             cookies=auth_cookies,
         )
-        print(f"[CHAT] Mocked chat status: {resp.status_code}, body: {resp.json()}")
+        print(f"[CHAT] Mocked chat status: {resp.status_code}, body: {resp.text}")
 
         assert resp.status_code == 200
-        body = resp.json()
-        assert "data" in body and "response" in body["data"]
-        assert body["data"]["response"] == "This is a mocked AI response."
+        
+        lines = [line.strip() for line in resp.text.split("\n") if line.strip()]
+        events = []
+        for line in lines:
+            if line.startswith("data: "):
+                events.append(json.loads(line[6:]))
+        
+        assert len(events) >= 2
+        assert events[0]["type"] == "token"
+        assert events[0]["content"] == "This is a mocked AI response."
+        assert events[1]["type"] == "done"
+        assert events[1]["content"] == "This is a mocked AI response."
 
-    @patch("api.routes.multi_rag_routes.RunGraphPipeline")
-    def test_chat_response_includes_user_info(self, mock_pipeline_cls, client, thread_id, auth_cookies):
-        """Chat response must include the user dict alongside the AI response."""
+    @patch("api.routes.multi_rag_routes.graph")
+    def test_chat_response_includes_user_info(self, mock_graph, client, thread_id, auth_cookies):
+        """Chat response stream must include the user dict alongside the AI response in done event."""
         artifact_dir = f"artifacts/{thread_id}/transformation/store2"
         os.makedirs(artifact_dir, exist_ok=True)
 
-        mock_instance = MagicMock()
-        mock_instance.run_graph = AsyncMock(return_value={
-            "ai_response": "Mocked response.",
-            "messages": []
-        })
-        mock_pipeline_cls.return_value = mock_instance
+        async def mock_astream_events(*args, **kwargs):
+            yield {
+                "event": "on_chat_model_stream",
+                "tags": ["chat_token"],
+                "data": {
+                    "chunk": MagicMock(content="Mocked response.")
+                }
+            }
+            yield {
+                "event": "on_chain_end",
+                "name": "LangGraph",
+                "data": {
+                    "output": {
+                        "ai_response": "Mocked response."
+                    }
+                }
+            }
+
+        mock_graph.astream_events = mock_astream_events
 
         resp = client.post(
             "/api/v1/multi_rag/chat",
             json={"message": "Who are you?"},
             cookies=auth_cookies,
         )
-        body = resp.json()
-        print(f"[CHAT] User in response: {body.get('data', {}).get('user')}")
-        assert "data" in body and "user" in body["data"]
-        assert body["data"]["user"].get("thread_id") == thread_id
+        
+        lines = [line.strip() for line in resp.text.split("\n") if line.strip()]
+        events = []
+        for line in lines:
+            if line.startswith("data: "):
+                events.append(json.loads(line[6:]))
+                
+        assert len(events) >= 2
+        done_event = events[1]
+        assert done_event["type"] == "done"
+        assert "user" in done_event
+        assert done_event["user"].get("thread_id") == thread_id
 
 
 # ─────────────────────────────────────────────────────────────

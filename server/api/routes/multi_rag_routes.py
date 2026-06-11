@@ -1,8 +1,9 @@
 import logging
 import os
 import uuid
+import json
 from fastapi import APIRouter, Request, UploadFile, File, BackgroundTasks, HTTPException,Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from langchain_core.messages import HumanMessage
 
 from src.constants import (
@@ -12,7 +13,7 @@ from src.constants import (
     PUBLIC_FOLDER_FILE_PATH,
     DEFAULT_COOKIE_MAX_AGE_SECONDS,
 )
-from src.graphs.multi_rag_graph_builder import load_conversation as GraphConversationLoader
+from src.graphs.multi_rag_graph_builder import graph, load_conversation as GraphConversationLoader
 from api.models.multi_rag_models import ChatRequest
 from src.pipelines.multi_rag_graph_runner_pipeline import RunGraphPipeline
 from src.pipelines.Vectiorizer_pipeline import VectiorizerPipeline
@@ -34,22 +35,14 @@ router = APIRouter(tags=['Multi-Rag'])
     "/chat",
     tags=['Chat'],
     summary="Chat with ingested documents",
-    description="Sends a chat message to the Multi-RAG LangGraph pipeline, retrieving relevant information from the ingested document vector stores and generating an AI response.",
+    description="Sends a chat message to the Multi-RAG LangGraph pipeline, retrieving relevant information from the ingested document vector stores and generating an AI response as SSE.",
+    response_class=StreamingResponse,
     responses={
         200: {
-            "description": "Chat response generated successfully.",
+            "description": "Chat response stream generated successfully.",
             "content": {
-                "application/json": {
-                    "example": {
-                        "success": True,
-                        "message": "Chat completed successfully",
-                        "data": {
-                            "response": "This is a mocked AI response.",
-                            "user": {
-                                "thread_id": "pytest-api-test-12345"
-                            }
-                        }
-                    }
+                "text/event-stream": {
+                    "example": "data: {\"type\": \"token\", \"content\": \"hello\"}\n\ndata: {\"type\": \"done\", \"content\": \"hello details\"}"
                 }
             }
         },
@@ -125,21 +118,32 @@ async def chat_endpoint(request: Request, chat_request: ChatRequest):
             "ai_response": ""
         }
 
-        graph_pipeline = RunGraphPipeline()
-        graph_result = await graph_pipeline.run_graph(initial_state, config={"configurable": {"thread_id": thread_id}})
-        logging.info(f"Graph execution result: {graph_result}")
+        async def event_generator():
+            try:
+                final_state = {}
+                async for event in graph.astream_events(
+                    initial_state,
+                    config={"configurable": {"thread_id": thread_id}},
+                    version="v2"
+                ):
+                    kind = event.get("event")
+                    if kind == "on_chat_model_stream":
+                        if "chat_token" in event.get("tags", []):
+                            chunk = event["data"]["chunk"]
+                            token = chunk.content if hasattr(chunk, "content") else ""
+                            if token:
+                                yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
+                    elif kind == "on_chain_end" and event.get("name") == "LangGraph":
+                        final_state = event["data"].get("output", {})
+                
+                ai_response = final_state.get("ai_response", "No response generated")
+                user_dict = user.dict() if hasattr(user, "dict") else user
+                yield f"data: {json.dumps({'type': 'done', 'content': ai_response, 'user': user_dict})}\n\n"
+            except Exception as e:
+                logging.error(f"Error in chat stream: {e}")
+                yield f"data: {json.dumps({'type': 'error', 'content': str(e)})}\n\n"
 
-        return JSONResponse(
-            status_code=200,
-            content={
-                "data": {
-                    "response": graph_result.get("ai_response", "No response generated"),
-                    "user": user.dict()
-                },
-                "message": "Chat completed successfully",
-                "success": True
-            }
-        )
+        return StreamingResponse(event_generator(), media_type="text/event-stream")
     except HTTPException:
         raise
     except Exception as e:

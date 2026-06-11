@@ -117,20 +117,107 @@ export default function MultiRagChat() {
 
     setWaiting(true);
     setInputText("");
-    setMessages((prev) => [...prev, { type: "human", content: text }]);
+    setMessages((prev) => [
+      ...prev,
+      { type: "human", content: text },
+      { type: "ai", content: "" }
+    ]);
 
     try {
-      const res = await multiRagApi.chat(text);
-      if (res.success) {
-        setMessages((prev) => [...prev, { type: "ai", content: res.data.response || "No response." }]);
-      } else {
-        setMessages((prev) => [...prev, { type: "ai", content: `❌ Error: ${res.message}` }]);
+      const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1";
+      const response = await fetch(`${BASE_URL}/multi_rag/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ message: text })
+      });
+
+      if (!response.ok) {
+        let errMsg = "Failed to send message";
+        try {
+          const errData = await response.json();
+          errMsg = errData.message || errData.detail || errMsg;
+        } catch {}
+        throw new Error(errMsg);
+      }
+
+      if (!response.body) {
+        throw new Error("No response body");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let aiResponse = "";
+      let buffer = "";
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        if (value) {
+          buffer += decoder.decode(value, { stream: !done });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith("data: ")) {
+              try {
+                const eventData = JSON.parse(trimmedLine.substring(6));
+                if (eventData.type === "token") {
+                  aiResponse += eventData.content;
+                  setMessages((prev) => {
+                    const newMsgs = [...prev];
+                    if (newMsgs.length > 0 && newMsgs[newMsgs.length - 1].type === "ai") {
+                      newMsgs[newMsgs.length - 1] = {
+                        type: "ai",
+                        content: aiResponse,
+                      };
+                    }
+                    return newMsgs;
+                  });
+                } else if (eventData.type === "done") {
+                  if (eventData.content) {
+                    aiResponse = eventData.content;
+                  }
+                  setMessages((prev) => {
+                    const newMsgs = [...prev];
+                    if (newMsgs.length > 0 && newMsgs[newMsgs.length - 1].type === "ai") {
+                      newMsgs[newMsgs.length - 1] = {
+                        type: "ai",
+                        content: aiResponse,
+                      };
+                    }
+                    return newMsgs;
+                  });
+                } else if (eventData.type === "error") {
+                  toast.error(eventData.content);
+                }
+              } catch (e) {
+                // Ignore partial JSON
+              }
+            }
+          }
+        }
       }
     } catch (err: any) {
-      setMessages((prev) => [
-        ...prev,
-        { type: "ai", content: `❌ Network error: ${err.response?.data?.message || err.message}` },
-      ]);
+      setMessages((prev) => {
+        const newMsgs = [...prev];
+        if (newMsgs.length > 0 && newMsgs[newMsgs.length - 1].type === "ai" && !newMsgs[newMsgs.length - 1].content) {
+          newMsgs[newMsgs.length - 1] = {
+            type: "ai",
+            content: `❌ Error: ${err.message}`,
+          };
+        } else {
+          newMsgs.push({
+            type: "ai",
+            content: `❌ Error: ${err.message}`,
+          });
+        }
+        return newMsgs;
+      });
     } finally {
       setWaiting(false);
       inputRef.current?.focus();

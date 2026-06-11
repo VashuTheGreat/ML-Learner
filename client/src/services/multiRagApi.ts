@@ -1,6 +1,11 @@
 import api from './api';
 
 class MultiRagApi {
+  async getOptions() {
+    const response = await api.get('/multirag_options');
+    return response.data;
+  }
+
   async initiate(seconds: number) {
     const response = await api.get(`/multi_rag/initiate/${seconds}`);
     return response.data;
