@@ -145,7 +145,7 @@ const ThanksParticipating = () => {
                       Back to Dashboard
                     </Link>
                     <Link 
-                      to="/apply" 
+                      to="/practice" 
                       className="btn-outline flex items-center justify-center gap-2"
                     >
                       <RotateCcw className="w-5 h-5" />

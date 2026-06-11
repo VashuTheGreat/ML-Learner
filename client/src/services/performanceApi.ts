@@ -29,13 +29,15 @@ interface PerformanceData {
 
 class PerformanceApi {
     async createPerformance(data: PerformanceData) {
-        const response = await api.post('/performance/create', data);
-        return response.data.data;
+        // Redundant as FastAPI backend automatically saves performance evaluations
+        // upon completed SSE streams.
+        return { success: true, data };
     }
 
     async fetchInterviewPerformance(interview_id: string) {
-        const response = await api.post(`/performance/fetchPerformance`, { interview_id });
-        return response.data.data;
+        const response = await api.get(`/interview/interviews/${interview_id}`);
+        // The API returns the completed interview item, including its 'performance' key
+        return response.data.data?.performance || response.data.data;
     }
 }
 

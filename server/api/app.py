@@ -103,14 +103,15 @@ async def validation_exception_handler(request, exc):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*", "https://www.mlearner.tech", "www.mlearner.tech"], 
-    allow_credentials=False,
-    allow_methods=["*"], 
+    allow_origins=["http://localhost:5173","http://localhost:8081", "http://localhost:5174", "https://www.mlearner.tech", "www.mlearner.tech"],
+    allow_credentials=True,
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
 app.include_router(CommonRouter,prefix="")
+app.include_router(CommonRouter,prefix="/api/v1")
 app.include_router(UserRouter, prefix="/api/v1/user")
 app.include_router(TemplateRouter, prefix="/api/v1/template")
 app.include_router(QuestionRouter, prefix="/api/v1/question")

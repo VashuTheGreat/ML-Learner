@@ -86,3 +86,4 @@ python_backend/db.sqlite-wal
 # Entire fig folder
 python_backend/fig/
 
+claude.md

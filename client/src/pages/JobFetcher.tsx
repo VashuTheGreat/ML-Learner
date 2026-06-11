@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import pythonApi from '@/services/pythonApi';
 import {
   Search, Briefcase, Building2, ExternalLink, ClipboardList,
-  Loader2, AlertCircle, Linkedin, RefreshCw, ChevronDown, ChevronUp, ImageOff
+  Loader2, AlertCircle, Linkedin, RefreshCw, ChevronDown, ChevronUp, ImageOff,
+  Sparkles
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -18,13 +20,13 @@ interface Job {
 
 const JobFetcher: React.FC = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [jobTitle, setJobTitle] = useState('');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const [searched, setSearched] = useState(false);
-  const [recommendToMe, setRecommendToMe] = useState(false);
 
   const handleFetch = async () => {
     if (!jobTitle.trim()) {
@@ -38,34 +40,7 @@ const JobFetcher: React.FC = () => {
     setExpandedIdx(null);
     try {
       const data = await pythonApi.fetchJobs(jobTitle.trim());
-      // data can be an array or { jobs: Job[] }
       let parsed: Job[] = Array.isArray(data) ? data : (data?.jobs ?? []);
-
-      if (recommendToMe && parsed.length > 0) {
-        toast({ title: 'Analyzing Jobs...', description: 'Predicting best matches for you.'});
-        const userStr = localStorage.getItem('user');
-        const userData = userStr ? JSON.parse(userStr) : {};
-        const userDetails = userData.aboutUser || JSON.stringify(userData);
-
-        if (userDetails && userDetails.trim() !== '{}') {
-          const predictions = await Promise.all(
-            parsed.map(async (job) => {
-              try {
-                const scoreData = await pythonApi.similarJobPredictor(job.Description, userDetails);
-                const score = typeof scoreData === 'number' ? scoreData : typeof scoreData?.data === 'number' ? scoreData.data : 0;
-                return { ...job, score };
-              } catch (e) {
-                return { ...job, score: 0 };
-              }
-            })
-          );
-          predictions.sort((a, b) => (b.score || 0) - (a.score || 0));
-          parsed = predictions;
-        } else {
-          toast({ title: 'Profile Data Missing', description: 'Could not find sufficient user details in local storage for recommendation.', variant: 'destructive' });
-        }
-      }
-
       setJobs(parsed);
       if (parsed.length === 0) {
         setError('No jobs found. The scraper may still be logging in — try again in a moment.');
@@ -117,21 +92,6 @@ const JobFetcher: React.FC = () => {
                 <option value="AIML Intern" className="bg-background text-foreground">AIML Intern</option>
                 <option value="Backend Intern" className="bg-background text-foreground">Backend Intern</option>
                 <option value="Frontend Intern" className="bg-background text-foreground">Frontend Intern</option>
-              </select>
-              <ChevronDown className="w-4 h-4 text-muted-foreground absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
-
-            <div className="hidden md:block w-px h-8 bg-border/50" />
-
-            <div className="relative px-4 w-full md:w-48 h-12 md:h-auto flex items-center border-t border-border/50 md:border-none">
-              <select
-                id="recommend-to-me-input"
-                value={recommendToMe ? "true" : "false"}
-                onChange={e => setRecommendToMe(e.target.value === "true")}
-                className={`w-full bg-transparent text-sm focus:outline-none py-2 cursor-pointer appearance-none pr-8 h-full ${recommendToMe ? 'text-primary font-bold' : 'font-medium text-foreground'}`}
-              >
-                <option value="false" className="bg-background text-foreground">Standard Search</option>
-                <option value="true" className="bg-background text-primary font-semibold">Recommend to me</option>
               </select>
               <ChevronDown className="w-4 h-4 text-muted-foreground absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
@@ -283,6 +243,18 @@ const JobFetcher: React.FC = () => {
                           </a>
                         ) : null;
                       })()}
+
+                      <button
+                        onClick={() => {
+                          localStorage.setItem('ats_job_description', job.Description || '');
+                          navigate('/check_ats_score');
+                        }}
+                        className="w-full py-2 flex items-center justify-center gap-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-all duration-300"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        Check ATS Score
+                      </button>
+
                       {job['Job Link'] && job['Job Link'].startsWith('http') && (
                         <a
                           href={job['Job Link']}

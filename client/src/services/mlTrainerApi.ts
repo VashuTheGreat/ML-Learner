@@ -1,11 +1,4 @@
-import axios from 'axios';
-
-const PYTHON_BASE_URL = import.meta.env.VITE_PYTHON_BASE_URL || 'http://localhost:8000';
-
-const pythonApiInstance = axios.create({
-    baseURL: PYTHON_BASE_URL,
-    headers: { 'Content-Type': 'application/json' },
-});
+import api from './api';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -76,14 +69,14 @@ export interface TrainResult {
 class MLTrainerApi {
     /** Fetch all available models and their configurable parameters */
     async getAvailableAttributes(): Promise<AvailableAttributes> {
-        const response = await pythonApiInstance.get('/api/modelTrainingConfig/get_available_attributes');
-        return response.data;
+        const response = await api.get('/modelTraining/available_attributes');
+        return response.data.data;
     }
 
     /** Train a regression or classification model with custom config */
     async trainModel(payload: TrainPayload): Promise<TrainResult> {
-        const response = await pythonApiInstance.post('/api/modelTraining/train', payload);
-        console.log(response.data)
+        const response = await api.post('/modelTraining/train', payload);
+        console.log(response.data);
         return response.data.data;
     }
 }

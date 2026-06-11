@@ -30,6 +30,7 @@ const Solve: React.FC = () => {
     const [code, setCode] = useState('');
     const [loading, setLoading] = useState(true);
     const [running, setRunning] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const [results, setResults] = useState<any[] | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'description' | 'learn' | 'solution'>('description');
@@ -38,6 +39,7 @@ const Solve: React.FC = () => {
     const [fullscreen, setFullscreen] = useState(false);
     // On mobile we switch between 'description' view and 'editor' view
     const [mobileView, setMobileView] = useState<'description' | 'editor'>('description');
+    const [isAlreadySolved, setIsAlreadySolved] = useState(false);
     
     // Auto-persist ID if coming from AI Interview flow
     useEffect(() => {
@@ -99,9 +101,20 @@ const Solve: React.FC = () => {
                 const res = await questionApi.getCodingSchema();
                 if (res.success && res.data) {
                     const schema = Array.isArray(res.data) ? res.data[0] : res.data;
-                    const visited = schema.recently_visited || [];
-                    if (!visited.includes(slug)) {
-                        const newVisited = [slug, ...visited].slice(0, 10);
+                    
+                    const solved = (schema.all_questions_solved || []).map(Number);
+                    const currentId = Number(question.id);
+                    if (solved.includes(currentId)) {
+                        setIsAlreadySolved(true);
+                    }
+
+                    const visited = (schema.recently_visited || []).map(Number);
+                    // Filter out currentId if it exists, to move it to the front
+                    const filteredVisited = visited.filter(id => id !== currentId);
+                    const newVisited = [currentId, ...filteredVisited].slice(0, 5);
+                    
+                    // Only update backend if the visited queue changed
+                    if (JSON.stringify(visited) !== JSON.stringify(newVisited)) {
                         await questionApi.updateCodingSchema({ recently_visited: newVisited });
                     }
                 }
@@ -117,21 +130,15 @@ const Solve: React.FC = () => {
         setRunning(true);
         setResults(null);
         setError(null);
-        // On mobile, switch to editor view to see results
         setMobileView('editor');
         try {
-            const functionNameMatch = question.starter_code.match(/def\s+(\w+)\s*\(/);
-            const functionName = functionNameMatch ? functionNameMatch[1] : 'solution';
-
-            const res = await questionApi.submitCode(code, question.test_cases, functionName);
+            const res = await questionApi.runCode(code, Number(question.id));
 
             let runResults = [];
             if (res && res.data && Array.isArray(res.data)) {
                 runResults = res.data;
             } else if (res && Array.isArray(res)) {
                 runResults = res;
-            } else if (res && res.data && res.data.data && Array.isArray(res.data.data)) {
-                runResults = res.data.data;
             } else {
                 runResults = res ? (res.data || res) : [];
             }
@@ -140,38 +147,10 @@ const Solve: React.FC = () => {
             setResults(runResults);
 
             const allPassed = runResults.length > 0 && runResults.every((r: any) => !!r.pass);
-
             if (allPassed) {
-                toast({ title: "All Tests Passed!", description: "Syncing progress..." });
-                try {
-                    await questionApi.createCodingSchema();
-                    const schemaRes = await questionApi.getCodingSchema();
-
-                    if (schemaRes.success && schemaRes.data) {
-                        const schema = Array.isArray(schemaRes.data) ? schemaRes.data[0] : schemaRes.data;
-                        if (!schema) throw new Error("Schema record not returned");
-
-                        const solved = schema.all_questions_solved || [];
-                        const currentId = String(question.id);
-
-                        if (!solved.includes(currentId)) {
-                            const newSolved = [currentId, ...solved];
-                            const recentSolved = [currentId, ...(schema.recently_solved || [])].slice(0, 10);
-                            const updateData: any = { all_questions_solved: newSolved, recently_solved: recentSolved };
-                            const diff = (question.difficulty || 'easy').toLowerCase();
-                            if (diff === 'easy') updateData.easy = (schema.easy || 0) + 1;
-                            else if (diff === 'medium') updateData.medium = (schema.medium || 0) + 1;
-                            else if (diff === 'hard') updateData.hard = (schema.hard || 0) + 1;
-                            await questionApi.updateCodingSchema(updateData);
-                            toast({ title: "Success!", description: "Achievement unlocked!" });
-                        } else {
-                            toast({ title: "Correct!", description: "Already in your solved list." });
-                        }
-                    }
-                } catch (schemaErr: any) {
-                    console.error("Sync error:", schemaErr);
-                    toast({ title: "Sync Failed", description: "Passed, but couldn't sync progress.", variant: "destructive" });
-                }
+                toast({ title: "Run Finished", description: "All sample test cases passed." });
+            } else {
+                toast({ title: "Run Finished", description: "Some test cases failed or had errors.", variant: "destructive" });
             }
         } catch (err: any) {
             console.error("Solve page: Failed to run code:", err);
@@ -183,6 +162,52 @@ const Solve: React.FC = () => {
             );
         } finally {
             setRunning(false);
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (!question) return;
+        setSubmitting(true);
+        setResults(null);
+        setError(null);
+        setMobileView('editor');
+        try {
+            const res = await questionApi.submitCode(code, Number(question.id));
+
+            let runResults = [];
+            if (res && res.data && Array.isArray(res.data)) {
+                runResults = res.data;
+            } else if (res && Array.isArray(res)) {
+                runResults = res;
+            } else {
+                runResults = res ? (res.data || res) : [];
+            }
+
+            if (!Array.isArray(runResults)) runResults = [];
+            setResults(runResults);
+
+            const allPassed = runResults.length > 0 && runResults.every((r: any) => !!r.pass);
+
+            if (allPassed) {
+                if (!isAlreadySolved) {
+                    toast({ title: "All Tests Passed!", description: "Achievement unlocked! Progress updated." });
+                    setIsAlreadySolved(true);
+                } else {
+                    toast({ title: "Correct!", description: "Already in your solved list." });
+                }
+            } else {
+                toast({ title: "Submission Failed", description: "One or more test cases failed.", variant: "destructive" });
+            }
+        } catch (err: any) {
+            console.error("Solve page: Failed to submit code:", err);
+            const isNetworkError = err?.code === 'ERR_NETWORK' || err?.message?.includes('Network Error');
+            setError(
+                isNetworkError
+                    ? "Network Error: Could not reach the code execution server. Please make sure the Python backend is running."
+                    : "An error occurred while submitting your code."
+            );
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -257,14 +282,24 @@ const Solve: React.FC = () => {
                             {fullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
                         </button>
                         {fullscreen && (
-                            <button
-                                onClick={handleRun}
-                                disabled={running}
-                                className="btn-primary flex items-center gap-1.5 px-4 py-1 text-sm font-bold"
-                            >
-                                {running ? <Loader2 className="animate-spin" size={15} /> : <Play size={15} fill="currentColor" />}
-                                Run
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleRun}
+                                    disabled={running || submitting}
+                                    className="btn-outline flex items-center gap-1.5 px-3 py-1 text-sm font-semibold"
+                                >
+                                    {running ? <Loader2 className="animate-spin" size={15} /> : <Play size={15} fill="currentColor" />}
+                                    Run
+                                </button>
+                                <button
+                                    onClick={handleSubmit}
+                                    disabled={running || submitting}
+                                    className="btn-primary flex items-center gap-1.5 px-4 py-1 text-sm font-bold animate-pulse"
+                                >
+                                    {submitting ? <Loader2 className="animate-spin" size={15} /> : <CheckCircle2 size={15} />}
+                                    Submit
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -596,11 +631,19 @@ const Solve: React.FC = () => {
                     </button>
                     <button
                         onClick={handleRun}
-                        disabled={running}
-                        className="btn-primary flex items-center gap-1.5 px-3 sm:px-5 py-1.5 shadow-lg shadow-primary/20 shrink-0"
+                        disabled={running || submitting}
+                        className="btn-outline flex items-center gap-1.5 px-3 sm:px-4 py-1.5 shrink-0"
                     >
                         {running ? <Loader2 className="animate-spin" size={14} /> : <Play size={14} fill="currentColor" />}
-                        <span className="font-bold text-[10px] sm:text-sm">Run</span>
+                        <span className="font-medium text-[10px] sm:text-xs">Run</span>
+                    </button>
+                    <button
+                        onClick={handleSubmit}
+                        disabled={running || submitting}
+                        className="btn-primary flex items-center gap-1.5 px-3 sm:px-5 py-1.5 shadow-lg shadow-primary/20 shrink-0"
+                    >
+                        {submitting ? <Loader2 className="animate-spin" size={14} /> : <CheckCircle2 size={14} />}
+                        <span className="font-bold text-[10px] sm:text-sm">Submit</span>
                     </button>
                 </div>
             </div>

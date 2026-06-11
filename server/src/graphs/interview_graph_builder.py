@@ -64,10 +64,11 @@ async def chat_interviewer_stream(thread_id: str, time_remain: int, topic: str, 
     ):
         kind = event.get("event")
         if kind == "on_chat_model_stream":
-            chunk = event["data"]["chunk"]
-            token = chunk.content if hasattr(chunk, "content") else ""
-            if token:
-                yield {"type": "token", "content": token}
+            if "chat_token" in event.get("tags", []):
+                chunk = event["data"]["chunk"]
+                token = chunk.content if hasattr(chunk, "content") else ""
+                if token:
+                    yield {"type": "token", "content": token}
         elif kind == "on_chain_end" and event.get("name") == "LangGraph":
             final_state = event["data"].get("output", {})
 

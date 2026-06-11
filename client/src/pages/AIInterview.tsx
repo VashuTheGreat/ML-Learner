@@ -5,6 +5,7 @@ import {
   Clock, Bot, User, Volume2, Trophy, ShieldCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 import pythonApi from '@/services/pythonApi';
 import performanceApi from '@/services/performanceApi';
 import interviewApi from '@/services/interviewApi';
@@ -13,6 +14,7 @@ import { FaceDetectionVideo } from '@/components/common/FaceDetectionVideo';
 export const AIInterview = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [timeRemaining, setTimeRemaining] = useState(10 * 60); // 10 minutes default
   const [isMicOn, setIsMicOn] = useState(true);
   const [isVideoOn, setIsVideoOn] = useState(true);
@@ -33,6 +35,7 @@ export const AIInterview = () => {
 
   // Ref to auto-focus textarea when user starts speaking
   const answerRef = useRef<HTMLTextAreaElement>(null);
+
   // Ref to scroll chat to latest message
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
@@ -67,10 +70,21 @@ export const AIInterview = () => {
       };
 
       rec.onerror = (e: any) => {
+        console.error("Speech reco error event:", e.error);
         if (e.error === 'network') {
-          console.warn("Speech reco network error observed. This usually happens in Chrome without internet or due to a bug. Restarting...");
-        } else if (e.error !== 'no-speech') {
-          console.error("Speech reco error:", e.error);
+          setIsMicOn(false);
+          toast({
+            title: "Voice Input Network Error",
+            description: "Speech-to-text service is temporarily unavailable. Please type your responses manually.",
+            variant: "destructive"
+          });
+        } else if (e.error === 'not-allowed') {
+          setIsMicOn(false);
+          toast({
+            title: "Microphone Access Denied",
+            description: "Please check your browser permissions to enable microphone input.",
+            variant: "destructive"
+          });
         }
         setIsListening(false);
       };
@@ -84,17 +98,33 @@ export const AIInterview = () => {
   // Manage Mic State — restart recognition each time it ends (non-continuous workaround)
   useEffect(() => {
     if (!recognition) return;
+    
+    let active = true;
+    const startTimeout = setTimeout(() => {
+      if (!active) return;
+      try {
+        if (isMicOn && !isAISpeaking && !isListening) {
+          recognition.start();
+          setIsListening(true);
+        }
+      } catch (e) {
+        // ignore AbortError / InvalidStateError
+      }
+    }, 400); // 400ms delay to prevent CPU-hogging loop on rapid failures
+
     try {
-      if (isMicOn && !isAISpeaking && !isListening) {
-        recognition.start();
-        setIsListening(true);
-      } else if ((!isMicOn || isAISpeaking) && isListening) {
+      if ((!isMicOn || isAISpeaking) && isListening) {
         recognition.stop();
         setIsListening(false);
       }
     } catch (e) {
-      // ignore AbortError / InvalidStateError from rapid start/stop
+      // ignore
     }
+
+    return () => {
+      active = false;
+      clearTimeout(startTimeout);
+    };
   }, [isMicOn, isAISpeaking, isListening, recognition]);
 
   // Auto-focus textarea when user starts speaking OR when AI finishes speaking
@@ -117,26 +147,25 @@ export const AIInterview = () => {
 
   // Initialize unique threadId for the interview session
   useEffect(() => {
-    // Check if we already have a threadId for this session (e.g. on refresh)
     let id = sessionStorage.getItem('interview_thread_id');
+    const storedSlug = sessionStorage.getItem('interview_slug');
     
-    if (!id) {
-      // Generate a new unique ID if none exists for this session
+    if (!id || storedSlug !== slug) {
+      // Generate a new unique ID if none exists or if the interview slug has changed
       id = crypto.randomUUID();
       sessionStorage.setItem('interview_thread_id', id);
       localStorage.setItem('interview_thread_id', id);
-      console.log("New Interview Thread ID generated:", id);
+      if (slug) {
+        sessionStorage.setItem('interview_slug', slug);
+        localStorage.setItem('interview_slug', slug);
+      }
+      console.log("New Interview Thread ID generated for slug:", id, slug);
     } else {
       console.log("Resuming Interview with Thread ID:", id);
     }
     
-    if (slug) {
-      sessionStorage.setItem('interview_slug', slug);
-      localStorage.setItem('interview_slug', slug);
-    }
-    
     setThreadId(id);
-  }, []);
+  }, [slug]);
 
   // Fetch Interview Details
   useEffect(() => {
@@ -144,8 +173,13 @@ export const AIInterview = () => {
     const fetchInterview = async () => {
       try {
         const data = await interviewApi.getInterviewById(slug);
-        if (data && data.topic) {
-          setTopic(data.topic);
+        if (data) {
+          if (data.topic) {
+            setTopic(data.topic);
+          }
+          if (data.duration) {
+            setTimeRemaining(Number(data.duration));
+          }
         }
       } catch (error) {
         console.error("Error fetching interview:", error);
@@ -155,16 +189,58 @@ export const AIInterview = () => {
   }, [slug]);
 
   // TTS Helper
-  const speak = useCallback((text: string) => {
+  const speak = useCallback((rawText: string) => {
     if (!window.speechSynthesis) return;
     
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel();
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.onstart = () => setIsAISpeaking(true);
-    utterance.onend = () => setIsAISpeaking(false);
-    window.speechSynthesis.speak(utterance);
+    // Clean and prune text to be spoken
+    let textToSpeak = rawText
+      .replace(/\*\*?/g, "") // remove bold asterisks
+      .replace(/#+\s+/g, "") // remove headers
+      .replace(/__?/g, "") // remove underscores
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // replace markdown links
+      .replace(/`/g, "") // remove backticks
+      .trim();
+
+    if (textToSpeak.includes("Let's start")) {
+      const parts = textToSpeak.split("Let's start");
+      textToSpeak = "Let's start. " + parts[parts.length - 1];
+    }
+
+    // Strip out emojis for cleaner pronunciation
+    textToSpeak = textToSpeak.replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]/g, "");
+
+    if (!textToSpeak) return;
+
+    try {
+      window.speechSynthesis.resume(); // Workaround for Chromium SpeechSynthesis freeze bug
+      window.speechSynthesis.cancel();
+      
+      // Short delay to reset speechSynthesis in Chromium engines
+      setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.onstart = () => setIsAISpeaking(true);
+        utterance.onend = () => setIsAISpeaking(false);
+        utterance.onerror = (e) => {
+          // Ignore interruption events as they are normal on cancellation
+          if (e.error !== 'interrupted') {
+            console.error("SpeechSynthesisUtterance error:", e);
+          }
+          setIsAISpeaking(false);
+        };
+        
+        // Select an English voice if available
+        const voices = window.speechSynthesis.getVoices();
+        const englishVoice = voices.find(v => v.lang.startsWith('en'));
+        if (englishVoice) {
+          utterance.voice = englishVoice;
+        }
+        
+        window.speechSynthesis.speak(utterance);
+      }, 50);
+    } catch (e) {
+      console.error("TTS Speak error:", e);
+      setIsAISpeaking(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -178,12 +254,34 @@ export const AIInterview = () => {
     const startInterview = async () => {
       try {
         const currentTopic = topic || slug;
-        const response = await pythonApi.chatInterviewer(threadId, timeRemaining, currentTopic, "Hello, I am ready for the interview.");
+        setMessages([{ role: 'ai', content: "" }]);
+        
+        const response = await pythonApi.chatInterviewer(
+          threadId, 
+          timeRemaining, 
+          currentTopic, 
+          "Hello, I am ready for the interview.",
+          (token) => {
+            setMessages(prev => {
+              if (prev.length === 0) return [{ role: 'ai', content: token }];
+              const last = prev[prev.length - 1];
+              if (last.role === 'ai') {
+                return [...prev.slice(0, -1), { role: 'ai', content: last.content + token }];
+              }
+              return [...prev, { role: 'ai', content: token }];
+            });
+          }
+        );
         
         const aiMsg = (typeof response === 'string' ? response : (response.ai_response)) 
           || "Hello! I am your AI interviewer. Let's begin.";
           
-        setMessages([{ role: 'ai', content: aiMsg }]);
+        setMessages(prev => {
+          const last = prev[prev.length - 1];
+          if (last && last.role === 'ai' && last.content) return prev;
+          return [{ role: 'ai', content: aiMsg }];
+        });
+        
         speak(aiMsg);
       } catch (error) {
         console.error("Error starting interview:", error);
@@ -222,19 +320,48 @@ export const AIInterview = () => {
   const handleSendAnswer = async () => {
     if (!userAnswer.trim() || isAISpeaking || isAnalyzing) return;
 
+    // Renew user activation synchronously to prevent browser from blocking subsequent async speak() call
+    if (window.speechSynthesis) {
+      try {
+        window.speechSynthesis.resume();
+        const u = new SpeechSynthesisUtterance(" ");
+        window.speechSynthesis.speak(u);
+      } catch (e) {
+        // ignore
+      }
+    }
+
     const currentAnswer = userAnswer;
-    setMessages(prev => [...prev, { role: 'user', content: currentAnswer }]);
+    setMessages(prev => [...prev, { role: 'user', content: currentAnswer }, { role: 'ai', content: "" }]);
     setUserAnswer("");
 
     try {
       setIsAISpeaking(true);
-      const response = await pythonApi.chatInterviewer(threadId, timeRemaining, topic || slug || "General", currentAnswer);
+      const response = await pythonApi.chatInterviewer(
+        threadId, 
+        timeRemaining, 
+        topic || slug || "General", 
+        currentAnswer,
+        (token) => {
+          setMessages(prev => {
+            const last = prev[prev.length - 1];
+            if (last && last.role === 'ai') {
+              return [...prev.slice(0, -1), { role: 'ai', content: last.content + token }];
+            }
+            return [...prev, { role: 'ai', content: token }];
+          });
+        }
+      );
       
       // Handle both string and object responses
       const aiMsg = typeof response === 'string' ? response : response.ai_response;
       
       if (aiMsg) {
-        setMessages(prev => [...prev, { role: 'ai', content: aiMsg }]);
+        setMessages(prev => {
+          const last = prev[prev.length - 1];
+          if (last && last.role === 'ai' && last.content) return prev;
+          return [...prev.slice(0, -1), { role: 'ai', content: aiMsg }];
+        });
         speak(aiMsg);
       } else {
         console.warn("Empty AI response received");
@@ -246,117 +373,65 @@ export const AIInterview = () => {
     }
   };
 
-  const normalizeSkills = (skills: any) => {
-    const defaultSkill = { score: 0, feedback: "Not evaluated" };
-    if (!skills || typeof skills !== 'object') {
-       return {
-         technical: defaultSkill, dsa: defaultSkill, problemSolving: defaultSkill,
-         communication: defaultSkill, systemDesign: defaultSkill, projects: defaultSkill, behaviour: defaultSkill
-       };
-    }
-
-    const skillKeys = ['technical', 'dsa', 'problemSolving', 'communication', 'systemDesign', 'projects', 'behaviour'];
-    const normalized: any = {};
-    
-    skillKeys.forEach(key => {
-      const val = skills[key];
-      if (val && typeof val === 'object' && val.score !== undefined) {
-        normalized[key] = {
-          score: Math.min(10, Math.max(0, Number(val.score) || 0)),
-          feedback: String(val.feedback || "Good performance")
-        };
-      } else if (typeof val === 'string') {
-        normalized[key] = {
-          score: 7, 
-          feedback: val
-        };
-      } else {
-        normalized[key] = defaultSkill;
-      }
-    });
-    return normalized;
-  };
-
-  // Helper to map LLM string to precise enum values for Mongoose
-  const mapVerdict = (v: any): "hire" | "maybe" | "reject" => {
-    const lower = String(v || "").toLowerCase();
-    if (lower.includes("hire") && !lower.includes("no") && !lower.includes("not")) return "hire";
-    if (lower.includes("reject") || lower.includes("no")) return "reject";
-    return "maybe";
-  };
-
   const handleEndInterview = async () => {
     if (isAnalyzing) return;
     
     console.log("Ending interview...");
     setIsAnalyzing(true);
-    setAnalysisStatus("Wrapping up conversation...");
+    setAnalysisStatus("Evaluating performance...");
     
-    const finalMsg = "Thanks for the interview! Please wait while I analyze your performance...";
-    setMessages(prev => [...prev, { role: 'ai', content: finalMsg }]);
+    const finalMsg = "Analyzing your performance now. Redirecting you to the dashboard.";
     speak(finalMsg);
 
     try {
-      // 1. Get Performance Evaluation from Python backend
-      setAnalysisStatus("Evaluating performance...");
-      const response = await pythonApi.getPerformance(threadId);
-      console.log("Python performance response:", response);
+      // 1. Send final chat request with timeRemaining = 0 to trigger performance node & auto-saving
+      await pythonApi.chatInterviewer(
+        threadId, 
+        0, 
+        topic || slug || "General", 
+        "Please end the interview and evaluate my performance now."
+      );
       
-      let performanceRes = response.performance;
+      // 2. Clear scheduled/pending status from local storage
+      localStorage.removeItem(`pending_interview_${slug}`);
       
-      // Secondary fallback if it's the raw result or wrapped differently
-      if (!performanceRes && response.data) performanceRes = response.data;
-      if (!performanceRes) performanceRes = response;
+      // 3. Clear session and thread storage keys
+      const itemsToClear = ['interview_thread_id', 'interview_slug'];
+      itemsToClear.forEach(item => {
+        localStorage.removeItem(item);
+        sessionStorage.removeItem(item);
+      });
 
-      if (performanceRes) {
-        // 2. Normalize and Save to Node.js backend
-        setAnalysisStatus("Saving results to your profile...");
-        const normalizedData = {
-          interview_id: slug || "unknown",
-          overallScore: Math.min(10, Math.max(0, Number(performanceRes.overallScore ?? performanceRes.score) || 0)),
-          verdict: mapVerdict(performanceRes.verdict),
-          summaryFeedback: performanceRes.summaryFeedback || "Interview completed successfully.",
-          skills: normalizeSkills(performanceRes.skills),
-          strengths: Array.isArray(performanceRes.strengths) ? performanceRes.strengths : [],
-          weaknesses: Array.isArray(performanceRes.weaknesses) ? performanceRes.weaknesses : [],
-          practiceRecommendations: Array.isArray(performanceRes.practiceRecommendations) ? performanceRes.practiceRecommendations : [],
-          studyRecommendations: Array.isArray(performanceRes.studyRecommendations) ? performanceRes.studyRecommendations : [],
-          lowPriorityOrAvoid: Array.isArray(performanceRes.lowPriorityOrAvoid) ? performanceRes.lowPriorityOrAvoid : [],
-          confidenceLevel: Math.min(10, Math.max(0, Number(performanceRes.confidenceLevel) || 5))
-        };
-
-        await performanceApi.createPerformance(normalizedData);
-        
-        // 3. Update status in Node.js
-        await interviewApi.updateInterviewStatus({ id: slug!, status: 'done' });
-        
-        // 4. Cleanup Python thread
-        setAnalysisStatus("Cleaning up session...");
-        await pythonApi.deleteThread(threadId);
-        
-        // 5. Clear Local Storage
-        const itemsToClear = ['interview_thread_id', 'interview_slug'];
-        itemsToClear.forEach(item => {
-          localStorage.removeItem(item);
-          sessionStorage.removeItem(item);
-        });
-
-        setAnalysisStatus("Success! Redirecting...");
-        
-        setTimeout(() => {
-          navigate(`/performance/${slug}`);
-        }, 1000);
-      } else {
-        throw new Error("Analysis completed but no data was generated. Please contact support.");
-      }
-
+      setAnalysisStatus("Success! Redirecting...");
+      
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1000);
     } catch (error) {
       console.error("Error during interview wrap-up:", error);
-      setAnalysisStatus("Failed to analyze. Please try again or check your dashboard.");
-      setTimeout(() => {
-        navigate("/thanks-participating", { state: { threadId, slug, error: true } });
-      }, 2000);
+      // Fallback: make sure storage is cleaned up and user is redirected
+      localStorage.removeItem(`pending_interview_${slug}`);
+      const itemsToClear = ['interview_thread_id', 'interview_slug'];
+      itemsToClear.forEach(item => {
+        localStorage.removeItem(item);
+        sessionStorage.removeItem(item);
+      });
+      navigate('/dashboard');
     }
+  };
+
+  const handleStartClick = () => {
+    // Unlock SpeechSynthesis by speaking a non-empty string trigger synchronously in the gesture handler
+    if (window.speechSynthesis) {
+      try {
+        window.speechSynthesis.resume();
+        const u = new SpeechSynthesisUtterance("Let's begin");
+        window.speechSynthesis.speak(u);
+      } catch (e) {
+        console.error("Failed to unlock speech synthesis:", e);
+      }
+    }
+    setHasStarted(true);
   };
 
   // Update ref whenever handleEndInterview changes
@@ -434,7 +509,7 @@ export const AIInterview = () => {
                 Make sure your mic and camera are working correctly before we begin.
               </p>
               <button 
-                onClick={() => setHasStarted(true)}
+                onClick={handleStartClick}
                 className="w-full btn-primary h-14 rounded-2xl text-lg font-bold"
               >
                 Start Interview
@@ -543,12 +618,21 @@ export const AIInterview = () => {
                   )}
                 </div>
                 <div className={cn(
-                  "max-w-[75%] px-5 py-3 rounded-2xl shadow-sm",
+                  "max-w-[75%] px-5 py-3 rounded-2xl shadow-sm relative group/msg",
                   msg.role === 'ai' 
                     ? "bg-background text-foreground rounded-tl-none border border-border/50" 
                     : "gradient-bg text-white rounded-tr-none"
                 )}>
-                  <p className="leading-relaxed text-sm md:text-base">{msg.content}</p>
+                  <p className="leading-relaxed text-sm md:text-base pr-8">{msg.content}</p>
+                  {msg.role === 'ai' && msg.content && (
+                    <button
+                      onClick={() => speak(msg.content)}
+                      className="absolute right-2 top-2.5 p-1.5 rounded-lg bg-secondary/10 hover:bg-secondary/20 text-muted-foreground hover:text-foreground opacity-40 group-hover/msg:opacity-100 transition-all"
+                      title="Speak Question"
+                    >
+                      <Volume2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

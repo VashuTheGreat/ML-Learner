@@ -16,6 +16,8 @@ tools = [tavily_search]
 @asyncHandler
 @traceable(name="question_Generator", tags=["interview:question_generator"])
 async def generate_questions(state: InterviewState):
+    if state.questions_generated and state.questions:
+        return {}
     prompt = QuestionGeneraterPrompt.format(topic=state.topic)
     llm_with_tools = llm.bind_tools(tools=tools)
     res = await llm_with_tools.ainvoke(prompt)
@@ -30,7 +32,7 @@ async def generate_questions(state: InterviewState):
 async def performance_generation_node(state: InterviewState):
     prompt = generateInterviewPerformance_prompts.format()
     llm_structured = llm.with_structured_output(Performance)
-    res = await llm_structured.ainvoke([prompt,*state.message])
+    res = await llm_structured.ainvoke([prompt,*state.messages])
     logging.info(res)
     return {"performance": res}
 
@@ -38,28 +40,7 @@ async def performance_generation_node(state: InterviewState):
 @asyncHandler
 @traceable(name="Chat_node", tags=["interview:chat"])
 async def chat(state: InterviewState):
-    llm_chat = interview_prompts2 | llm
-
     messages = state.messages
-
-    if not state.questions_generated:
-        if not state.topic:
-            raise ValueError("Topic must be provided to start the interview")
-
-        questions = state.questions
-
-        return {
-            "questions_generated": True,
-            "messages": messages + [
-                AIMessage(
-                    content=(
-                        f"📝 Interview Topic: **{state.topic}**\n\n"
-                        f"Here are your interview questions:\n\n{questions}\n\n"
-                        "Let's start.\n\nQuestion 1:"
-                    )
-                )
-            ]
-        }
 
     if state.time_remaining <= 0:
         return {
@@ -68,10 +49,18 @@ async def chat(state: InterviewState):
             ]
         }
 
-    response = await llm_chat.ainvoke(
-        state.messages + [SystemMessage(content=f"Time remaining: {state.time_remaining} seconds")]
+    system_instruction = (
+        f"{interview_prompts2.format(time_remaining=state.time_remaining)}\n\n"
+        f"Interview Topic: {state.topic}\n"
+        f"10 Generated Questions:\n{state.questions}"
+    )
+    
+    response = await llm.ainvoke(
+        [SystemMessage(content=system_instruction)] + state.messages,
+        config={"tags": ["chat_token"]}
     )
 
     return {
         "messages": messages + [AIMessage(content=response.content)]
     }
+
