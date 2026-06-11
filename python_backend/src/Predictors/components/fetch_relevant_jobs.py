@@ -1,5 +1,0 @@
-
-
-
-class JobPrediction:
-    def __

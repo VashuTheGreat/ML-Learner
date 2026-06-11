@@ -1,0 +1,58 @@
+[project]
+name = "Interview-Cracker"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "aiosqlite>=0.22.1",
+    "dill>=0.4.1",
+    "fastapi>=0.128.8",
+    "from-root>=1.3.0",
+    "langchain>=1.2.10",
+    "langchain-aws>=1.2.5",
+    "langchain-community>=0.4.1",
+    "langgraph>=1.0.7",
+    "langgraph-checkpoint-sqlite>=3.0.3",
+    "pypdf>=6.7.1",
+    "python-multipart>=0.0.22",
+    "scikit-learn>=1.7.2",
+    "seaborn>=0.13.2",
+    "torch>=2.10.0",
+    "uvicorn[standard]>=0.40.0",
+    "vconsoleprint>=1.0.2",
+    "mediapipe==0.10.14",
+    "opencv-python>=4.13.0.92",
+    "websockets>=16.0",
+    "langsmith>=0.6.6",
+    "selenium>=4.41.0",
+    "pandas>=2.0.0",
+    "datasets>=4.8.4",
+    "nltk>=3.9.4",
+    "transformers>=5.3.0",
+    "tqdm>=4.67.3",
+    "mlflow>=3.10.1",
+    "dagshub>=0.6.9",
+    "sqlalchemy>=2.0.46",
+    "psycopg2-binary>=2.9.12",
+    "bcrypt>=5.0.0",
+    "pyjwt>=2.13.0",
+    "pydantic[email]>=2.12.5",
+    "cloudinary>=1.44.2",
+    "langchain-groq>=1.1.2",
+    "pytest>=9.0.3",
+    "pytest-asyncio>=1.4.0",
+]
+
+[tool.uv.workspace]
+members = [
+    ".",
+]
+
+[tool.uv.sources]
+interview-cracker = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "interview-cracker",
+]
