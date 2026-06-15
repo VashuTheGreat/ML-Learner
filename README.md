@@ -2,64 +2,64 @@
 
 **The Ultimate AI-Powered Technical Interview & Machine Learning Playground.**
 
-InterviewCracker is a robust, full-stack platform designed to bridge the gap between learning and landing your dream job. It combines a sophisticated Machine Learning playground, an interactive coding environment, and AI-driven interview simulations into one seamless experience.
+ML-Learner is a robust, full-stack platform designed to bridge the gap between learning and landing your dream job. It combines a sophisticated Machine Learning playground, an interactive coding environment, and AI-driven interview simulations into one seamless experience.
 
 ---
 
-## � Core Features
+## 🚀 Core Features
 
 ### 🧠 AI Interview Simulation
-
-- **Dynamic Interaction**: Engage in realistic technical interviews with AI agents that adapt to your responses.
-- **Skill Mapping**: Get a detailed breakdown of your strengths and weaknesses across different technical domains.
-- **Performance Analytics**: Track your progress with visual metrics and historical performance data.
-
-### 💻 Interactive Coding Practice
-
-- **Multi-Category Challenges**: Practice Linear Algebra, Statistics, Data Structures, and ML-specific coding problems.
-- **TinyGrad Integration**: Solve problems specifically designed for optimized tensor computation.
-- **Real-time Execution**: Immediate feedback on code performance and test case validation.
-- **Progress Tracking**: Keep tabs on your achievements with a gamified dashboard.
+- **LangGraph Driven**: Realistic technical interviews powered by LangGraph for complex, stateful conversational flows.
+- **Real-time Interaction**: Server-Sent Events (SSE) for low-latency, streaming AI responses.
+- **Face Tracking**: Integrated computer vision (OpenCV/MediaPipe) for engagement monitoring.
+- **Performance Analytics**: Detailed feedback on technical accuracy, communication, and confidence.
 
 ### 📊 ML Playground & Trainer
+- **End-to-End ML Pipeline**: Dynamic model configuration, training, and evaluation directly from the UI.
+- **Visualization**: Real-time plots for classification decision regions, regression residuals, and training metrics.
+- **MLflow Integration**: Track experiments and model versions seamlessly.
 
-- **End-to-End ML Pipeline**: From data transformation to model training and evaluation.
-- **Interactive Visualizations**: Real-time plots for classification decision regions, regression residuals, and more.
-- **Model Configuration**: Experiment with different architectures and hyperparameters directly from the UI.
+### 💻 Interactive Coding Practice
+- **Multi-Category Challenges**: Practice Linear Algebra, Statistics, Data Structures, and ML-specific coding problems.
+- **Secure Sandbox**: Python code execution environment for real-time validation.
+- **Monaco Editor**: A premium, VS Code-like coding experience.
 
 ### 📝 Resume & Career Tools
-
-- **Template-Based Builder**: Create professional, EJS-templated resumes.
-- **LinkedIn Sync**: Integrate your professional profile for a unified career presence.
+- **ATS Scoring**: Match your resume against job descriptions using advanced similarity models.
+- **Multi-RAG Chat**: Upload multiple documents and chat with an AI assistant to extract insights.
+- **Template-Based Builder**: Create professional, high-impact resumes.
 
 ---
 
 ## 🏗️ Architecture & Tech Stack
 
-The project follows a distributed architecture with dual backends to handle high-performance ML workloads and scalable user management.
-
 ### 🎨 Frontend (React + Vite)
-
 - **Framework**: React 18 with TypeScript
-- **Styling**: Tailwind CSS & Lucide Icons
-- **Components**: Shadcn/UI for premium, responsive design
-- **Editor**: Monaco Editor for a VS-Code like coding experience
+- **Styling**: Tailwind CSS & Framer Motion
+- **UI Components**: Shadcn/UI (Radix UI)
+- **Visuals**: Recharts for analytics, Three.js for interactive elements
 - **State/Data**: TanStack Query (React Query) & Axios
+- **Editor**: Monaco Editor
 
-### ⚡ Node.js Backend (Core Engine)
-
-- **Framework**: Express.js with `@vashuthegreat/vexpress`
-- **Database**: MongoDB (Mongoose)
-- **Caching**: Redis for session and rate-limiting
-- **Storage**: Cloudinary for file and avatar management
-- **Logging**: Winston for comprehensive observability
-
-### 🐍 Python Backend (ML & AI)
-
+### 🐍 Backend (Python)
 - **Framework**: FastAPI
-- **AI/LLM**: LangChain & LangGraph for intelligent interview flows
-- **ML Libraries**: PyTorch, Scikit-Learn, TinyGrad
-- **Visualization**: Seaborn & Matplotlib
+- **AI/LLM**: LangChain & LangGraph
+- **ML Libraries**: Scikit-Learn, PyTorch, Transformers, MLflow
+- **CV**: OpenCV & MediaPipe for face tracking
+- **Database**: SQLAlchemy with SQLite/PostgreSQL
+- **Vector DB**: ChromaDB/FAISS for RAG workflows
+
+---
+
+## 📊 Visualizing the AI Logic
+
+### AI Interview State Graph
+This graph represents the complex state management of our AI interview agent, built with LangGraph.
+![Interview Graph](server/interview_graph.png)
+
+### System Component Visualization
+Architecture of the underlying components and their relationships.
+![Graph Visualization](server/graph_visualization.png)
 
 ---
 
@@ -67,61 +67,31 @@ The project follows a distributed architecture with dual backends to handle high
 
 ```bash
 ML-Learner/
-├── frontend/               # React + Vite application
-│   ├── src/pages/          # Main application views (Solve, DashBoard, MLTrainer, etc.)
-│   ├── src/Services/       # API integration layers
+├── client/                 # React + Vite application
+│   ├── src/pages/          # Main application views (MLTrainer, AIInterview, etc.)
+│   ├── src/services/       # API integration layers
 │   └── src/components/     # Shared UI components
-├── Backend_node/           # Main application server (Node.js)
-│   ├── src/routes/         # Auth, Questions, Coding, Interviews
-│   ├── src/controllers/    # Business logic implementation
-│   └── src/models/         # MongoDB schemas
-└── python_backend/         # AI & ML computation server (Python)
-    ├── src/routes/         # ML Training, AI Interviews, Coding Execution
-    ├── src/components/     # Coderunner, Model Trainer, AI Agents
-    └── main.py             # FastAPI entry point
+└── server/                 # AI & ML computation server (Python/FastAPI)
+    ├── api/                # FastAPI routes and middleware
+    ├── src/graphs/         # LangGraph interview flow definitions
+    ├── src/components/     # ML Trainer and Code Runner logic
+    └── main.py             # Server entry point
 ```
 
 ---
 
-## 🚥 API Reference
+## 🚥 Getting Started
 
-### Node.js API (`:3000`)
-
-- `GET  /api/user/me` - Fetch authenticated user profile
-- `GET  /api/question/fetch_question/all` - List practice challenges
-- `POST /api/codingSchema/updateCodingSchema` - Sync user progress
-- `GET  /api/interview/getUserAppliedInterviews` - Fetch interview history
-
-### Python API (`:8000`)
-
-- `POST /api/coding/submit` - Execute and validate coding solutions
-- `POST /api/modelTrain/initiate_training` - Trigger custom ML training
-- `POST /api/interviewSchema/aboutUserByResume` - AI-powered resume extraction
-
----
-
-## 🛠️ Getting Started
-
-### 1. Setup Backend (Node)
-
+### 1. Setup Backend (Python)
 ```bash
-cd Backend_node
-npm install
-npm run dev
-```
-
-### 2. Setup ML Engine (Python)
-
-```bash
-cd python_backend
-# Recommended: use uv
+cd server
+# Using uv (recommended)
 uv run main.py
 ```
 
-### 3. Setup Frontend
-
+### 2. Setup Frontend (React)
 ```bash
-cd frontend
+cd client
 npm install
 npm run dev
 ```
@@ -129,13 +99,10 @@ npm run dev
 ---
 
 ## 📄 License
-
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 👨‍💻 Author
-
 **Vansh** - [GitHub](https://github.com/VashuTheGreat)
 
 ---
-
 _Powered by Deep Learning and Passion. 🚀_

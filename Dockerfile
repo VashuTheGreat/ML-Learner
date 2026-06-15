@@ -8,19 +8,19 @@ RUN apt-get update && apt-get install -y curl bash libgl1 libglib2.0-0 redis-ser
 
 WORKDIR /app
 
-# 1. Setup Frontend Dependencies
-WORKDIR /app/frontend
-COPY frontend/package*.json ./
+# 1. Setup client Dependencies
+WORKDIR /app/client
+COPY client/package*.json ./
 RUN npm install
 
 # 2. Setup Node Backend Dependencies
-WORKDIR /app/Backend_node
-COPY Backend_node/package*.json ./
-RUN npm install
+# WORKDIR /app/Backend_node
+# COPY Backend_node/package*.json ./
+# RUN npm install
 
 # 3. Setup Python Backend Dependencies
-WORKDIR /app/python_backend
-COPY python_backend/pyproject.toml python_backend/README.md python_backend/uv.lock* ./
+WORKDIR /app/server
+COPY server/pyproject.toml server/README.md server/uv.lock* ./
 RUN pip install --no-cache-dir uv
 RUN uv pip compile pyproject.toml -o requirements.txt && \
     uv pip install --system -r requirements.txt
@@ -29,16 +29,15 @@ RUN uv pip compile pyproject.toml -o requirements.txt && \
 WORKDIR /app
 COPY . .
 
-# 1b. Build Frontend
-WORKDIR /app/frontend
+# 1b. Build client
+WORKDIR /app/client
 # Inject base URLs for Vite build process since .env is ignored in docker
-ENV VITE_NODE_BASE_URL="/node_api/api"
-ENV VITE_PYTHON_BASE_URL="/python_api"
+ENV VITE_API_BASE_URL="/server"
 # Produce the optimized static files for Nginx to serve
 RUN npm run build
 
 # 3b. Install Python Package
-WORKDIR /app/python_backend
+WORKDIR /app/server
 # Using uv to install dependencies from pyproject.toml
 RUN uv pip install --system -e .
 
@@ -59,11 +58,8 @@ redis-server --daemonize yes\n\
 echo "Starting Nginx..."\n\
 nginx -g "daemon off;" &\n\
 \n\
-echo "Starting Node Backend..."\n\
-cd /app/Backend_node && npm run dev &\n\
-\n\
 echo "Starting Python Backend..."\n\
-cd /app/python_backend && python main.py &\n\
+cd /app/server && uv run main.py &\n\
 \n\
 echo "All servers started! Waiting for them to crash or finish..."\n\
 wait -n\n\
