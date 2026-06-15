@@ -52,17 +52,19 @@ COPY nginx.conf /etc/nginx/nginx.conf
 
 # Create a startup script that runs all three apps in the background
 RUN echo '#!/bin/bash\n\
+set -e\n\
+\n\
 echo "Starting Redis..."\n\
 redis-server --daemonize yes\n\
 \n\
-echo "Starting Nginx..."\n\
-nginx -g "daemon off;" &\n\
+echo "Starting Python Backend (FastAPI)..."\n\
+cd /app/server\n\
+# Running with uvicorn directly to ensure it binds correctly to localhost:8000\n\
+python3 -m uvicorn main:app --host 127.0.0.1 --port 8000 &\n\
 \n\
-echo "Starting Python Backend..."\n\
-cd /app/server && uv run main.py &\n\
-\n\
-echo "All servers started! Waiting for them to crash or finish..."\n\
-wait -n\n\
+echo "Starting Nginx (Gateway on 7860)..."\n\
+# Nginx stays in foreground to keep container alive\n\
+nginx -g "daemon off;"\n\
 ' > /app/start.sh && chmod +x /app/start.sh
 
 # Run the startup script
