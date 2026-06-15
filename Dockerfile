@@ -54,9 +54,6 @@ COPY nginx.conf /etc/nginx/nginx.conf
 RUN echo '#!/bin/bash\n\
 set -e\n\
 \n\
-echo "Starting Redis..."\n\
-redis-server --daemonize yes\n\
-\n\
 echo "Starting Python Backend (FastAPI)..."\n\
 cd /app/server\n\
 # Running with uvicorn directly to ensure it binds correctly to localhost:8000\n\
@@ -68,4 +65,6 @@ nginx -g "daemon off;"\n\
 ' > /app/start.sh && chmod +x /app/start.sh
 
 # Run the startup script
+CMD ["/app/start.sh"]
+un the startup script
 CMD ["/app/start.sh"]
