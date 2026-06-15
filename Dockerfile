@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
-# Install Node.js, Redis, Nginx, Chromium (for Selenium), and required system dependencies
-RUN apt-get update && apt-get install -y curl bash libgl1 libglib2.0-0 redis-server nginx chromium chromium-driver && \
+# Install Node.js, Nginx, Chromium (for Selenium), and required system dependencies
+RUN apt-get update && apt-get install -y curl bash libgl1 libglib2.0-0 nginx chromium chromium-driver && \
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -53,9 +53,6 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Create a startup script that runs all three apps in the background
 RUN echo '#!/bin/bash\n\
 set -e\n\
-\n\
-echo "Starting Redis..."\n\
-redis-server --daemonize yes\n\
 \n\
 echo "Starting Python Backend (FastAPI)..."\n\
 cd /app/server\n\
