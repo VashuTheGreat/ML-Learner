@@ -32,7 +32,8 @@ COPY . .
 # 1b. Build client
 WORKDIR /app/client
 # Inject base URLs for Vite build process since .env is ignored in docker
-ENV VITE_API_BASE_URL="/server"
+ENV VITE_API_BASE_URL="/server/api/v1"
+ENV VITE_PYTHON_BASE_URL="/server"
 # Produce the optimized static files for Nginx to serve
 RUN npm run build
 
